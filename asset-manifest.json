@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/midispatcher/static/css/main.2346008e.css",
-    "main.js": "/midispatcher/static/js/main.f7134b06.js",
+    "main.js": "/midispatcher/static/js/main.b80db961.js",
     "static/js/27.a34ba809.chunk.js": "/midispatcher/static/js/27.a34ba809.chunk.js",
     "index.html": "/midispatcher/index.html",
     "static/media/logo.svg": "/midispatcher/static/media/logo.ec1bd0de757e2814c22f3926fda7774f.svg"
   },
   "entrypoints": [
     "static/css/main.2346008e.css",
-    "static/js/main.f7134b06.js"
+    "static/js/main.b80db961.js"
   ]
 }
