@@ -1,16 +1,13 @@
 {
   "files": {
-    "main.css": "/midispatcher/static/css/main.ca8fc7df.css",
-    "main.js": "/midispatcher/static/js/main.578572b3.js",
-    "static/js/787.3a9308fb.chunk.js": "/midispatcher/static/js/787.3a9308fb.chunk.js",
+    "main.css": "/midispatcher/static/css/main.2346008e.css",
+    "main.js": "/midispatcher/static/js/main.80ea1b15.js",
+    "static/js/27.a34ba809.chunk.js": "/midispatcher/static/js/27.a34ba809.chunk.js",
     "index.html": "/midispatcher/index.html",
-    "static/media/logo.svg": "/midispatcher/static/media/logo.ec1bd0de757e2814c22f3926fda7774f.svg",
-    "main.ca8fc7df.css.map": "/midispatcher/static/css/main.ca8fc7df.css.map",
-    "main.578572b3.js.map": "/midispatcher/static/js/main.578572b3.js.map",
-    "787.3a9308fb.chunk.js.map": "/midispatcher/static/js/787.3a9308fb.chunk.js.map"
+    "static/media/logo.svg": "/midispatcher/static/media/logo.ec1bd0de757e2814c22f3926fda7774f.svg"
   },
   "entrypoints": [
-    "static/css/main.ca8fc7df.css",
-    "static/js/main.578572b3.js"
+    "static/css/main.2346008e.css",
+    "static/js/main.80ea1b15.js"
   ]
 }
