@@ -256,6 +256,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+/**
+ * Tone.js
+ * @author Yotam Mann
+ * @license http://opensource.org/licenses/MIT MIT License
+ * @copyright 2014-2019 Yotam Mann
+ */
+
 /** @license MUI v5.10.8
  *
  * This source code is licensed under the MIT license found in the
