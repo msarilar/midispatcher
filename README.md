@@ -4,17 +4,32 @@ Midispatcher is a tool that allows you to design routes to send and receive MIDI
 
 It connects to the MIDI devices plugged in your computer and provides a number of virtual components (virtual synths, keyboards, dispatching machines) to interact with them.
 
-## How to use the tool
-
-<p align="center">
-    <img src='https://github.com/msarilar/midispatcher/assets/5569959/1a138b09-ec39-4d16-83b5-33664e67c27d' alt='Tutorial' height='600' />
+<table>
+<tr>
+<th align="center">
+<img width="441" height="1">
+<p> 
+Sample usage
 </p>
-
-Connecting to physical device Elektron Syntakt (used as output in this example) - 6 channels configured with the same monophonic synths and dispatching MIDI notes across them all to mimic polyphony:
-
-<p align="center">
-    <video src='https://github.com/msarilar/midispatcher/assets/5569959/f39f8e78-8530-4cd7-af7c-2e054147180d' height='600' />
+</th>
+<th align="center">
+<img width="441" height="1">
+<p> 
+Connecting to physical device
 </p>
+</th>
+</tr>
+<tr>
+<td>
+    <img src="https://github.com/msarilar/midispatcher/assets/5569959/11a67a3c-074b-44bb-9bd4-be833dd6a470" alt="Tutorial" width="441"/>
+</td>
+<td>
+<video src="https://github.com/msarilar/midispatcher/assets/5569959/f39f8e78-8530-4cd7-af7c-2e054147180d" width="441"/>
+</td>
+</tr>
+</table>
+
+
 
 ## How to add a new machine
 
