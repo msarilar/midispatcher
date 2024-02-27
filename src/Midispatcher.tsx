@@ -235,6 +235,10 @@ const Midispatcher: React.FunctionComponent = () => {
             </p>
             <br />
             <p>
+                🐌 If you notice performance issues, try closing other tabs or disable spectrograms/oscilloscopes by clicking on them
+            </p>
+            <br />
+            <p>
                 💀 Mostly developed & tested on Chromium based browsers
             </p>
             <br />
