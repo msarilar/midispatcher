@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.f1d196ee.css",
-    "main.js": "/static/js/main.44253550.js",
+    "main.js": "/static/js/main.9018b906.js",
     "static/js/206.31d535fb.chunk.js": "/static/js/206.31d535fb.chunk.js",
     "index.html": "/index.html",
     "static/media/github-mark-white.svg": "/static/media/github-mark-white.97ed8e7eef60d61ca469881dd6f34511.svg",
@@ -9,6 +9,6 @@
   },
   "entrypoints": [
     "static/css/main.f1d196ee.css",
-    "static/js/main.44253550.js"
+    "static/js/main.9018b906.js"
   ]
 }
