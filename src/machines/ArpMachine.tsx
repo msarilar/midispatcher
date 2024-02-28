@@ -1,15 +1,16 @@
 import styled from '@emotion/styled';
 import { DiagramEngine } from '@projectstorm/react-diagrams-core';
 import * as React from 'react';
-import * as WebMidi from 'webmidi';
 import { AddBox, Clear, VolumeOff, VolumeUp } from '@mui/icons-material';
 import { Checkbox, IconButton, Slider } from '@mui/material';
 
-import { allNotes } from '../Utils';
+import { allNotes, noteStringToNoteMidi } from '../Utils';
 import { MidiLinkModel } from '../layout/Link';
 import { MachineNodeModel } from './../layout/Node';
 import { ClockMachine } from './ClockMachine';
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, registeredMachine } from './Machines';
+
+type ArpStyle = "up" | "down" | "updown" | "updown2" | "random";
 
 interface NoteConfig {
 
@@ -17,8 +18,6 @@ interface NoteConfig {
     octave: number;
     muted: boolean;
 }
-
-type ArpStyle = "up" | "down" | "updown" | "updown2" | "random";
 
 interface ArpConfig {
 
@@ -28,7 +27,6 @@ interface ArpConfig {
     arpStyle: ArpStyle;
 }
 
-const notesRawDataCache: { [note: string]: Uint8Array } = { }
 
 @registeredMachine
 export class ArpMachine extends AbstractMachine implements MachineSourceTarget {
@@ -171,16 +169,7 @@ export class ArpMachine extends AbstractMachine implements MachineSourceTarget {
                             return;
                         }
 
-                        if (!notesRawDataCache[noteData.noteValue + noteData.octave]) {
-
-                            const note = WebMidi.Utilities.buildNote(noteData.noteValue + noteData.octave, { rawAttack: 150 });
-                            notesRawDataCache[noteData.noteValue + noteData.octave] = Uint8Array.from([
-                                (WebMidi.Enumerations.MIDI_CHANNEL_MESSAGES.noteon << 4),
-                                note.getOffsetNumber(WebMidi.WebMidi.octaveOffset),
-                                note.rawAttack]);
-                        }
-
-                        const data = notesRawDataCache[noteData.noteValue + noteData.octave];
+                        const data = noteStringToNoteMidi(noteData.noteValue + noteData.octave);
 
                         this.emit({ message: { rawData: data, isChannelMessage: true, type: "noteon", channel: 0 }, type: "noteon" }, 0);
                         this.previousNote = data;
@@ -202,6 +191,7 @@ const ArpNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ArpMachine>> 
         props.machine.setState(newConfig);
         setConfig(newConfig);
     }
+
     function noteToIndex(note: string) {
 
         return allNotes.indexOf(note);

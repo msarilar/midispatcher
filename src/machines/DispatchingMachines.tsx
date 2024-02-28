@@ -1,6 +1,198 @@
-import { AbstractMachine, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, registeredMachine } from "./Machines";
+import styled from "@emotion/styled";
+import React from "react";
+import { Box, Checkbox, FormControlLabel, TextField } from "@mui/material";
+import { DiagramEngine } from "@projectstorm/react-diagrams";
+
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, registeredMachine } from "./Machines";
 import { AllLinkCode } from "../layout/Engine";
 import { MidiLinkModel } from "../layout/Link";
+import { noteStringToNoteMidi } from "../Utils";
+import { ToggleOff, ToggleOnRounded } from "@mui/icons-material";
+import { MachineNodeModel } from "../layout/Node";
+
+interface NoteSplitConfig {
+
+    readonly editNote: string;
+    readonly noteThreshold: string;
+    readonly broadcastNonNotes: boolean;
+    readonly active: boolean;
+} 
+
+@registeredMachine
+export class NoteSplitMachine extends AbstractMachine implements MachineSourceTarget {
+
+    setState(newConfig: NoteSplitConfig) {
+        
+        try {
+
+            noteStringToNoteMidi(newConfig.editNote);
+            newConfig = { ...newConfig, noteThreshold: newConfig.editNote };
+        }
+        catch {
+            // couldn't parse the edit note
+        }
+
+        this.config = newConfig;
+    }
+
+    private config: NoteSplitConfig;
+    private static factory: MachineFactory;
+    static buildFactory(): MachineFactory {
+
+        if (this.factory) {
+
+            return this.factory;
+        }
+
+        this.factory = {
+
+            createMachine(config?: NoteSplitConfig) {
+
+                return new NoteSplitMachine(config);
+            },
+            createWidget(engine: DiagramEngine, node: MachineNodeModel) { return <NoteSplitNodeWidget engine={engine} size={50} machine={node.machine as NoteSplitMachine} />; },
+            getType() { return MachineType.Processor; },
+            getName() { return "NoteSplitMachine"; },
+            getTooltip() { return "Reads notes then dispatches them over 2 channels depending on whether they're above or below a threshold"; },
+            getMachineCode() { return "split" }
+        }
+
+        return this.factory;
+    }
+
+    constructor(config?: NoteSplitConfig) {
+
+        super();
+
+        this.config = config ?? { editNote: "C3", noteThreshold: "C3", broadcastNonNotes: false , active: true };
+        
+        this.getNode().addMachineInPort("In", 1);
+
+        this.getNode().addMachineOutPort(AllLinkCode, 0);
+        this.getNode().addMachineOutPort("Channel 1", 1);
+        this.getNode().addMachineOutPort("Channel 2", 2);
+    }
+
+    getState() {
+
+        return this.config;
+    }
+
+    getFactory(): MachineFactory {
+
+        return NoteSplitMachine.buildFactory();
+    }
+
+    receive(messageEvent: MachineMessage, channel: number, link: MidiLinkModel): void {
+        
+        if (messageEvent.message.type === "noteoff" ||
+            (messageEvent.message.type === "noteon" && messageEvent.message.rawData[2] === 0)) {
+            
+            if (this.config.editNote !== this.config.noteThreshold) {
+
+                return;
+            }
+
+            link.setSending(true);
+
+            if (this.config.active) {
+
+                const midiNote = messageEvent.message.rawData[1];
+                const threshold = noteStringToNoteMidi(this.config.noteThreshold);
+                if(midiNote > threshold[1]) {
+
+                    this.emit(messageEvent, 1);
+                }
+                else {
+
+                    this.emit(messageEvent, 2);
+                }
+            }
+            else {
+                
+                this.emit(messageEvent, 1);
+                this.emit(messageEvent, 2);
+            }
+        }
+        else if (this.config.broadcastNonNotes) {
+
+            link.setSending(true);
+            this.emit(messageEvent, 1);
+            this.emit(messageEvent, 2);
+        }
+    }
+}
+
+const NoteSplitNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<NoteSplitMachine>> = props => {
+
+    const [config, setConfig] = React.useState(props.machine.getState());
+
+    function update(newConfig: NoteSplitConfig) {
+
+        props.machine.setState(newConfig);
+        setConfig(props.machine.getState());
+    }
+
+    const enableCheckbox = <Checkbox aria-label="enable split"
+        icon={<ToggleOff />}
+        checkedIcon={<ToggleOnRounded />}
+        style={{ margin: 0, padding: 0 }}
+        checked={config.active}
+        onChange={e => update({ ...config, active: e.target.checked })} />;
+
+    const broadcastNonNotesCheckbox = <Checkbox aria-label="enable non notes"
+        icon={<ToggleOff />}
+        checkedIcon={<ToggleOnRounded />}
+        style={{ margin: 0, padding: 0 }}
+        checked={config.broadcastNonNotes}
+        onChange={e => update({ ...config, broadcastNonNotes: e.target.checked })} />;
+    return (
+        <S.SettingsBarHorizontal>
+            <S.SettingsBarVertical>
+                <FormControlLabel control={enableCheckbox} label={
+                    <Box component="div" fontSize={11} padding={0} margin={0}>
+                        Active?
+                    </Box>
+                } labelPlacement="top" />
+                <FormControlLabel control={broadcastNonNotesCheckbox} label={
+                    <Box component="div" fontSize={11} padding={0} margin={0}>
+                        Broadcast non-notes?
+                    </Box>
+                } labelPlacement="top" />
+            </S.SettingsBarVertical>
+            <TextField size="small"
+                label="Note"
+                variant="standard"
+                onKeyDown={e => { if (e.key === "Enter" || e.key === "Escape") { (e.target as any).blur(); } } }
+                onChange={e => update({ ...config, editNote: e.target.value})}
+                value={config.editNote}
+                error={config.editNote !== config.noteThreshold}
+                fullWidth />
+        </S.SettingsBarHorizontal>
+    );
+}
+
+namespace S {
+
+    export const SettingsBarVertical = styled.div`
+        position: relative;
+        vertical-align: middle;
+        width: 100%;
+        display: flex;
+        justifyContent: "down";
+        flex-direction: row;
+    `;
+
+    export const SettingsBarHorizontal = styled.div`
+        position: relative;
+        vertical-align: middle;
+        width: 100%;
+        display: flex;
+        justifyContent: "down";
+        flex-direction: column;
+        padding: 10px;
+    `;
+}
 
 @registeredMachine
 export class NoteGrowMachine extends AbstractMachine implements MachineSourceTarget {

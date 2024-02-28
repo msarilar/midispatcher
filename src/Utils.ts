@@ -1,4 +1,3 @@
-import { DefaultPortModel } from '@projectstorm/react-diagrams';
 import * as WebMidi from 'webmidi';
 
 export const allNotes = [
@@ -17,7 +16,7 @@ export const allNotes = [
 ];
 
 const noteMidiToStringCache: { [index: number]: string } = {}
-export function noteMidiToString(n: number) {
+export function noteMidiToString(n: number): string {
 
     if (noteMidiToStringCache[n] != undefined) {
 
@@ -32,6 +31,23 @@ export function noteMidiToString(n: number) {
 
     return result;
 }
+
+const notesRawDataCache: { [note: string]: Uint8Array } = { }
+
+export function noteStringToNoteMidi(noteString: string): Uint8Array {
+
+    if (!notesRawDataCache[noteString]) {
+
+        const note = WebMidi.Utilities.buildNote(noteString, { rawAttack: 150 });
+        notesRawDataCache[noteString] = Uint8Array.from([
+            (WebMidi.Enumerations.MIDI_CHANNEL_MESSAGES.noteon << 4),
+            note.getOffsetNumber(WebMidi.WebMidi.octaveOffset),
+            note.rawAttack]);
+    }
+
+    return notesRawDataCache[noteString];
+}
+
 
 export function normalizeVelocity(v: number) {
 
@@ -137,48 +153,47 @@ export const gsStandardSetDrumKit: { [index: string]: string } = {
 var context = typeof window === "undefined" ? global : window;
 const FLAG_TYPED_ARRAY = "FLAG_TYPED_ARRAY";
 
-export const toJson = (obj: any): string => JSON.stringify(obj , function(_, value ){
+export const toJson = (obj: any): string => JSON.stringify(obj, function (_, value) {
 
-    if ( value instanceof Int8Array         ||
-         value instanceof Uint8Array        ||
-         value instanceof Uint8ClampedArray ||
-         value instanceof Int16Array        ||
-         value instanceof Uint16Array       ||
-         value instanceof Int32Array        ||
-         value instanceof Uint32Array       ||
-         value instanceof Float32Array      ||
-         value instanceof Float64Array       )
-    {
-      var replacement = {
-        constructor: value.constructor.name,
-        data: Array.apply([], value as any),
-        flag: FLAG_TYPED_ARRAY
-      }
-      return replacement;
+    if (value instanceof Int8Array ||
+        value instanceof Uint8Array ||
+        value instanceof Uint8ClampedArray ||
+        value instanceof Int16Array ||
+        value instanceof Uint16Array ||
+        value instanceof Int32Array ||
+        value instanceof Uint32Array ||
+        value instanceof Float32Array ||
+        value instanceof Float64Array) {
+        var replacement = {
+            constructor: value.constructor.name,
+            data: Array.apply([], value as any),
+            flag: FLAG_TYPED_ARRAY
+        }
+        return replacement;
     }
     return value;
-  });
+});
 
-export const fromJson = (jsonStr: string): any => JSON.parse(jsonStr, function( _, value){
+export const fromJson = (jsonStr: string): any => JSON.parse(jsonStr, function (_, value) {
 
     try {
 
-      if( value.flag != undefined && value.flag === FLAG_TYPED_ARRAY) {
+        if (value.flag != undefined && value.flag === FLAG_TYPED_ARRAY) {
 
-        const constr = (context as any)[value.constructor];
-        return new constr( value.data );
-      }
+            const constr = (context as any)[value.constructor];
+            return new constr(value.data);
+        }
     }
-    catch(e){}
+    catch (e) { }
 
     return value;
-  });
+});
 
 export const notesOff: Uint8Array[] = [];
-for(let i = 0; i < 128; i++) {
+for (let i = 0; i < 128; i++) {
 
-  notesOff.push(Uint8Array.from([
-    (WebMidi.Enumerations.MIDI_CHANNEL_MESSAGES.noteoff << 4),
-    i,
-    0]));
+    notesOff.push(Uint8Array.from([
+        (WebMidi.Enumerations.MIDI_CHANNEL_MESSAGES.noteoff << 4),
+        i,
+        0]));
 }
