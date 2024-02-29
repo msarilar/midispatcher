@@ -12,6 +12,7 @@ interface ToneJsSynthConfig {
 
     readonly preset: string,
     readonly voice: any
+    readonly volume: number;
 }
 
 @registeredMachine
@@ -20,7 +21,7 @@ export class ToneJsSynthMachine extends AbstractMachine implements MachineTarget
     private synth: Tone.PolySynth;
     private static factory: MachineFactory;
     private config: ToneJsSynthConfig;
-    public readonly destination: Tone.ToneAudioNode;
+    public readonly destination: Tone.Volume;
 
     getState() {
 
@@ -29,21 +30,36 @@ export class ToneJsSynthMachine extends AbstractMachine implements MachineTarget
 
     setState(config: ToneJsSynthConfig) {
 
-        const newSynth = new Tone.PolySynth(Tone.AMSynth, config.voice);
+        if (config.voice !== this.config.voice) {
 
+            this.synth.dispose();
+            const newSynth = new Tone.PolySynth(Tone.AMSynth, config.voice);
+            this.synth = newSynth.connect(this.destination);
+        }
+
+        this.destination.volume.value = config.volume;
+        this.destination.mute = config.volume === -10;
         this.config = config;
-        this.synth.dispose();
-        this.synth = newSynth.connect(this.destination);
     }
 
     constructor(config?: ToneJsSynthConfig) {
 
         super();
+
+        this.destination = new Tone.Volume();
+
         this.config = config ?? voiceSamples[0];
 
+        // legacy saves:
+        if (this.config.volume == undefined) {
+
+            this.config = { ...this.config, volume: 5 };
+        }
+
+        this.destination.volume.value = this.config.volume;
         this.synth = new Tone.PolySynth(Tone.AMSynth, this.config.voice);
-        this.destination = new Tone.Analyser();
         this.synth.connect(this.destination);
+
         this.destination.toDestination();
         this.getNode().addMachineInPort("In", 1);
     }
@@ -150,7 +166,7 @@ const ToneJsSynthNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ToneJ
         try {
 
             const voice = JSON.parse(newVoice);
-            const newConfig: ToneJsSynthConfig = { preset: preset, voice: voice }
+            const newConfig: ToneJsSynthConfig = { preset: preset, voice: voice, volume: state.voiceConfig.volume }
             props.machine.setState(newConfig);
             inError = false;
         }
@@ -165,6 +181,13 @@ const ToneJsSynthNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ToneJ
             inError
         };
 
+        setState(newState);
+    }
+
+    function updateVolume(volume: number) {
+
+        let newState = { ...state, voiceConfig: { ...state.voiceConfig, volume: volume } };
+        props.machine.setState(newState.voiceConfig);
         setState(newState);
     }
 
@@ -207,6 +230,18 @@ const ToneJsSynthNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ToneJ
 
     return (
         <S.SettingsBar>
+            <S.Slider>
+                <span>Volume: </span>
+                <input
+                    type="range"
+                    min="-10.0"
+                    max="30"
+                    step="0.5"
+                    value={state.voiceConfig.volume}
+                    onChange={e => { updateVolume(Number(e.target.value)) }}
+                    list="volumes"
+                    name="volume" />
+            </S.Slider>
             <div ref={spectrogramRef} />
             <div ref={oscilloscopeRef} />
             <S.ExpandButton open={open} onClick={toggleVoiceInput}>
@@ -264,6 +299,18 @@ namespace S {
         }
     `;
 
+    export const Slider = styled.div`
+        vertical-align: middle;
+        input {
+
+            vertical-align: middle;
+        }
+        span {
+
+            vertical-align: middle;
+        }
+    `;
+
     export const VoiceInput = styled.textarea<{ inError: boolean }>`
         display: inline-block;
         border: solid 1px black;
@@ -299,10 +346,10 @@ namespace S {
 const voiceSamples: ToneJsSynthConfig[] = [
     {
 
+        volume: 5,
         preset: "Default",
         voice: {
 
-            "volume": 15,
             "detune": 0,
             "portamento": 0,
             "harmonicity": 2.5,
@@ -346,6 +393,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "Harmonics",
         voice: {
 
@@ -377,6 +425,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "Tiny",
         voice: {
 
@@ -412,6 +461,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "Bah",
         voice: {
 
@@ -447,6 +497,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "BassGuitar",
         voice: {
 
@@ -483,6 +534,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "Bassy",
         voice: {
 
@@ -517,6 +569,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "BrassCircuit",
         voice: {
 
@@ -551,6 +604,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "CoolGuy",
         voice: {
 
@@ -585,6 +639,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "Pianoetta",
         voice: {
 
@@ -618,6 +673,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "Pizz",
         voice: {
 
@@ -651,6 +707,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "AlienChorus",
         voice: {
 
@@ -673,6 +730,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "DelicateWindPart",
         voice: {
 
@@ -692,6 +750,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "DropPulse",
         voice: {
 
@@ -712,6 +771,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "Lectric",
         voice: {
 
@@ -731,6 +791,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "Marimba",
         voice: {
 
@@ -755,6 +816,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "Steelpan",
         voice: {
 
@@ -776,6 +838,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "SuperSaw",
         voice: {
 
@@ -797,6 +860,7 @@ const voiceSamples: ToneJsSynthConfig[] = [
     },
     {
 
+        volume: 5,
         preset: "TreeTrunk",
         voice: {
 

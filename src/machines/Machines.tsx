@@ -251,18 +251,25 @@ class CustomNodeFactory extends AbstractReactFactory<MachineNodeModel, DiagramEn
         }
         else if (this.machineFactory.getName().startsWith("ToneJsSampleMachine")) {
 
-            // retrocompatibility (used to be an enum):
-            switch (e.initialConfig.state) {
+            if (e.initialConfig?.state instanceof String) {
 
-                case 0:
-                    e.initialConfig.state = "Drum";
-                    break;
-                case 1:
-                    e.initialConfig.state = "Kalimba";
-                    break;
-                case 2:
-                    e.initialConfig.state = "Guitar";
-                    break;
+                e.initialConfig.state = { "sample": e.initialConfig.state, "volume": 15 };
+            }
+            else {
+
+                // retrocompatibility (used to be an enum):
+                switch (e.initialConfig.state) {
+
+                    case 0:
+                        e.initialConfig.state = { sample: "Drum", volume: -15 };
+                        break;
+                    case 1:
+                        e.initialConfig.state = { sample: "Kalimba", volume: -15 };
+                        break;
+                    case 2:
+                        e.initialConfig.state = { sample: "Guitar", volume: -15 };
+                        break;
+                }
             }
         }
 

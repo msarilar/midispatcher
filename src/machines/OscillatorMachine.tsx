@@ -182,19 +182,6 @@ const OscillatorNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Oscill
 
     return (
         <S.SettingsBar>
-            <div ref={spectrogramRef}/>
-            <div ref={oscilloscopeRef}/>
-            <S.Dropdown>
-                <span>Waveform: </span>
-                <select name="waveform"
-                    value={state.waveform}
-                    onChange={e => { update({ ...state, waveform: e.target.value as OscillatorType }) }}                    >
-                    <option value="sine">Sine</option>
-                    <option value="square">Square</option>
-                    <option value="sawtooth">Sawtooth</option>
-                    <option value="triangle">Triangle</option>
-                </select>
-            </S.Dropdown>
             <S.Slider>
                 <span>Volume: </span>
                 <input
@@ -211,6 +198,19 @@ const OscillatorNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Oscill
                     <option value="1.0" label="100%"></option>
                 </datalist>
             </S.Slider>
+            <div ref={spectrogramRef}/>
+            <div ref={oscilloscopeRef}/>
+            <S.Dropdown>
+                <span>Waveform: </span>
+                <select name="waveform"
+                    value={state.waveform}
+                    onChange={e => { update({ ...state, waveform: e.target.value as OscillatorType }) }}                    >
+                    <option value="sine">Sine</option>
+                    <option value="square">Square</option>
+                    <option value="sawtooth">Sawtooth</option>
+                    <option value="triangle">Triangle</option>
+                </select>
+            </S.Dropdown>
             <S.Slider>
                 <span>Detune ({state.detune})</span>
                 <input

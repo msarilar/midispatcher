@@ -134,41 +134,58 @@ type FactoryDictionary = {
     [key in Instrument]?: MachineFactory;
 };
 
+interface ToneJsSampleMachineConfig {
+
+    readonly sample: Instrument;
+    readonly volume: number;
+}
+
 @registeredMachine
 @registeredMachineWithParameter<Instrument>("Drum")
 export class ToneJsSampleMachine extends AbstractMachine implements MachineTarget {
 
     private sampler: Tone.Sampler;
-    private sample: Instrument;
-    public readonly destination: Tone.ToneAudioNode;
+    private config: ToneJsSampleMachineConfig;
+    public readonly destination: Tone.Volume;
     private static factory: MachineFactory;
     private static factories: FactoryDictionary = {};
 
-    constructor(sample: Instrument) {
+    constructor(config: ToneJsSampleMachineConfig) {
 
         super();
 
-        this.sample = sample;
-        this.sampler = new Tone.Sampler(getSamples(sample));
-        this.destination = new Tone.Analyser();
+        this.config = config;
+        this.sampler = new Tone.Sampler(getSamples(config.sample));
+
+        this.destination = new Tone.Volume();
         this.sampler.connect(this.destination);
+
+        this.destination.volume.value = this.config.volume;
+        this.destination.mute = this.config.volume === -30;
+
         this.destination.toDestination();
 
         this.getNode().addMachineInPort("In", 1);
     }
 
-    setState(instrument: Instrument) {
+    setState(config: ToneJsSampleMachineConfig) {
 
-        const opt = getSamples(instrument);
-        const newSample = new Tone.Sampler(opt);
-        this.sampler.dispose();
-        this.sampler = newSample.connect(this.destination);
-        this.sample = instrument;
+        if (config.sample !== this.config.sample) {
+
+            const newSample = new Tone.Sampler(getSamples(config.sample));
+            this.sampler.dispose();
+            this.sampler = newSample.connect(this.destination);
+        }
+
+        this.destination.volume.value = config.volume;
+        this.destination.mute = config.volume === -30;
+
+        this.config = config;
     }
 
     getState() {
 
-        return this.sample;
+        return this.config;
     }
 
     dispose() {
@@ -192,7 +209,7 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
 
         const newFactory = {
 
-            createMachine(library?: Instrument) { return new ToneJsSampleMachine(library ?? defaultInstrument ?? "Guitar"); },
+            createMachine(config?: ToneJsSampleMachineConfig) { return new ToneJsSampleMachine( config ?? { sample: defaultInstrument ?? "Guitar", volume: -15 }); },
             createWidget(engine: DiagramEngine, node: MachineNodeModel): JSX.Element { return <ToneJsSampleNodeWidget engine={engine} size={50} machine={node.machine as ToneJsSampleMachine} />; },
             getName() { return "ToneJsSampleMachine" + (defaultInstrument == undefined ? "" : " (" + defaultInstrument + ")"); },
             getType() { return MachineType.Output; },
@@ -272,24 +289,35 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
 const ToneJsSampleNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ToneJsSampleMachine>> = props => {
 
     const [spectrogramRef, oscilloscopeRef] = BuildVisualizers(props.machine.destination as any as AudioNode);
-    const [sample, setSample] = React.useState(props.machine.getState());
+    const [config, setSample] = React.useState(props.machine.getState());
 
-    function changeSample(s: string) {
+    function update(s: ToneJsSampleMachineConfig) {
 
-        const newSample = s as Instrument;
-        setSample(newSample);
-        props.machine.setState(newSample);
+        props.machine.setState(s);
+        setSample(props.machine.getState());
     }
 
     return (
         <S.SettingsBar>
+            <S.Slider>
+                <span>Volume: </span>
+                <input
+                    type="range"
+                    min="-30.0"
+                    max="5"
+                    step="0.5"
+                    value={config.volume}
+                    onChange={e => { update({ ...config, volume: Number(e.target.value) }) }}
+                    list="volumes"
+                    name="volume" />
+            </S.Slider>
             <div ref={spectrogramRef}/>
             <div ref={oscilloscopeRef}/>
             <S.Dropdown>
                 <span>Preset: </span>
                 <select name="sampleSelection"
-                        value={sample}
-                        onChange={e => { changeSample(e.target.value) }}>
+                        value={config.sample}
+                        onChange={e => { update({ ...config, sample: e.target.value as Instrument}) }}>
                     { allInstruments.map(instrument => <option key={instrument} value={instrument}>{instrument}</option>) }
                 </select>
             </S.Dropdown>
@@ -317,6 +345,18 @@ namespace S {
             vertical-align: middle;
         }
         input {
+
+            vertical-align: middle;
+        }
+    `;
+
+    export const Slider = styled.div`
+        vertical-align: middle;
+        input {
+
+            vertical-align: middle;
+        }
+        span {
 
             vertical-align: middle;
         }
