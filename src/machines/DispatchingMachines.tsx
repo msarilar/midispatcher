@@ -6,7 +6,7 @@ import { DiagramEngine } from "@projectstorm/react-diagrams";
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, registeredMachine } from "./Machines";
 import { AllLinkCode } from "../layout/Engine";
 import { MidiLinkModel } from "../layout/Link";
-import { noteStringToNoteMidi } from "../Utils";
+import { noteStringToNoteMidi, standardMidiMessages } from "../Utils";
 import { ToggleOff, ToggleOnRounded } from "@mui/icons-material";
 import { MachineNodeModel } from "../layout/Node";
 
@@ -27,6 +27,12 @@ export class NoteSplitMachine extends AbstractMachine implements MachineSourceTa
 
             noteStringToNoteMidi(newConfig.editNote);
             newConfig = { ...newConfig, noteThreshold: newConfig.editNote };
+
+            if (newConfig.noteThreshold !== this.config.noteThreshold) {
+
+                this.emit(standardMidiMessages["allnotesoff"], 1);
+                this.emit(standardMidiMessages["allnotesoff"], 2);
+            }
         }
         catch {
             // couldn't parse the edit note
@@ -64,7 +70,7 @@ export class NoteSplitMachine extends AbstractMachine implements MachineSourceTa
 
         super();
 
-        this.config = config ?? { editNote: "C3", noteThreshold: "C3", broadcastNonNotes: false , active: true };
+        this.config = config ?? { editNote: "C3", noteThreshold: "C3", broadcastNonNotes: true , active: true };
         
         this.getNode().addMachineInPort("In", 1);
 
@@ -85,8 +91,7 @@ export class NoteSplitMachine extends AbstractMachine implements MachineSourceTa
 
     receive(messageEvent: MachineMessage, channel: number, link: MidiLinkModel): void {
         
-        if (messageEvent.message.type === "noteoff" ||
-            (messageEvent.message.type === "noteon" && messageEvent.message.rawData[2] === 0)) {
+        if (messageEvent.message.type === "noteoff" || messageEvent.message.type === "noteon") {
             
             if (this.config.editNote !== this.config.noteThreshold) {
 
@@ -114,7 +119,7 @@ export class NoteSplitMachine extends AbstractMachine implements MachineSourceTa
                 this.emit(messageEvent, 2);
             }
         }
-        else if (this.config.broadcastNonNotes) {
+        else if (this.config.broadcastNonNotes || (messageEvent.message.type === "allnotesoff" || messageEvent.message.type === "allsoundoff")) {
 
             link.setSending(true);
             this.emit(messageEvent, 1);
@@ -161,7 +166,7 @@ const NoteSplitNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<NoteSpl
                 } labelPlacement="top" />
             </S.SettingsBarVertical>
             <TextField size="small"
-                label="Note"
+                label="Note threshold"
                 variant="standard"
                 onKeyDown={e => { if (e.key === "Enter" || e.key === "Escape") { (e.target as any).blur(); } } }
                 onChange={e => update({ ...config, editNote: e.target.value})}

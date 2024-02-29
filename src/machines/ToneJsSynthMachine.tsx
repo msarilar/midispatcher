@@ -91,6 +91,12 @@ export class ToneJsSynthMachine extends AbstractMachine implements MachineTarget
                 link.setSending(true);
                 break;
 
+            case "allnotesoff":
+            case "allsoundoff":
+                this.synth.releaseAll();
+                link.setSending(true);
+                break;
+
             case "noteon":
                 link.setSending(true);
                 if(messageEvent.message.rawData[2] === 0) {

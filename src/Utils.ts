@@ -1,4 +1,5 @@
 import * as WebMidi from 'webmidi';
+import { MachineMessage } from './machines/Machines';
 
 export const allNotes = [
     "C",
@@ -48,11 +49,20 @@ export function noteStringToNoteMidi(noteString: string): Uint8Array {
     return notesRawDataCache[noteString];
 }
 
-
 export function normalizeVelocity(v: number) {
 
     return v / 127;
 }
+
+export const standardMidiMessages: { [type: string]: MachineMessage } =  {
+
+    ["clock"]: { type: "clock", message: { rawData: Uint8Array.from([248]), isChannelMessage: false, type: "clock", channel: 0 } },
+    ["start"]: { type: "start", message: { rawData: Uint8Array.from([250]), isChannelMessage: false, type: "start", channel: 0 } },
+    ["continue"]: { type: "continue", message: { rawData: Uint8Array.from([251]), isChannelMessage: false, type: "continue", channel: 0 } },
+    ["stop"]: { type: "stop", message: { rawData: Uint8Array.from([252]), isChannelMessage: false, type: "stop", channel: 0 } },
+    ["allnotesoff"]: { type: "allnotesoff", message: { rawData: Uint8Array.from([176, 123, 0]), isChannelMessage: true, type: "allnotesoff", channel: 0 } },
+    ["allsoundoff"]: { type: "allsoundoff", message: { rawData: Uint8Array.from([176, 120, 0]), isChannelMessage: true, type: "allsoundoff", channel: 0 } }
+};
 
 export const gsStandardSetDrumKitMini: { [index: string]: string } = {
     "B1": "Kick Drum 2",

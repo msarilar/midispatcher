@@ -128,7 +128,9 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
 
         const midiNote = messageEvent.message.rawData[1] + this.state.detune;
 
-        if (messageEvent.message.type === "stop") {
+        if (messageEvent.message.type === "stop" ||
+            messageEvent.message.type === "allnotesoff" ||
+            messageEvent.message.type === "allsoundoff") {
 
             this.stopAllOscillators();
         }

@@ -6,7 +6,8 @@ import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { PauseOutlined, RestartAltOutlined } from '@mui/icons-material';
 
 import { MachineNodeModel } from './../layout/Node';
-import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSource, MachineType, registeredMachine } from './Machines';
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineSource, MachineType, registeredMachine } from './Machines';
+import { standardMidiMessages } from '../Utils';
 
 type ClockStatus = "stop" | "start" | "continue";
 interface ClockConfig {
@@ -22,22 +23,12 @@ export class ClockMachine extends AbstractMachine implements MachineSource {
     private state: ClockConfig;
     private readonly worker: Worker;
     public hasWorker() { return this.worker != undefined };
-    public static readonly messages: { [type: string]: MachineMessage } =
-        {
-
-            ["clock"]: { type: "clock", message: { rawData: Uint8Array.from([248]), isChannelMessage: false, type: "clock", channel: 0 } },
-            ["start"]: { type: "start", message: { rawData: Uint8Array.from([250]), isChannelMessage: false, type: "start", channel: 0 } },
-            ["continue"]: { type: "continue", message: { rawData: Uint8Array.from([251]), isChannelMessage: false, type: "continue", channel: 0 } },
-            ["stop"]: { type: "stop", message: { rawData: Uint8Array.from([252]), isChannelMessage: false, type: "stop", channel: 0 } },
-            ["allnotesoff"]: { type: "allnotesoff", message: { rawData: Uint8Array.from([176, 123, 0]), isChannelMessage: true, type: "allnotesoff", channel: 0 } },
-            ["allsoundoff"]: { type: "allsoundoff", message: { rawData: Uint8Array.from([176, 120, 0]), isChannelMessage: true, type: "allsoundoff", channel: 0 } }
-        };
 
     dispose() {
 
         this.worker.postMessage("stop");
         this.worker?.terminate()
-        this.emit(ClockMachine.messages["stop"], 0);
+        this.emit(standardMidiMessages["stop"], 0);
     }
 
     getFactory() { return ClockMachine.factory; }
@@ -56,10 +47,13 @@ export class ClockMachine extends AbstractMachine implements MachineSource {
 
         if (this.state.status !== config.status) {
 
-            this.emit(ClockMachine.messages[config.status], 0);
+            this.emit(standardMidiMessages[config.status], 0);
         }
 
         if (this.state.status === "stop" && config.status !== "stop") {
+
+            this.emit(standardMidiMessages["allnotesoff"], 0);
+            this.emit(standardMidiMessages["allsoundoff"], 0);
 
             this.worker.postMessage("start");
         }
@@ -68,8 +62,8 @@ export class ClockMachine extends AbstractMachine implements MachineSource {
 
             this.worker.postMessage("stop");
 
-            this.emit(ClockMachine.messages["allnotesoff"], 0);
-            this.emit(ClockMachine.messages["allsoundoff"], 0);
+            this.emit(standardMidiMessages["allnotesoff"], 0);
+            this.emit(standardMidiMessages["allsoundoff"], 0);
         }
 
         this.state = config;
@@ -141,7 +135,7 @@ export class ClockMachine extends AbstractMachine implements MachineSource {
         this.worker.onmessage = function (_: MessageEvent) {
 
             // assume all messages mean tick:
-            that.emit(ClockMachine.messages["clock"], 0);
+            that.emit(standardMidiMessages["clock"], 0);
         }
 
         this.worker.postMessage({ tempo: this.state.tempo });

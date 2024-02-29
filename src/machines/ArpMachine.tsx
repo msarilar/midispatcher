@@ -4,7 +4,7 @@ import * as React from 'react';
 import { AddBox, Clear, VolumeOff, VolumeUp } from '@mui/icons-material';
 import { Checkbox, IconButton, Slider } from '@mui/material';
 
-import { allNotes, noteStringToNoteMidi } from '../Utils';
+import { allNotes, noteStringToNoteMidi, standardMidiMessages } from '../Utils';
 import { MidiLinkModel } from '../layout/Link';
 import { MachineNodeModel } from './../layout/Node';
 import { ClockMachine } from './ClockMachine';
@@ -113,7 +113,7 @@ export class ArpMachine extends AbstractMachine implements MachineSourceTarget {
                 this.emit({ message: { rawData: this.previousNote, isChannelMessage: true, type: "noteoff", channel: 0 }, type: "noteoff" }, 0);
             }
 
-            this.emit(ClockMachine.messages["stop"], 0);
+            this.emit(standardMidiMessages["allnotesoff"], 0);
         }
 
         this.config = { ...config, notesToPlay: notesToPlay };

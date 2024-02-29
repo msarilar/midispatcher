@@ -237,6 +237,12 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
                 link.setSending(true);
                 break;
 
+            case "allnotesoff":
+            case "allsoundoff":
+                this.sampler.releaseAll();
+                link.setSending(true);
+                break;
+
             case "noteon":
                 link.setSending(true);
                 if(messageEvent.message.rawData[2] === 0) {

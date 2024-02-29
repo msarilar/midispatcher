@@ -7,6 +7,7 @@ import { IconButton, TextField } from '@mui/material';
 import { MidiLinkModel } from './../layout/Link';
 import { MachineNodeModel } from './../layout/Node';
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, registeredMachine } from './Machines';
+import { standardMidiMessages } from '../Utils';
 
 interface Filter {
 
@@ -68,6 +69,11 @@ export class ThruMachine extends AbstractMachine implements MachineSourceTarget 
     }
 
     setState(options: ThruConfig) {
+
+        if (options.detune !== this.config.detune) {
+
+            this.emit(standardMidiMessages["allnotesoff"], 0);
+        }
 
         this.config = options;
     }
