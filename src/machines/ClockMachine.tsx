@@ -1,10 +1,10 @@
-import styled from '@emotion/styled';
 import PlayArrowOutlined from '@mui/icons-material/PlayArrowOutlined';
 import { DiagramEngine } from '@projectstorm/react-diagrams-core';
 import * as React from 'react';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { PauseOutlined, RestartAltOutlined } from '@mui/icons-material';
 
+import { S } from './MachineStyling';
 import { MachineNodeModel } from './../layout/Node';
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineSource, MachineType, registeredMachine } from './Machines';
 import { standardMidiMessages } from '../Utils';
@@ -209,29 +209,4 @@ const ClockNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ClockMachin
             </ToggleButtonGroup>
         </S.SettingsBar>
     );
-}
-
-namespace S {
-
-    export const Slider = styled.div`
-        vertical-align: middle;
-        input {
-
-            vertical-align: middle;
-        }
-        span {
-
-            vertical-align: middle;
-        }
-    `;
-
-    export const SettingsBar = styled.div`
-        padding: 3px;
-        position: relative;
-        vertical-align: middle;
-        width: 100%;
-        display: flex;
-        justifyContent: "center";
-        flex-direction: column;
-    `;
 }

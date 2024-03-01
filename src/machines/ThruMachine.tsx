@@ -1,9 +1,9 @@
-import styled from '@emotion/styled';
 import { DiagramEngine } from '@projectstorm/react-diagrams-core';
 import * as React from 'react';
 import { AddBox, Clear } from '@mui/icons-material';
 import { IconButton, TextField } from '@mui/material';
 
+import { S } from './MachineStyling';
 import { MidiLinkModel } from './../layout/Link';
 import { MachineNodeModel } from './../layout/Node';
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, registeredMachine } from './Machines';
@@ -174,7 +174,8 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
 
                     fontSize: '12px',
                     color: 'white',
-                    height: '20px'
+                    height: '20px',
+                    width: '80px'
                 },
                 readOnly: isReadOnly,
             }} />
@@ -188,7 +189,8 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
 
                     fontSize: '12px',
                     color: 'white',
-                    height: '20px'
+                    height: '20px',
+                    width: '80px'
                 },
                 readOnly: isReadOnly
             }} />
@@ -233,51 +235,4 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
             </S.Dropdown>
         </S.SettingsBar>
     );
-}
-
-namespace S {
-
-    export const Dropdown = styled.div`
-        vertical-align: middle;
-        span {
-
-            vertical-align: middle;
-        }
-        input {
-
-            vertical-align: middle;
-        }
-    `;
-
-    export const SettingsBarVertical = styled.div`
-        position: relative;
-        vertical-align: middle;
-        width: 100%;
-        height: 24px;
-width: 200px;
-        display: flex;
-        justifyContent: "down";
-        flex-direction: row;
-    `;
-
-    export const Slider = styled.div`
-        vertical-align: middle;
-        input {
-
-            vertical-align: middle;
-        }
-        span {
-
-            vertical-align: middle;
-        }
-    `;
-
-    export const SettingsBar = styled.div`
-        padding: 3px;
-        position: relative;
-        vertical-align: middle;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-    `;
 }

@@ -1,8 +1,8 @@
-import styled from "@emotion/styled";
 import React from "react";
 import { Box, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import { DiagramEngine } from "@projectstorm/react-diagrams";
 
+import { S } from './MachineStyling';
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, registeredMachine } from "./Machines";
 import { AllLinkCode } from "../layout/Engine";
 import { MidiLinkModel } from "../layout/Link";
@@ -175,28 +175,6 @@ const NoteSplitNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<NoteSpl
                 fullWidth />
         </S.SettingsBarHorizontal>
     );
-}
-
-namespace S {
-
-    export const SettingsBarVertical = styled.div`
-        position: relative;
-        vertical-align: middle;
-        width: 100%;
-        display: flex;
-        justifyContent: "down";
-        flex-direction: row;
-    `;
-
-    export const SettingsBarHorizontal = styled.div`
-        position: relative;
-        vertical-align: middle;
-        width: 100%;
-        display: flex;
-        justifyContent: "down";
-        flex-direction: column;
-        padding: 10px;
-    `;
 }
 
 @registeredMachine

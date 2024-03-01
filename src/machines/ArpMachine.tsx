@@ -1,4 +1,3 @@
-import styled from '@emotion/styled';
 import { DiagramEngine } from '@projectstorm/react-diagrams-core';
 import * as React from 'react';
 import { AddBox, Clear, VolumeOff, VolumeUp } from '@mui/icons-material';
@@ -7,7 +6,7 @@ import { Checkbox, IconButton, Slider } from '@mui/material';
 import { allNotes, noteStringToNoteMidi, standardMidiMessages } from '../Utils';
 import { MidiLinkModel } from '../layout/Link';
 import { MachineNodeModel } from './../layout/Node';
-import { ClockMachine } from './ClockMachine';
+import { S } from './MachineStyling';
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, registeredMachine } from './Machines';
 
 type ArpStyle = "up" | "down" | "updown" | "updown2" | "random";
@@ -287,59 +286,4 @@ const ArpNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ArpMachine>> 
             </S.Dropdown>
         </S.SettingsBarHorizontal>
     );
-}
-
-namespace S {
-
-    export const Dropdown = styled.div`
-        vertical-align: middle;
-        span {
-
-            vertical-align: middle;
-        }
-        input {
-
-            vertical-align: middle;
-        }
-    `;
-    export const Slider = styled.div`
-        vertical-align: middle;
-        input {
-
-            vertical-align: middle;
-        }
-        span {
-
-            vertical-align: middle;
-        }
-    `;
-
-    export const Note = styled.div`
-        height: 200px;
-        position: relative;
-        vertical-align: middle;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    `;
-
-    export const SettingsBarVertical = styled.div`
-        position: relative;
-        vertical-align: middle;
-        width: 100%;
-        display: flex;
-        justifyContent: "down";
-        flex-direction: row;
-    `;
-
-    export const SettingsBarHorizontal = styled.div`
-        position: relative;
-        vertical-align: middle;
-        width: 100%;
-        display: flex;
-        justifyContent: "down";
-        flex-direction: column;
-        padding: 10px;
-    `;
 }

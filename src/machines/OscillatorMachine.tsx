@@ -1,7 +1,7 @@
-import styled from '@emotion/styled';
 import { DiagramEngine } from '@projectstorm/react-diagrams-core';
 import * as React from 'react';
 
+import { S } from './MachineStyling';
 import { MidiLinkModel } from './../layout/Link';
 import { MachineNodeModel } from './../layout/Node';
 import { AbstractMachine, BuildVisualizers, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, registeredMachine } from './Machines';
@@ -288,42 +288,6 @@ const OscillatorNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Oscill
             </S.Slider>
         </S.SettingsBar>
     );
-}
-
-namespace S {
-
-    export const Dropdown = styled.div`
-        vertical-align: middle;
-        span {
-
-            vertical-align: middle;
-        }
-        input {
-
-            vertical-align: middle;
-        }
-    `;
-
-    export const Slider = styled.div`
-        vertical-align: middle;
-        input {
-
-            vertical-align: middle;
-        }
-        span {
-
-            vertical-align: middle;
-        }
-    `;
-
-    export const SettingsBar = styled.div`
-        padding: 3px;
-        position: relative;
-        vertical-align: middle;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-    `;
 }
 
 const frequencies: { [index: number]: number } = {}

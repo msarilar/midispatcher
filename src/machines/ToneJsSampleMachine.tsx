@@ -1,9 +1,9 @@
 import * as React from 'react';
 import * as Tone from "tone";
-import styled from "@emotion/styled";
 import { DiagramEngine } from "@projectstorm/react-diagrams";
 import { SamplerOptions } from "tone";
 
+import { S } from './MachineStyling';
 import { AbstractMachine, BuildVisualizers, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, registeredMachine, registeredMachineWithParameter } from "./Machines";
 import { noteMidiToString } from "../Utils";
 import { MidiLinkModel } from "../layout/Link";
@@ -323,42 +323,4 @@ const ToneJsSampleNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Tone
             </S.Dropdown>
         </S.SettingsBar>
     );
-}
-
-namespace S {
-
-    export const SettingsBar = styled.div`
-        padding: 3px;
-        position: relative;
-        vertical-align: middle;
-        width: 100%;
-        display: flex;
-        justifyContent: "center";
-        flex-direction: column;
-    `;
-
-    export const Dropdown = styled.div`
-        vertical-align: middle;
-        width: 100%;
-        span {
-
-            vertical-align: middle;
-        }
-        input {
-
-            vertical-align: middle;
-        }
-    `;
-
-    export const Slider = styled.div`
-        vertical-align: middle;
-        input {
-
-            vertical-align: middle;
-        }
-        span {
-
-            vertical-align: middle;
-        }
-    `;
 }
