@@ -54,6 +54,7 @@ export namespace S {
         justifyContent: "down";
         flex-direction: column;
         padding: 10px;
+        padding: 0px;
     `;
 
     export const ExpandButton = styled.button<{ open: boolean }>`

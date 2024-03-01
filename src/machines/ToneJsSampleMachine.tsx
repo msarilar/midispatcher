@@ -4,10 +4,11 @@ import { DiagramEngine } from "@projectstorm/react-diagrams";
 import { SamplerOptions } from "tone";
 
 import { S } from './MachineStyling';
-import { AbstractMachine, BuildVisualizers, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, registeredMachine, registeredMachineWithParameter } from "./Machines";
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, registeredMachine, registeredMachineWithParameter } from "./Machines";
 import { noteMidiToString } from "../Utils";
 import { MidiLinkModel } from "../layout/Link";
 import { MachineNodeModel } from "../layout/Node";
+import { Visualizers } from './Visualizers';
 
 function getSamples(library: Instrument): Partial<SamplerOptions> | undefined {
 
@@ -146,7 +147,8 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
 
     private sampler: Tone.Sampler;
     private config: ToneJsSampleMachineConfig;
-    public readonly destination: Tone.Volume;
+    public readonly analyzer: AnalyserNode;
+    public readonly volume: Tone.Volume;
     private static factory: MachineFactory;
     private static factories: FactoryDictionary = {};
 
@@ -157,13 +159,15 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
         this.config = config;
         this.sampler = new Tone.Sampler(getSamples(config.sample));
 
-        this.destination = new Tone.Volume();
-        this.sampler.connect(this.destination);
+        this.volume = new Tone.Volume();
+        this.sampler.connect(this.volume);
 
-        this.destination.volume.value = this.config.volume;
-        this.destination.mute = this.config.volume === -30;
-
-        this.destination.toDestination();
+        this.volume.volume.value = this.config.volume;
+        this.volume.mute = this.config.volume === -30;
+        
+        this.analyzer = Tone.context.createAnalyser();
+        this.volume.connect(this.analyzer);
+        this.volume.toDestination();
 
         this.getNode().addMachineInPort("In", 1);
     }
@@ -174,11 +178,11 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
 
             const newSample = new Tone.Sampler(getSamples(config.sample));
             this.sampler.dispose();
-            this.sampler = newSample.connect(this.destination);
+            this.sampler = newSample.connect(this.volume);
         }
 
-        this.destination.volume.value = config.volume;
-        this.destination.mute = config.volume === -30;
+        this.volume.volume.value = config.volume;
+        this.volume.mute = config.volume === -30;
 
         this.config = config;
     }
@@ -288,7 +292,6 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
 
 const ToneJsSampleNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ToneJsSampleMachine>> = props => {
 
-    const [spectrogramRef, oscilloscopeRef] = BuildVisualizers(props.machine.destination as any as AudioNode);
     const [config, setSample] = React.useState(props.machine.getState());
 
     function update(s: ToneJsSampleMachineConfig) {
@@ -311,8 +314,7 @@ const ToneJsSampleNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Tone
                     list="volumes"
                     name="volume" />
             </S.Slider>
-            <div ref={spectrogramRef}/>
-            <div ref={oscilloscopeRef}/>
+            <Visualizers width={200} height={50} analyser={props.machine.analyzer as any as AnalyserNode} />
             <S.Dropdown>
                 <span>Preset: </span>
                 <select name="sampleSelection"

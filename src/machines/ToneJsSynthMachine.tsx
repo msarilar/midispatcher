@@ -6,7 +6,8 @@ import { S } from './MachineStyling';
 import { normalizeVelocity, noteMidiToString } from "../Utils";
 import { MidiLinkModel } from "../layout/Link";
 import { MachineNodeModel } from "../layout/Node";
-import { AbstractMachine, BuildVisualizers, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, registeredMachine } from "./Machines";
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, registeredMachine } from "./Machines";
+import { Visualizers } from "./Visualizers";
 
 interface ToneJsSynthConfig {
 
@@ -22,6 +23,7 @@ export class ToneJsSynthMachine extends AbstractMachine implements MachineTarget
     private static factory: MachineFactory;
     private config: ToneJsSynthConfig;
     public readonly destination: Tone.Volume;
+    public readonly analyzer: AnalyserNode;
 
     getState() {
 
@@ -60,6 +62,9 @@ export class ToneJsSynthMachine extends AbstractMachine implements MachineTarget
         this.synth = new Tone.PolySynth(Tone.AMSynth, this.config.voice);
         this.synth.connect(this.destination);
 
+        this.analyzer = Tone.context.createAnalyser();
+        this.destination.connect(this.analyzer);
+        
         this.destination.toDestination();
         this.getNode().addMachineInPort("In", 1);
     }
@@ -226,8 +231,6 @@ const ToneJsSynthNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ToneJ
 
     const arrow = open ? '▲' : '▼';
 
-    const [spectrogramRef, oscilloscopeRef] = BuildVisualizers(props.machine.destination as any as AudioNode);
-
     return (
         <S.SettingsBar>
             <S.Slider>
@@ -242,8 +245,7 @@ const ToneJsSynthNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ToneJ
                     list="volumes"
                     name="volume" />
             </S.Slider>
-            <div ref={spectrogramRef} />
-            <div ref={oscilloscopeRef} />
+            <Visualizers width={200} height={50} analyser={props.machine.analyzer as any as AnalyserNode} />
             <S.ExpandButton open={open} onClick={toggleVoiceInput}>
                 {arrow} Edit {state.voiceConfig.preset} {arrow}
             </S.ExpandButton>

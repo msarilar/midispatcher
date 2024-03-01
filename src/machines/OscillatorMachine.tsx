@@ -4,7 +4,8 @@ import * as React from 'react';
 import { S } from './MachineStyling';
 import { MidiLinkModel } from './../layout/Link';
 import { MachineNodeModel } from './../layout/Node';
-import { AbstractMachine, BuildVisualizers, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, registeredMachine } from './Machines';
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, registeredMachine } from './Machines';
+import { Visualizers } from './Visualizers';
 
 interface OscillatorConfig {
 
@@ -25,6 +26,7 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
     private static readonly audioContext: AudioContext = new AudioContext();
     private readonly mainGainNode: GainNode;
     public readonly filter: BiquadFilterNode;
+    public readonly analyzer: AnalyserNode;
     private state: OscillatorConfig;
     private turnedOff: boolean = false;
 
@@ -45,6 +47,9 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
         this.mainGainNode = OscillatorMachine.audioContext.createGain();
         this.mainGainNode.connect(OscillatorMachine.audioContext.destination);
 
+        this.analyzer = OscillatorMachine.audioContext.createAnalyser();
+        this.analyzer.connect(this.mainGainNode);
+
         this.state = config ??
         {
 
@@ -62,7 +67,7 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
         this.filter = OscillatorMachine.audioContext.createBiquadFilter();
         this.applyFilterOptions(this.state);
 
-        this.filter.connect(this.mainGainNode);
+        this.filter.connect(this.analyzer);
 
         this.getNode().addMachineInPort("In", 1);
     }
@@ -178,8 +183,6 @@ const OscillatorNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Oscill
         setState(newState);
     }
 
-    const [spectrogramRef, oscilloscopeRef] = BuildVisualizers(props.machine.filter);
-
     return (
         <S.SettingsBar>
             <S.Slider>
@@ -198,8 +201,7 @@ const OscillatorNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Oscill
                     <option value="1.0" label="100%"></option>
                 </datalist>
             </S.Slider>
-            <div ref={spectrogramRef}/>
-            <div ref={oscilloscopeRef}/>
+            <Visualizers width={200} height={50} analyser={props.machine.analyzer} />
             <S.Dropdown>
                 <span>Waveform: </span>
                 <select name="waveform"

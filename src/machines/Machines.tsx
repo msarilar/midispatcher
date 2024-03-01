@@ -1,5 +1,3 @@
-import React from 'react';
-import Nexus from 'nexusui';
 import { DiagramEngine } from '@projectstorm/react-diagrams';
 import { AbstractReactFactory, GenerateWidgetEvent, GenerateModelEvent } from '@projectstorm/react-canvas-core';
 
@@ -34,41 +32,6 @@ export interface CustomNodeWidgetProps<T extends Machine> {
     engine: DiagramEngine;
     size?: number;
     machine: T;
-}
-
-export function BuildVisualizers(node: AudioNode) {
-
-    const visualizersInitialized = React.useRef(false);
-    const spectrogramRef = React.useRef<HTMLDivElement>(null);
-    const oscilloscopeRef = React.useRef<HTMLDivElement>(null);
-    React.useEffect(() => {
-
-        if (visualizersInitialized.current === true) { return ; }
-
-        const options = {
-
-            size: [200, 50]
-        };
-
-        const spectrogram = new Nexus.Spectrogram(spectrogramRef.current, options);
-
-        spectrogram.connect(node);
-        spectrogram.colorize("fill", "#000");
-
-        const oscilloscope = new Nexus.Oscilloscope(oscilloscopeRef.current, options);
-        oscilloscope.connect(node);
-        oscilloscope.colorize("fill", "#000");
-
-        visualizersInitialized.current = true;
-
-        return(() => {
-
-            spectrogram.disconnect();
-            oscilloscope.disconnect();
-        });
-    }, []);
-
-    return [spectrogramRef, oscilloscopeRef];
 }
 
 export abstract class AbstractMachine implements Machine {
