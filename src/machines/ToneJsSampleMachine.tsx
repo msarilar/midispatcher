@@ -149,6 +149,7 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
     private config: ToneJsSampleMachineConfig;
     public readonly analyzer: AnalyserNode;
     public readonly volume: Tone.Volume;
+    private readonly gainForAnalyser: GainNode;
     private static factory: MachineFactory;
     private static factories: FactoryDictionary = {};
 
@@ -166,7 +167,10 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
         this.volume.mute = this.config.volume === -30;
         
         this.analyzer = Tone.context.createAnalyser();
-        this.volume.connect(this.analyzer);
+        this.gainForAnalyser = Tone.context.createGain();
+        this.gainForAnalyser.connect(this.analyzer);
+        this.gainForAnalyser.gain.value = 1;
+        this.sampler.connect(this.gainForAnalyser);
         this.volume.toDestination();
 
         this.getNode().addMachineInPort("In", 1);

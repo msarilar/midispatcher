@@ -1,5 +1,6 @@
 import { DiagramEngine } from '@projectstorm/react-diagrams-core';
 import * as React from 'react';
+import * as Tone from "tone";
 
 import { S } from './MachineStyling';
 import { MidiLinkModel } from './../layout/Link';
@@ -23,7 +24,6 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
 
     private static factory: MachineFactory;
     private readonly oscillators: { [frequency: number]: OscillatorNode } = {}
-    private static readonly audioContext: AudioContext = new AudioContext();
     private readonly mainGainNode: GainNode;
     public readonly filter: BiquadFilterNode;
     public readonly analyzer: AnalyserNode;
@@ -44,10 +44,10 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
 
         super();
 
-        this.mainGainNode = OscillatorMachine.audioContext.createGain();
-        this.mainGainNode.connect(OscillatorMachine.audioContext.destination);
+        this.mainGainNode = Tone.getContext().createGain();
+        this.mainGainNode.connect(Tone.getContext().rawContext.destination);
 
-        this.analyzer = OscillatorMachine.audioContext.createAnalyser();
+        this.analyzer = Tone.getContext().createAnalyser();
         this.analyzer.connect(this.mainGainNode);
 
         this.state = config ??
@@ -64,7 +64,7 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
 
         this.mainGainNode.gain.value = this.state.volume / 4;
 
-        this.filter = OscillatorMachine.audioContext.createBiquadFilter();
+        this.filter = Tone.getContext().createBiquadFilter();
         this.applyFilterOptions(this.state);
 
         this.filter.connect(this.analyzer);
@@ -148,7 +148,7 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
         }
         else if (messageEvent.message.type === "noteon") {
 
-            const osc = OscillatorMachine.audioContext.createOscillator();
+            const osc = Tone.getContext().createOscillator();
             osc.connect(this.filter);
             osc.connect(this.mainGainNode);
             osc.frequency.value = getFrequency(midiNote);

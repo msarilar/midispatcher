@@ -24,6 +24,7 @@ export class ToneJsSynthMachine extends AbstractMachine implements MachineTarget
     private config: ToneJsSynthConfig;
     public readonly destination: Tone.Volume;
     public readonly analyzer: AnalyserNode;
+    private readonly gainForAnalyser: GainNode;
 
     getState() {
 
@@ -37,6 +38,7 @@ export class ToneJsSynthMachine extends AbstractMachine implements MachineTarget
             this.synth.dispose();
             const newSynth = new Tone.PolySynth(Tone.AMSynth, config.voice);
             this.synth = newSynth.connect(this.destination);
+            this.synth.connect(this.gainForAnalyser);
         }
 
         this.destination.volume.value = config.volume;
@@ -63,7 +65,10 @@ export class ToneJsSynthMachine extends AbstractMachine implements MachineTarget
         this.synth.connect(this.destination);
 
         this.analyzer = Tone.context.createAnalyser();
-        this.destination.connect(this.analyzer);
+        this.gainForAnalyser = Tone.context.createGain();
+        this.synth.connect(this.gainForAnalyser);
+        this.gainForAnalyser.connect(this.analyzer);
+        this.gainForAnalyser.gain.value = 10;
         
         this.destination.toDestination();
         this.getNode().addMachineInPort("In", 1);

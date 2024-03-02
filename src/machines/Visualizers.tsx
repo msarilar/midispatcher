@@ -21,14 +21,19 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
     let running = true;
 
     props.analyser.fftSize = 1024;
-    const bufferLength = props.analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    const sliceWidth = props.width / bufferLength;
+    
+    const bufferSpectrogramLength = props.analyser.frequencyBinCount;
+    const dataSpectrogramArray = new Uint8Array(bufferSpectrogramLength);
+    const sliceSpectrogramWidth = props.width / bufferSpectrogramLength;
+
+    const bufferOscilloscopeLength = props.analyser.fftSize;
+    const dataOscilloscopeArray = new Uint8Array(bufferOscilloscopeLength);
+    const sliceOscilloscopeWidth = props.width / bufferOscilloscopeLength;
     const definition = props.width / 50;
 
     const fps = 48;
     const fpsInterval = 1000 / fps;
-    let then = performance.now();
+    let then = 0;
 
     const drawVisuals = function (state: VisualizersState) {
 
@@ -61,7 +66,7 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
 
     const drawOscilloscope = function (oscilloscope: CanvasRenderingContext2D) {
 
-        props.analyser.getByteTimeDomainData(dataArray);
+        props.analyser.getByteTimeDomainData(dataOscilloscopeArray);
 
         oscilloscope.clearRect(0, 0, props.width, props.height);
         oscilloscope.lineWidth = 2;
@@ -69,9 +74,9 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
         oscilloscope.beginPath();
         let totalWidth = 0;
 
-        for (let i = 0; i < bufferLength; i++) {
+        for (let i = 0; i < dataOscilloscopeArray.length; i++) {
 
-            const v = dataArray[i] / 128.0;
+            const v = dataOscilloscopeArray[i] / 128.0;
 
             const y = v * (props.height / 2);
 
@@ -83,7 +88,7 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
                 oscilloscope.lineTo(totalWidth, y);
             }
 
-            totalWidth += sliceWidth;
+            totalWidth += sliceOscilloscopeWidth;
         }
 
         oscilloscope.lineTo(props.width, props.height / 2);
@@ -92,26 +97,26 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
 
     const drawSpectrogram = function (spectrogram: CanvasRenderingContext2D) {
 
-        props.analyser.getByteFrequencyData(dataArray);
+        props.analyser.getByteFrequencyData(dataSpectrogramArray);
 
         spectrogram.clearRect(0, 0, props.width, props.height);
         spectrogram.fillStyle = foreground;
         let totalWidth = 0;
 
-        for (let i = 0; i < bufferLength; i = i + definition) {
+        for (let i = 0; i < dataSpectrogramArray.length; i = i + definition) {
 
-            let barHeight = findMaxUint8Array(dataArray.subarray(i, i + definition));
+            let barHeight = findMaxUint8Array(dataSpectrogramArray.subarray(i, i + definition));
             barHeight /= 255;
             barHeight *= props.height;
 
             spectrogram.fillRect(
                 totalWidth,
                 props.height - barHeight,
-                sliceWidth * definition,
+                sliceSpectrogramWidth * definition,
                 barHeight
             );
 
-            totalWidth += sliceWidth * definition;
+            totalWidth += sliceSpectrogramWidth * definition;
         }
     };
 
