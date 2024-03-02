@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as Tone from "tone";
 
 import { S } from './MachineStyling';
 
@@ -31,8 +32,13 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
     const sliceOscilloscopeWidth = props.width / bufferOscilloscopeLength;
     const definition = props.width / 50;
 
-    const fps = 48;
+    const fps = 24;
     const fpsInterval = 1000 / fps;
+
+    // could be used to determine where to start reading the array from getByteTimeDomainData (using elapsed), but fft doesnt seem accurate enough?
+    const waveArrayDuration = 1000 * props.analyser.fftSize / Tone.getContext().sampleRate;
+    const waveArrayStepDuration = waveArrayDuration / props.analyser.fftSize;
+
     let then = 0;
 
     const drawVisuals = function (state: VisualizersState) {
@@ -51,7 +57,7 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
             return;
         }
 
-        then = now - (elapsed % fpsInterval);
+        then = now;
 
         if (state.oscilloscopeOn && state.oscilloscope != undefined) {
 
@@ -64,9 +70,33 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
         }
     }
 
+    const findTargetIndex = (startingTarget: number, array: Uint8Array) => {
+
+        let index = 0;
+        if(dataOscilloscopeArray[0] !== startingTarget || dataOscilloscopeArray[dataOscilloscopeArray.length - 1] >= startingTarget) {
+
+            for (let i = 1; i < dataOscilloscopeArray.length; i++) {
+                if(dataOscilloscopeArray[i] === startingTarget && dataOscilloscopeArray[i -1] < startingTarget) {
+
+                    index = i;
+                    break;
+                }
+            }
+        }
+
+        return index;
+    }
+
     const drawOscilloscope = function (oscilloscope: CanvasRenderingContext2D) {
 
         props.analyser.getByteTimeDomainData(dataOscilloscopeArray);
+
+        let shift = findTargetIndex(128, dataOscilloscopeArray);
+
+        if(shift === 0) {
+
+            shift = findTargetIndex(255, dataOscilloscopeArray);
+        }
 
         oscilloscope.clearRect(0, 0, props.width, props.height);
         oscilloscope.lineWidth = 2;
@@ -76,11 +106,12 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
 
         for (let i = 0; i < dataOscilloscopeArray.length; i++) {
 
-            const v = dataOscilloscopeArray[i] / 128.0;
+            const index = shift + i;
+            const v = dataOscilloscopeArray[index % dataOscilloscopeArray.length] / 128.0;
 
             const y = v * (props.height / 2);
 
-            if (i === 0) {
+            if (index === 0) {
 
                 oscilloscope.moveTo(totalWidth, y);
             } else {
