@@ -39,25 +39,12 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
     const waveArrayDuration = 1000 * props.analyser.fftSize / Tone.getContext().sampleRate;
     const waveArrayStepDuration = waveArrayDuration / props.analyser.fftSize;
 
-    let then = 0;
-
     const drawVisuals = function (state: VisualizersState) {
 
         if (!running) {
 
             return;
         }
-
-        const _ = requestAnimationFrame(function() { drawVisuals(state); });
-
-        let now = performance.now();
-        let elapsed = now - then;
-        if (elapsed <= fpsInterval) {
-
-            return;
-        }
-
-        then = now;
 
         if (state.oscilloscopeOn && state.oscilloscope != undefined) {
 
@@ -68,11 +55,13 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
 
             drawSpectrogram(state.spectrogram);
         }
+
+        const _ = setTimeout(() => requestAnimationFrame(function() { drawVisuals(state); }), fpsInterval);
     }
 
     const findTargetIndex = (startingTarget: number, array: Uint8Array) => {
 
-        let index = 0;
+        let index = -1;
         if(dataOscilloscopeArray[0] !== startingTarget || dataOscilloscopeArray[dataOscilloscopeArray.length - 1] >= startingTarget) {
 
             for (let i = 1; i < dataOscilloscopeArray.length; i++) {
@@ -93,7 +82,7 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
 
         let shift = findTargetIndex(128, dataOscilloscopeArray);
 
-        if(shift === 0) {
+        if(shift === -1) {
 
             shift = findTargetIndex(255, dataOscilloscopeArray);
         }
@@ -111,13 +100,7 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
 
             const y = v * (props.height / 2);
 
-            if (index === 0) {
-
-                oscilloscope.moveTo(totalWidth, y);
-            } else {
-
-                oscilloscope.lineTo(totalWidth, y);
-            }
+            oscilloscope.lineTo(totalWidth, y);
 
             totalWidth += sliceOscilloscopeWidth;
         }
