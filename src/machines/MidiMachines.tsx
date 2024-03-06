@@ -102,6 +102,25 @@ export class MidiMachineTarget extends AbstractMachine implements MachineTarget 
 
     getInChannelCount() { return this.midiOutput.channels.length; }
 
+    dispose(): void {
+        
+        for(let channel = 1; channel < this.midiOutput.channels.length; channel++) {
+            
+            for (let i = 0; i < notesOff.length; i++) {
+
+                this.setChannel(notesOff[i], channel);
+                try {
+        
+                    this.midiOutput.send(notesOff[i]);
+                }
+                catch(e) {
+        
+                    console.error(e);
+                }
+            }
+        }
+    }
+
     receive(messageEvent: MachineMessage, channel: number, link: MidiLinkModel) {
 
         link.setSending(true);
@@ -112,23 +131,38 @@ export class MidiMachineTarget extends AbstractMachine implements MachineTarget 
             this.setChannel(messageEvent.message.rawData, channel);
         }
 
-        try {
-
-            this.midiOutput.send(messageEvent.message.rawData);
-        }
-        catch(e) {
-
-            console.error(e);
-            console.error(messageEvent);
-        }
-
         // somehow needed for some midi output device otherwise the midi is left in bad state?
-        if (messageEvent.type === "allnotesoff") {
+        if (messageEvent.type === "allnotesoff" || messageEvent.type === "allsoundoff") {
+
+            if (channel === 0) {
+
+                return;
+            }
 
             for (let i = 0; i < notesOff.length; i++) {
 
                 this.setChannel(notesOff[i], channel);
-                this.midiOutput.send(notesOff[i]);
+                try {
+        
+                    this.midiOutput.send(notesOff[i]);
+                }
+                catch(e) {
+        
+                    console.error(e);
+                    console.error(messageEvent);
+                }
+            }
+        }
+        else {
+
+            try {
+
+                this.midiOutput.send(messageEvent.message.rawData);
+            }
+            catch(e) {
+    
+                console.error(e);
+                console.error(messageEvent);
             }
         }
     }

@@ -5,7 +5,7 @@ import { SamplerOptions } from "tone";
 
 import { S } from './MachineStyling';
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, registeredMachine, registeredMachineWithParameter } from "./Machines";
-import { noteMidiToString } from "../Utils";
+import { normalizeVelocity, noteMidiToString } from "../Utils";
 import { MidiLinkModel } from "../layout/Link";
 import { MachineNodeModel } from "../layout/Node";
 import { Visualizers } from './Visualizers';
@@ -183,6 +183,7 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
             const newSample = new Tone.Sampler(getSamples(config.sample));
             this.sampler.dispose();
             this.sampler = newSample.connect(this.volume);
+            this.sampler.connect(this.gainForAnalyser);
         }
 
         this.volume.volume.value = config.volume;
@@ -276,7 +277,7 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
                 }
                 else {
 
-                    this.sampler.triggerAttack(noteMidiToString(messageEvent.message.rawData[1]), Tone.context.currentTime);
+                    this.sampler.triggerAttack(noteMidiToString(messageEvent.message.rawData[1]), Tone.context.currentTime, normalizeVelocity(messageEvent.message.rawData[2]));
                 }
 
                 break;

@@ -62,10 +62,10 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
     const findTargetIndex = (startingTarget: number, array: Uint8Array) => {
 
         let index = -1;
-        if(dataOscilloscopeArray[0] !== startingTarget || dataOscilloscopeArray[dataOscilloscopeArray.length - 1] >= startingTarget) {
+        if(array[0] !== startingTarget || array[array.length - 1] >= startingTarget) {
 
-            for (let i = 1; i < dataOscilloscopeArray.length; i++) {
-                if(dataOscilloscopeArray[i] === startingTarget && dataOscilloscopeArray[i -1] < startingTarget) {
+            for (let i = 1; i < array.length; i++) {
+                if(array[i] === startingTarget && array[i -1] < startingTarget) {
 
                     index = i;
                     break;
@@ -96,11 +96,11 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
         for (let i = 0; i < dataOscilloscopeArray.length; i++) {
 
             const index = shift + i;
-            const v = dataOscilloscopeArray[index % dataOscilloscopeArray.length] / 128.0;
+            const scaledDownValue = dataOscilloscopeArray[index % dataOscilloscopeArray.length] / 255.0;
 
-            const y = v * (props.height / 2);
+            const height = scaledDownValue * props.height;
 
-            oscilloscope.lineTo(totalWidth, y);
+            oscilloscope.lineTo(totalWidth, height);
 
             totalWidth += sliceOscilloscopeWidth;
         }
@@ -122,6 +122,7 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
             let barHeight = findMaxUint8Array(dataSpectrogramArray.subarray(i, i + definition));
             barHeight /= 255;
             barHeight *= props.height;
+            spectrogram.fillStyle = `rgb(${barHeight} ${barHeight} ${barHeight})`;
 
             spectrogram.fillRect(
                 totalWidth,

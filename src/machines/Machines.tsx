@@ -74,7 +74,7 @@ export abstract class AbstractMachine implements Machine {
     setEmit(emit: (messageEvent: MachineMessage, channel: number) => void) { this.emitter = emit; }
     emit(messageEvent: MachineMessage, channel: number) {
 
-        (this.machineNode ?? this.getNode()).getOutPorts()[channel].setSending(true);
+        (this.machineNode ?? this.getNode()).getOutPorts()[channel]?.setSending(true);
         this.emitter?.(messageEvent, channel);
     };
 }

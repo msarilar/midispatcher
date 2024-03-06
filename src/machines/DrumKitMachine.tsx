@@ -16,6 +16,8 @@ export enum DrumKitScope {
 export class DrumKitMachine extends AbstractMachine implements MachineSourceTarget {
 
     private readonly scope: DrumKitScope;
+    private readonly channelPerNote: { [note: string]: number } = {};
+    private readonly outOfScopeChannel: number;
 
     getState() {
 
@@ -29,7 +31,6 @@ export class DrumKitMachine extends AbstractMachine implements MachineSourceTarg
         [DrumKitScope.Toms]: undefined
     };
 
-    private readonly channelPerNote: { [note: string]: number } = {};
     getFactory() { return DrumKitMachine.buildFactory(this.scope)!; }
 
     static buildFactory(factoryScope?: DrumKitScope): MachineFactory {
@@ -81,7 +82,10 @@ export class DrumKitMachine extends AbstractMachine implements MachineSourceTarg
             this.getNode().addMachineOutPort(gsStandardSetDrumKit[note], channel++);
         });
 
-        this.getNode().addMachineOutPort(AllLinkCode, channel + 1);
+        this.getNode().addMachineOutPort("Out of scope", channel + 1);
+        this.getNode().addMachineOutPort(AllLinkCode, channel + 2);
+
+        this.outOfScopeChannel = channel;
     }
 
     receive(messageEvent: MachineMessage, _: number, link: MidiLinkModel): void {
@@ -90,9 +94,13 @@ export class DrumKitMachine extends AbstractMachine implements MachineSourceTarg
         if (messageEvent.message.type === "noteoff" || messageEvent.message.type === "noteon") {
 
             const note = noteMidiToString(messageEvent.message.rawData[1]);
-            if (gsStandardSetDrumKit[note] != undefined) {
+            if (this.channelPerNote[note] != undefined) {
 
                 this.emit(messageEvent, this.channelPerNote[note]);
+            }
+            else {
+
+                this.emit(messageEvent, this.outOfScopeChannel);
             }
         }
         else {
