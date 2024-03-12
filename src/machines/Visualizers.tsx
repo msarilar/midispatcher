@@ -62,10 +62,10 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
     const findTargetIndex = (startingTarget: number, array: Uint8Array) => {
 
         let index = -1;
-        if(array[0] !== startingTarget || array[array.length - 1] >= startingTarget) {
+        if (array[0] !== startingTarget || array[array.length - 1] >= startingTarget) {
 
             for (let i = 1; i < array.length; i++) {
-                if(array[i] === startingTarget && array[i -1] < startingTarget) {
+                if (array[i] === startingTarget && array[i -1] < startingTarget) {
 
                     index = i;
                     break;
@@ -82,7 +82,7 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
 
         let shift = findTargetIndex(128, dataOscilloscopeArray);
 
-        if(shift === -1) {
+        if (shift === -1) {
 
             shift = findTargetIndex(255, dataOscilloscopeArray);
         }
@@ -122,7 +122,6 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
             let barHeight = findMaxUint8Array(dataSpectrogramArray.subarray(i, i + definition));
             barHeight /= 255;
             barHeight *= props.height;
-            spectrogram.fillStyle = `rgb(${barHeight} ${barHeight} ${barHeight})`;
 
             spectrogram.fillRect(
                 totalWidth,

@@ -104,7 +104,7 @@ export class NoteSplitMachine extends AbstractMachine implements MachineSourceTa
 
                 const midiNote = messageEvent.message.rawData[1];
                 const threshold = noteStringToNoteMidi(this.config.noteThreshold);
-                if(midiNote > threshold[1]) {
+                if (midiNote > threshold[1]) {
 
                     this.emit(messageEvent, 1);
                 }

@@ -125,7 +125,7 @@ export class ToneJsSynthMachine extends AbstractMachine implements MachineTarget
 
             case "noteon":
                 link.setSending(true);
-                if(messageEvent.message.rawData[2] === 0) {
+                if (messageEvent.message.rawData[2] === 0) {
 
                     this.synth.triggerRelease(noteMidiToString(messageEvent.message.rawData[1]));
                 }

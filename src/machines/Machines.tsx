@@ -7,7 +7,8 @@ import { engine } from '../layout/Engine';
 
 export interface MachineMessage {
 
-    type: string, message: {
+    type: string,
+    message: {
 
         rawData: Uint8Array,
         isChannelMessage: boolean,
@@ -103,6 +104,7 @@ export interface MachineFactory {
 
 export enum MachineType {
 
+    WebRTC = "WebRTC",
     Emitter = "Emitters",
     Output = "Output",
     System = "System",
@@ -136,6 +138,11 @@ export const registeredFactories: { [type in MachineType]: MachineTypeData } = {
     [MachineType.System]: {
 
         tooltip: "Emit system signals",
+        factories: []
+    },
+    [MachineType.WebRTC]: {
+
+        tooltip: "Remote machines",
         factories: []
     },
     [MachineType.MIDI]: {
@@ -252,6 +259,8 @@ export function machineTypeToColor(type: MachineType) {
             return "rgb(0,150,50)";
         case MachineType.System:
             return "rgb(255,153,0)";
+        case MachineType.WebRTC:
+            return "rgb(250,150,150)";
         case MachineType.MIDI:
             return "rgb(150,150,50)";
     }

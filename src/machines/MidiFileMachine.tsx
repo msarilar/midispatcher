@@ -126,7 +126,7 @@ export class MidiFileMachine extends AbstractMachine implements MachineSourceTar
 
                 const data = [];
                 data.push(rawEvent.type << 4);
-                if(Array.isArray(rawEvent.data)) {
+                if (Array.isArray(rawEvent.data)) {
 
                     rawEvent.data.forEach((d: number) => {
 
@@ -239,7 +239,7 @@ export class MidiFileMachine extends AbstractMachine implements MachineSourceTar
 
                 break;
             case "clock":
-                if(!this.playing) { return; }
+                if (!this.playing) { return; }
                 link.setSending(true);
                 const toPlay = [];
                 for(let currentTrack = 0; currentTrack < this.config.tracks.length; currentTrack++) {

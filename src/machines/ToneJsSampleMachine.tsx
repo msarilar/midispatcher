@@ -271,7 +271,7 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
 
             case "noteon":
                 link.setSending(true);
-                if(messageEvent.message.rawData[2] === 0) {
+                if (messageEvent.message.rawData[2] === 0) {
 
                     this.sampler.triggerRelease(noteMidiToString(messageEvent.message.rawData[1]));
                 }

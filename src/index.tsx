@@ -13,6 +13,7 @@ require("./machines/OscillatorMachine");
 require("./machines/ThruMachine");
 require("./machines/ToneJsSampleMachine");
 require("./machines/ToneJsSynthMachine");
+require("./machines/RemoteMachines");
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
