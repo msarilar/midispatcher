@@ -35,7 +35,7 @@ export interface CustomNodeWidgetProps<T extends Machine> {
     machine: T;
 }
 
-export abstract class AbstractMachine implements Machine {
+export abstract class AbstractMachine extends EventTarget implements Machine {
 
     private static counters: { [machineName: string]: number } = {};
     abstract getState(): any;
@@ -54,6 +54,8 @@ export abstract class AbstractMachine implements Machine {
     abstract getFactory(): MachineFactory;
     protected readonly id: string;
     protected constructor(factory?: MachineFactory) {
+
+        super();
 
         if (!AbstractMachine.counters[this.constructor.name]) {
 
@@ -104,11 +106,11 @@ export interface MachineFactory {
 
 export enum MachineType {
 
-    WebRTC = "WebRTC",
     Emitter = "Emitters",
     Output = "Output",
     System = "System",
     Processor = "Processors",
+    WebRTC = "WebRTC",
     MIDI = "MIDI"
 }
 
@@ -260,7 +262,7 @@ export function machineTypeToColor(type: MachineType) {
         case MachineType.System:
             return "rgb(255,153,0)";
         case MachineType.WebRTC:
-            return "rgb(250,150,150)";
+            return "rgb(255,77,136)";
         case MachineType.MIDI:
             return "rgb(150,150,50)";
     }

@@ -1,5 +1,5 @@
 import { DataConnection, Peer } from "peerjs";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSource, MachineTarget, MachineType, registeredMachine } from "./Machines";
 import { MidiLinkModel } from "../layout/Link";
@@ -7,11 +7,23 @@ import React from "react";
 import { S } from "./MachineStyling";
 import { MachineNodeModel } from "../layout/Node";
 import { DiagramEngine } from "@projectstorm/react-diagrams";
+import { CachedOutlined, ContentCopyOutlined } from "@mui/icons-material";
+import { Alert, Button, Tooltip, Typography, Zoom } from "@mui/material";
+
+const ON_STATUS_CHANGED: string = "onStateChanged";
 
 interface RemoteMachineConfig {
 
     readonly channels: number;
     readonly dataChannelName: string;
+    readonly targetChannelName: string | undefined;
+}
+
+interface ConnectionStatus {
+
+    readonly status: string;
+    readonly error: string | undefined;
+    readonly connections: number;
 }
 
 @registeredMachine
@@ -23,8 +35,11 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
     private readonly config: RemoteMachineConfig;
 
     private peer: Peer | undefined;
+    private onStatusChanged: Event = new Event(ON_STATUS_CHANGED);
+    public connectionStatus: ConnectionStatus;
 
     private readonly connections: Set<DataConnection> = new Set<DataConnection>();
+
 
     static buildFactory(): MachineFactory {
 
@@ -59,6 +74,12 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
         this.peer?.destroy();
     }
 
+    private setConnectionStatus(connectionStatus: ConnectionStatus) {
+
+        this.connectionStatus = connectionStatus;
+        this.dispatchEvent(this.onStatusChanged);
+    }
+
     private constructor(config?: RemoteMachineConfig) {
 
         super();
@@ -66,7 +87,8 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
         this.config = config ?? {
 
             channels: 1,
-            dataChannelName: window.prompt("pick a unique name")!
+            dataChannelName: window.prompt("pick a unique name")!,
+            targetChannelName: undefined
         };
 
         for (let i = 0; i < this.config.channels; i++) {
@@ -74,10 +96,17 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
             this.getNode().addMachineInPort("Channel " + (i + 1), i + 1);
         }
 
+        this.connectionStatus = {
+
+            status: "loading",
+            error: undefined,
+            connections: 0
+        };
+
         this.initPeer();
     }
 
-    async initPeer() {
+    private async initPeer() {
 
         const apiKey = process.env.REACT_APP_METERED_API_KEY ?? window.alert("missing api key in environment variable");
         const response = await fetch("https://midispatcher.metered.live/api/v1/turn/credentials?apiKey=" + apiKey);
@@ -95,59 +124,60 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
             config: peerConfig
         });
 
+        const that = this;
         this.peer = newPeer;
 
-        this.peer.on("open", function (id) {
+        this.peer.on("open", function (_) {
         
-            console.log(newPeer.id + " ID: " + id);
+            that.setConnectionStatus({ ...that.connectionStatus, status: "waiting" });
         });
     
         this.peer.on("disconnected", function () {
-            console.log(newPeer.id + " disconnected");
+
+            that.setConnectionStatus({ ...that.connectionStatus, status: "disconnected" });
         });
+
         this.peer.on("close", function() {
-            console.log(newPeer.id + " Connection destroyed");
+
+            that.setConnectionStatus({ ...that.connectionStatus, status: "closed" });
         });
-        this.peer.on('error', function (err) {
-            console.log(newPeer.id + " " + err);
+
+        this.peer.on("error", function (err) {
+
+            that.setConnectionStatus({ ...that.connectionStatus, error: err.message });
         });
 
         this.peer.on("connection", (conn) => {
 
-            console.log(newPeer.id + " received connection " + conn.dataChannel + " (" + conn.connectionId + ")");
-
-            console.log("conn:");
-            console.log(conn);
-
-
-            conn.on("data", d => {
-
-                console.log("data:");
-                console.log(d);
-            });
-
             conn.on("iceStateChanged", d => {
 
-                console.log("iceStateChanged:");
-                console.log(d);
+                if (d === "disconnected" || d === "closed"  || d === "failed") {
+
+                    that.setConnectionStatus({ ...that.connectionStatus, error: d, status: "ice disconnected" });
+                }
+                else {
+                    
+                    that.setConnectionStatus({ ...that.connectionStatus, error: undefined });
+                }
             });
 
             conn.on("error", err => {
 
-                console.error(err);
+                this.connections.delete(conn);
+                that.setConnectionStatus({ ...that.connectionStatus, error: err.message, connections: that.connectionStatus.connections - 1 });
             });
 
             conn.on("open", () => {
-                
-                console.log("connection opened");
+
                 this.connections.add(conn);
+                that.setConnectionStatus({ ...that.connectionStatus, error: undefined, connections: that.connectionStatus.connections + 1, status: "connected" });
             });
 
             conn.on("close", () => {
 
-                console.log("connection closed");
                 this.connections.delete(conn);
-            })
+                that.setConnectionStatus({ ...that.connectionStatus, error: undefined, connections: that.connectionStatus.connections - 1, status: that.connections.size > 1 ? "connected" : "waiting" });
+            });
         });
     }
 
@@ -167,17 +197,53 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
 
 const EmittingRemoteNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<EmittingRemoteMachine>> = props => {
 
-    const [status, setStatus] = React.useState({ text: "waiting", connections: 0 });
+    const [connectionStatus, setConnectionStatus] = React.useState(props.machine.connectionStatus);
+    const [clipboardTooltipOpened, setClipboardTooltipOpened] = React.useState(false);
 
     React.useEffect(() => {
 
+        props.machine.addEventListener(ON_STATUS_CHANGED, () => {
+
+            setConnectionStatus(props.machine.connectionStatus);
+        });
     }, []);
+
+    const errorBlock = connectionStatus.error == undefined ? undefined :
+        <Alert severity="error">
+            {connectionStatus.error}
+        </Alert>
+
+    const titleClicked = () => {
+
+        navigator.clipboard.writeText(props.machine.getState().dataChannelName);
+        setClipboardTooltipOpened(true);
+        setTimeout(() => { setClipboardTooltipOpened(false); }, 1000);
+    };
 
     return (
         <S.SettingsBarHorizontal>
+            <Tooltip
+                PopperProps={{ disablePortal: true }}
+                open={clipboardTooltipOpened}
+                disableFocusListener
+                disableHoverListener
+                disableTouchListener
+                followCursor={true}
+                title="Copied!"
+                TransitionComponent={Zoom}>
+                <Typography variant="h6" align="center">
+                    { "<" + props.machine.getState().dataChannelName + ">" }
+                    <Button onClick={titleClicked}><ContentCopyOutlined/></Button>
+                </Typography >
+            </Tooltip>
+            
+            <Typography variant="body2" align="center">{ connectionStatus.connections } connected</Typography >
+            <Typography variant="body2" align="center">{ connectionStatus.status }</Typography >
+            { errorBlock }
         </S.SettingsBarHorizontal>
     );
 }
+
 
 @registeredMachine
 export class ReceivingRemoteMachine extends AbstractMachine implements MachineSource {
@@ -188,6 +254,8 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
     private readonly config: RemoteMachineConfig;
 
     private peer: Peer | undefined;
+    private onStatusChanged: Event = new Event(ON_STATUS_CHANGED);
+    public connectionStatus: ConnectionStatus;
 
     static buildFactory(): MachineFactory {
 
@@ -222,6 +290,12 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
         this.peer?.destroy();
     }
 
+    private setConnectionStatus(connectionStatus: ConnectionStatus) {
+
+        this.connectionStatus = connectionStatus;
+        this.dispatchEvent(this.onStatusChanged);
+    }
+
     private constructor(config?: RemoteMachineConfig) {
 
         super();
@@ -229,7 +303,8 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
         this.config = config ?? {
 
             channels: 1,
-            dataChannelName: uuidv4()
+            dataChannelName: uuidv4(),
+            targetChannelName: window.prompt("target name ?") ?? undefined
         };
 
         for (let i = 0; i < this.config.channels; i++) {
@@ -237,11 +312,19 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
             this.getNode().addMachineOutPort("Channel " + (i + 1), i + 1);
         }
 
+        this.connectionStatus = {
+
+            status: "loading",
+            error: undefined,
+            connections: 0
+        };
+
         this.initPeer();
     }
 
     async initPeer() {
 
+        this.peer?.destroy();
         const apiKey = process.env.REACT_APP_METERED_API_KEY ?? window.alert("missing api key in environment variable");
         const response = await fetch("https://midispatcher.metered.live/api/v1/turn/credentials?apiKey=" + apiKey);
         const iceServers = await response.json();
@@ -259,33 +342,58 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
 
         this.peer = newPeer;
 
-        this.peer.on("open", id => {
+        const that = this;
+        
+        this.peer.on("disconnected", function () {
 
-            const connection = newPeer.connect(window.prompt("target name?")!, {
+            that.setConnectionStatus({ ...that.connectionStatus, status: "disconnected" });
+        });
+
+        this.peer.on("close", function() {
+
+            that.setConnectionStatus({ ...that.connectionStatus, status: "closed" });
+        });
+
+        this.peer.on("error", function (err) {
+
+            that.setConnectionStatus({ ...that.connectionStatus, error: err.message, status: "error" });
+        });
+
+        this.peer.on("open", _ => {
+
+            that.setConnectionStatus({ ...that.connectionStatus, status: "waiting" });
+            const connection = newPeer.connect(that.config.targetChannelName ?? window.prompt("target name?")!, {
 
                 reliable: true
             });
 
-            console.log(connection);
+            that.setConnectionStatus({ ...that.connectionStatus, error: undefined, status: "connecting..." });
 
-            connection.on("iceStateChanged", s => {
+            connection.on("iceStateChanged", d => {
 
-                console.log(s);
+                if (d === "disconnected" || d === "closed"  || d === "failed") {
+
+                    that.setConnectionStatus({ ...that.connectionStatus, error: d, status: "ice disconnected" });
+                }
+                else {
+                    
+                    that.setConnectionStatus({ ...that.connectionStatus, error: undefined });
+                }
             })
         
             connection.on("close", () => {
 
-                console.log("closed");
+                that.setConnectionStatus({ ...that.connectionStatus, status: "closed" });
             });
     
             connection.on("error", e => {
 
-                console.error(e);
+                that.setConnectionStatus({ ...that.connectionStatus, error: e.message });
             });
 
             connection.on("open", () => {
 
-                console.log("connected");
+                that.setConnectionStatus({ ...that.connectionStatus, error: undefined, status: "connected" });
             });
 
             connection.on("data", (messageEventAndChannel: any) => {
@@ -304,42 +412,43 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
                 }
             });
         });
-
-        setUpLog(this.peer);
     }
 }
 
 const ReceivingRemoteNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ReceivingRemoteMachine>> = props => {
 
-    const [status, setStatus] = React.useState("waiting");
+    const [connectionStatus, setConnectionStatus] = React.useState(props.machine.connectionStatus);
 
     React.useEffect(() => {
 
+        props.machine.addEventListener(ON_STATUS_CHANGED, () => {
+
+            setConnectionStatus(props.machine.connectionStatus);
+        });
     }, []);
+
+    const errorBlock = connectionStatus.error == undefined ? undefined :
+        <Alert severity="error">
+            {connectionStatus.error}
+        </Alert>
+
+    const forceReconnectClicked = () => {
+
+        props.machine.initPeer();
+    };
 
     return (
         <S.SettingsBarHorizontal>
+            <Typography variant="h6" align="center">
+                { "target: <" + props.machine.getState().targetChannelName + ">" }
+            </Typography >
+            
+            <Typography variant="body2" align="center">{ connectionStatus.status }</Typography >
+            <Button onClick={forceReconnectClicked}>
+                <Typography variant="body2" align="center">Reconnect</Typography >
+                <CachedOutlined/>
+            </Button>
+            { errorBlock }
         </S.SettingsBarHorizontal>
     );
-}
-
-function setUpLog(peer: Peer) {
-
-    peer.on("open", function (id) {
-        
-        console.log(peer.id + " ID: " + id);
-    });
-    peer.on("connection", function (c) {
-        
-        console.log(peer.id + " received connection " + c.dataChannel + " (" + c.connectionId + ")");
-    });
-    peer.on("disconnected", function () {
-        console.log(peer.id + " disconnected");
-    });
-    peer.on("close", function() {
-        console.log(peer.id + " Connection destroyed");
-    });
-    peer.on('error', function (err) {
-        console.log(peer.id + " " + err);
-    });
 }

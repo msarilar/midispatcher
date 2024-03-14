@@ -131,7 +131,7 @@ namespace S {
 	export const Port = styled.div<{ sending: boolean }>`
 		width: 15px;
 		height: 15px;
-		background: ${(p) => p.sending ? "rgba(255, 255, 255, 0.7)" : "rgba(255, 255, 255, 0.1)" };
+		background: ${(p) => p.sending ? "rgba(255, 255, 255, 0.9)" : "rgba(255, 255, 255, 0.5)" };
 
 		&:hover {
 			background: rgb(192, 255, 0);
