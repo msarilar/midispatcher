@@ -7,10 +7,13 @@ import React from "react";
 import { S } from "./MachineStyling";
 import { MachineNodeModel } from "../layout/Node";
 import { DiagramEngine } from "@projectstorm/react-diagrams";
-import { CachedOutlined, ContentCopyOutlined } from "@mui/icons-material";
+import { AddCircle, CachedOutlined, ContentCopyOutlined, RemoveCircle } from "@mui/icons-material";
 import { Alert, Button, Tooltip, Typography, Zoom } from "@mui/material";
+import { MachinePortModel } from "../layout/Port";
+import { AllLinkCode } from "../layout/Engine";
 
 const ON_STATUS_CHANGED: string = "onStateChanged";
+const ON_REFRESH: string = "onRefresh";
 
 interface RemoteMachineConfig {
 
@@ -24,6 +27,7 @@ interface ConnectionStatus {
     readonly status: string;
     readonly error: string | undefined;
     readonly connections: number;
+    readonly channels: number;
 }
 
 @registeredMachine
@@ -32,7 +36,7 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
     private static factory: MachineFactory;
     getFactory() { return EmittingRemoteMachine.factory; }
 
-    private readonly config: RemoteMachineConfig;
+    private config: RemoteMachineConfig;
 
     private peer: Peer | undefined;
     private onStatusChanged: Event = new Event(ON_STATUS_CHANGED);
@@ -74,6 +78,24 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
         this.peer?.destroy();
     }
 
+    addChannel() {
+
+        this.config = { ...this.config, channels: this.config.channels + 1 };
+        this.getNode().addMachineInPort("Channel " + this.config.channels, this.config.channels);
+        this.send(this.config.channels);
+    }
+
+    removeChannel() {
+
+        const port = this.getNode().getPort("Channel " + this.config.channels);
+        if (port != undefined) {
+
+            this.getNode().removePort(port as MachinePortModel);
+            this.config = { ...this.config, channels: this.config.channels - 1 };
+            this.send(this.config.channels);
+        }
+    }
+
     private setConnectionStatus(connectionStatus: ConnectionStatus) {
 
         this.connectionStatus = connectionStatus;
@@ -100,7 +122,8 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
 
             status: "loading",
             error: undefined,
-            connections: 0
+            connections: 0,
+            channels: 1
         };
 
         this.initPeer();
@@ -170,6 +193,7 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
             conn.on("open", () => {
 
                 this.connections.add(conn);
+                this.send(that.config.channels);
                 that.setConnectionStatus({ ...that.connectionStatus, error: undefined, connections: that.connectionStatus.connections + 1, status: "connected" });
             });
 
@@ -181,16 +205,20 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
         });
     }
 
+    private send(message: any) {
+
+        for(const connection of this.connections) {
+
+            connection.send(message);
+        }
+    }
+
     receive(messageEvent: MachineMessage, channel: number, link: MidiLinkModel) {
 
         if (this.connections.size > 0) {
 
             link.setSending(true);
-            for(const connection of this.connections) {
-
-                const messageEventAndChannel = { messageEvent: messageEvent, channel: channel };
-                connection.send(messageEventAndChannel);
-            }
+            this.send({ messageEvent: messageEvent, channel: channel });
         }
     }
 }
@@ -199,6 +227,7 @@ const EmittingRemoteNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Em
 
     const [connectionStatus, setConnectionStatus] = React.useState(props.machine.connectionStatus);
     const [clipboardTooltipOpened, setClipboardTooltipOpened] = React.useState(false);
+    const [channels, setChannels] = React.useState(props.machine.getState().channels);
 
     React.useEffect(() => {
 
@@ -220,25 +249,48 @@ const EmittingRemoteNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Em
         setTimeout(() => { setClipboardTooltipOpened(false); }, 1000);
     };
 
+    const addChannel = () => {
+
+        props.machine.addChannel();
+        props.engine.repaintCanvas();
+        setChannels(props.machine.getState().channels);
+    };
+
+    const removeChannel = () => {
+
+        props.machine.removeChannel();
+        props.engine.repaintCanvas();
+        setChannels(props.machine.getState().channels);
+    };
+
     return (
         <S.SettingsBarHorizontal>
-            <Tooltip
-                PopperProps={{ disablePortal: true }}
-                open={clipboardTooltipOpened}
-                disableFocusListener
-                disableHoverListener
-                disableTouchListener
-                followCursor={true}
-                title="Copied!"
-                TransitionComponent={Zoom}>
-                <Typography variant="h6" align="center">
-                    { "<" + props.machine.getState().dataChannelName + ">" }
-                    <Button onClick={titleClicked}><ContentCopyOutlined/></Button>
+            <S.SettingsBarVertical>
+                <Typography variant="body2" align="center">
+                    <Button size="small" onClick={addChannel}><AddCircle fontSize="small"/></Button>
+                    <Button disabled={channels === 1} size="small" onClick={removeChannel}><RemoveCircle fontSize="small"/></Button>
                 </Typography >
-            </Tooltip>
-            
-            <Typography variant="body2" align="center">{ connectionStatus.connections } connected</Typography >
-            <Typography variant="body2" align="center">{ connectionStatus.status }</Typography >
+
+                <S.SettingsBarHorizontal>
+                    <Tooltip
+                        PopperProps={{ disablePortal: true }}
+                        open={clipboardTooltipOpened}
+                        disableFocusListener
+                        disableHoverListener
+                        disableTouchListener
+                        followCursor={true}
+                        title="Copied!"
+                        TransitionComponent={Zoom}>
+                        <Typography variant="h6" align="center">
+                            { "<" + props.machine.getState().dataChannelName + ">" }
+                            <Button onClick={titleClicked}><ContentCopyOutlined/></Button>
+                        </Typography >
+                    </Tooltip>
+                    
+                    <Typography variant="body2" align="center">{ connectionStatus.connections } connected</Typography >
+                    <Typography variant="body2" align="center">{ connectionStatus.status }</Typography >
+                </S.SettingsBarHorizontal>
+            </S.SettingsBarVertical>
             { errorBlock }
         </S.SettingsBarHorizontal>
     );
@@ -255,6 +307,7 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
 
     private peer: Peer | undefined;
     private onStatusChanged: Event = new Event(ON_STATUS_CHANGED);
+    private onRefresh: Event = new Event(ON_REFRESH);
     public connectionStatus: ConnectionStatus;
 
     static buildFactory(): MachineFactory {
@@ -307,6 +360,7 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
             targetChannelName: window.prompt("target name ?") ?? undefined
         };
 
+        this.getNode().addMachineOutPort(AllLinkCode, 0);
         for (let i = 0; i < this.config.channels; i++) {
 
             this.getNode().addMachineOutPort("Channel " + (i + 1), i + 1);
@@ -316,7 +370,8 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
 
             status: "loading",
             error: undefined,
-            connections: 0
+            connections: 0,
+            channels: 1
         };
 
         this.initPeer();
@@ -396,19 +451,35 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
                 that.setConnectionStatus({ ...that.connectionStatus, error: undefined, status: "connected" });
             });
 
-            connection.on("data", (messageEventAndChannel: any) => {
+            connection.on("data", (message: any) => {
                 
-                const messageEvent = messageEventAndChannel.messageEvent;
+                const messageEvent = message.messageEvent;
                 if (messageEvent != undefined) {
 
                     // rawData is an Uint8Array and binarypack serializes it into an ArrayBuffer, need to convert back:
                     const array = messageEvent.message.rawData;
                     messageEvent.message.rawData = new Uint8Array(array);
-                    this.emit(messageEvent, messageEventAndChannel.channel);
+                    this.emit(messageEvent, message.channel);
+                }
+                else if (Number.isFinite(message)) {
+
+                    const channels = (message as number) + 1;
+                    while (channels < this.getNode().getOutPorts().length) {
+
+                        const lastPort = this.getNode().getOutPorts()[this.getNode().getOutPorts().length - 1];
+                        this.getNode().removePort(lastPort)
+                    }
+                    
+                    while (channels > this.getNode().getOutPorts().length) {
+
+                        this.getNode().addMachineOutPort("Channel " + (this.getNode().getOutPorts().length), this.getNode().getOutPorts().length + 1)
+                    }
+
+                    this.dispatchEvent(this.onRefresh);
                 }
                 else {
 
-                    console.warn("unknown RTC message\n" + JSON.stringify(messageEventAndChannel));
+                    console.warn("unknown RTC message\n" + JSON.stringify(message));
                 }
             });
         });
@@ -421,10 +492,24 @@ const ReceivingRemoteNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<R
 
     React.useEffect(() => {
 
-        props.machine.addEventListener(ON_STATUS_CHANGED, () => {
+        const onStatusChanged = () => {
 
             setConnectionStatus(props.machine.connectionStatus);
-        });
+        };
+        props.machine.addEventListener(ON_STATUS_CHANGED, onStatusChanged);
+
+        const onRefresh = () => {
+
+            props.engine.repaintCanvas();
+        }
+        
+        props.machine.addEventListener(ON_REFRESH, onRefresh);
+
+        return () => {
+
+            props.machine.removeEventListener(ON_STATUS_CHANGED, onStatusChanged);
+            props.machine.removeEventListener(ON_REFRESH, onRefresh);
+        }
     }, []);
 
     const errorBlock = connectionStatus.error == undefined ? undefined :

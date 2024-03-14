@@ -64,6 +64,21 @@ export class MachineNodeModel extends NodeModel<DefaultNodeModelGenerics> {
         return this.portsOut;
     }
 
+    removePort(port: MachinePortModel) {
+
+        if (port.getOptions().in) {
+
+            const index = this.portsIn.indexOf(port);
+            this.portsIn.splice(index, 1);
+        } else {
+
+            const index = this.portsOut.indexOf(port);
+            this.portsOut.splice(index, 1);
+        }
+
+        super.removePort(port);
+    }
+
     addPort(port: MachinePortModel): MachinePortModel {
 
         super.addPort(port);

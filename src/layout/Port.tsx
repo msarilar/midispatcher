@@ -23,7 +23,7 @@ export class MachinePortModel extends DefaultPortModel {
 
     constructor(options: DefaultPortModelOptions, channel?: number) {
 
-        super({ ...options, type: "machine" })
+        super({ ...options, type: "machine" });
 
         this.channel = channel ?? -1;
         this.isIn = options.in!;
@@ -98,6 +98,7 @@ interface MachinePortLabelProps {
 export const MachinePortLabel: React.FunctionComponent<MachinePortLabelProps> = props => {
 
     const [portActive, setPortActive] = React.useState(props.port.portActive);
+
     props.port.setPortActiveCallback(s => setPortActive(s));
 
     const port = (
