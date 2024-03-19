@@ -146,6 +146,7 @@ const Midispatcher: React.FunctionComponent = () => {
                         const factory = MidiMachineSource.buildFactory(input, "midimessage");
                         state.machineFactories[factory.getName()] = factory;
                     });
+
                     action.result.outputs.forEach(input => {
 
                         const factory = MidiMachineTarget.buildFactory(input);

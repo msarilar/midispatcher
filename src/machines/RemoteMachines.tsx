@@ -218,7 +218,12 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
         if (this.connections.size > 0) {
 
             link.setSending(true);
-            this.send({ messageEvent: messageEvent, channel: channel });
+            var clone = { ...messageEvent } as any;
+            clone.port = undefined;
+            clone.target = undefined;
+            clone.channel = channel;
+            clone.message.channel = channel;
+            this.send({ messageEvent: clone, channel: channel });
         }
     }
 }
@@ -472,7 +477,7 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
                     
                     while (channels > this.getNode().getOutPorts().length) {
 
-                        this.getNode().addMachineOutPort("Channel " + (this.getNode().getOutPorts().length), this.getNode().getOutPorts().length + 1)
+                        this.getNode().addMachineOutPort("Channel " + this.getNode().getOutPorts().length, this.getNode().getOutPorts().length)
                     }
 
                     this.dispatchEvent(this.onRefresh);
