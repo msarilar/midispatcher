@@ -122,7 +122,7 @@ const Midispatcher: React.FunctionComponent = () => {
                 }
                 catch (e) {
 
-                    alert("invalid save data");
+                    alert("Invalid save data:\r\n" + e);
                     console.error(e);
                     return state;
                 }
@@ -194,19 +194,24 @@ const Midispatcher: React.FunctionComponent = () => {
                 state.machineFactories[factory.getName()] = factory;
             }
         });
-
         engine.getNodeFactories().registerFactory(new MachineNodeFactory(state.machineFactories));
-
         dispatch({ type: MidispatcherActionType.Refresh, result: {} });
         
-        WebMidi.WebMidi
-            .enable()
-            .then(() => dispatch({ type: MidispatcherActionType.MidiLoaded, result: { inputs: WebMidi.WebMidi.inputs, outputs: WebMidi.WebMidi.outputs } }))
-            .catch(err => {
+        if (navigator.requestMIDIAccess != undefined) {
+            
+            WebMidi.WebMidi
+                .enable()
+                .then(() => dispatch({ type: MidispatcherActionType.MidiLoaded, result: { inputs: WebMidi.WebMidi.inputs, outputs: WebMidi.WebMidi.outputs } }))
+                .catch(err => {
 
-                alert("Issue when trying to connect your MIDI devices:\r\n" + err);
-                dispatch({ type: MidispatcherActionType.MidiLoaded, result: { inputs: WebMidi.WebMidi.inputs, outputs: WebMidi.WebMidi.outputs } });
-            });
+                    alert("Can't connect to your MIDI devices:\r\n" + err);
+                    dispatch({ type: MidispatcherActionType.MidiLoaded, result: { inputs: WebMidi.WebMidi.inputs, outputs: WebMidi.WebMidi.outputs } });
+                });
+        }
+        else {
+            
+            alert("Can't connect to your MIDI devices:\r\nWeb MIDI API is not available on your browser");
+        }
 
         fetch("https://raw.githubusercontent.com/msarilar/midispatcher/main/saves/demos.json")
             .then(data => {
