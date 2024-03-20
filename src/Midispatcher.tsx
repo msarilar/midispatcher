@@ -15,7 +15,6 @@ import { LabelMachineFactory, MachineFactory, MachineType, registeredFactories }
 import { MidiLinkFactory } from './layout/Link';
 import { engine, CommandManager, MidispatcherDiagramModel } from './layout/Engine';
 import { MachineNodeFactory, MachineNodeModel } from './layout/Node';
-import { nextDemo } from './DemoData';
 import { MidiMachineSource, MidiMachineTarget } from './machines/MidiMachines';
 import { fromJson, toJson } from './Utils';
 import { MachinePortFactory } from './layout/Port';
@@ -53,6 +52,7 @@ interface MidispatcherState {
     readonly machineFactories: { [name: string]: MachineFactory };
     readonly modalContent: JSX.Element | undefined;
     readonly discussionVisible: boolean;
+    readonly demos: { [name: string] : string } | undefined;
 }
 
 const defaultMidispatcherState: MidispatcherState = {
@@ -60,7 +60,8 @@ const defaultMidispatcherState: MidispatcherState = {
     update: false,
     machineFactories: {},
     modalContent: undefined,
-    discussionVisible: false
+    discussionVisible: false,
+    demos: undefined
 }
 
 interface RefreshAction { }
@@ -68,6 +69,7 @@ interface ToggleDiscussAction { }
 interface ToggleModalAction { modalContent: JSX.Element | undefined }
 interface MidiLoadedAction { inputs: WebMidi.Input[], outputs: WebMidi.Output[] }
 interface LoadSaveAction { data: string }
+interface DemosLoadedAction { demos: { [name: string] : string } }
 
 export enum MidispatcherActionType {
 
@@ -75,7 +77,8 @@ export enum MidispatcherActionType {
     MidiLoaded = "MidiLoaded",
     ToggleModal = "ToggleModal",
     ToggleDiscuss = "ToggleDiscuss",
-    LoadSave = "LoadSave"
+    LoadSave = "LoadSave",
+    DemosLoaded = "DemosLoaded"
 }
 
 interface Action<TType, TValue> {
@@ -90,6 +93,9 @@ export type MidispatcherAction =
     | Action<MidispatcherActionType.ToggleModal, ToggleModalAction>
     | Action<MidispatcherActionType.ToggleDiscuss, ToggleDiscussAction>
     | Action<MidispatcherActionType.LoadSave, LoadSaveAction>
+    | Action<MidispatcherActionType.DemosLoaded, DemosLoadedAction>
+
+let demoIndex = 0;
 
 const Midispatcher: React.FunctionComponent = () => {
 
@@ -165,6 +171,12 @@ const Midispatcher: React.FunctionComponent = () => {
                     ...state,
                     discussionVisible: !state.discussionVisible
                 }
+            case MidispatcherActionType.DemosLoaded:
+                return {
+
+                    ...state,
+                    demos: action.result.demos
+                }
             default:
                 return state;
         }
@@ -192,10 +204,25 @@ const Midispatcher: React.FunctionComponent = () => {
             .then(() => dispatch({ type: MidispatcherActionType.MidiLoaded, result: { inputs: WebMidi.WebMidi.inputs, outputs: WebMidi.WebMidi.outputs } }))
             .catch(err => {
 
-                console.error(err);
                 alert("Issue when trying to connect your MIDI devices:\r\n" + err);
                 dispatch({ type: MidispatcherActionType.MidiLoaded, result: { inputs: WebMidi.WebMidi.inputs, outputs: WebMidi.WebMidi.outputs } });
             });
+
+        fetch("https://raw.githubusercontent.com/msarilar/midispatcher/main/saves/demos.json")
+            .then(data => {
+
+                if (data.ok) {
+
+                    return data.text();
+                }
+
+                throw "Unexpected HTTP " + data.status;
+            })
+            .then(json => dispatch({ type: MidispatcherActionType.DemosLoaded, result: { demos: JSON.parse(json) }}))
+            .catch(err => {
+
+                alert("Issue when trying to retrieve demos:\r\n" + err);
+            })
     }, []);
 
     function onDrop<T>(event: React.DragEvent<T>) {
@@ -210,6 +237,17 @@ const Midispatcher: React.FunctionComponent = () => {
         node.setPosition(point);
         engine.getModel().addAll(node);
         dispatch({ type: MidispatcherActionType.Refresh, result: {} });
+    }
+
+    function nextDemo() {
+        
+        if (state.demos == undefined) {
+            
+            return "";
+        }
+
+        demoIndex = (demoIndex + 1) % Object.values(state.demos).length;
+        return Object.values(state.demos)[demoIndex];
     }
 
     const trayItems = Object.keys(state.machineFactories).map(machineName =>
@@ -293,7 +331,7 @@ const Midispatcher: React.FunctionComponent = () => {
                 <WorkspaceButton key={"helpButtonKey"} onClick={() => dispatch({ type: MidispatcherActionType.ToggleModal, result: { modalContent: helpModalContent } })}>
                     Help
                 </WorkspaceButton>,
-                <WorkspaceButton key={"nextDemoKey"} onClick={() => {
+                <WorkspaceButton disabled={state.demos == undefined} key={"nextDemoKey"} onClick={() => {
 
                     dispatch({ type: MidispatcherActionType.LoadSave, result: { data: LZString.decompressFromBase64(nextDemo())! } });
                 }}>
