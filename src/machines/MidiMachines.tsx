@@ -2,7 +2,6 @@ import * as WebMidi from 'webmidi';
 
 import { notesOff } from "../Utils";
 import { AllLinkCode } from "../layout/Engine";
-import { MidiLinkModel } from "../layout/Link";
 import { AbstractMachine, MachineFactory, MachineMessage, MachineSource, MachineTarget, MachineType, MessageResult } from "./Machines";
 
 export class MidiMachineSource extends AbstractMachine implements MachineSource {

@@ -4,7 +4,6 @@ import * as Tone from "tone";
 
 import { S } from './MachineStyling';
 import { normalizeVelocity, noteMidiToString } from "../Utils";
-import { MidiLinkModel } from "../layout/Link";
 import { MachineNodeModel } from "../layout/Node";
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
 import { Visualizers } from "./Visualizers";

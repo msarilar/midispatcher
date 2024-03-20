@@ -2,7 +2,6 @@ import { DiagramEngine } from '@projectstorm/react-diagrams';
 import { AbstractReactFactory, GenerateWidgetEvent, GenerateModelEvent } from '@projectstorm/react-canvas-core';
 
 import { MachineNodeModel, MachineNodeWidget } from './../layout/Node';
-import { MidiLinkModel } from './../layout/Link';
 import { engine } from '../layout/Engine';
 
 export interface MachineMessage {

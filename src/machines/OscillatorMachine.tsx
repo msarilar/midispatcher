@@ -3,7 +3,6 @@ import * as React from 'react';
 import * as Tone from "tone";
 
 import { S } from './MachineStyling';
-import { MidiLinkModel } from './../layout/Link';
 import { MachineNodeModel } from './../layout/Node';
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, MessageResult, registeredMachine } from './Machines';
 import { Visualizers } from './Visualizers';

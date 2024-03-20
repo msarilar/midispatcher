@@ -2,7 +2,6 @@ import { DataConnection, Peer } from "peerjs";
 import { v4 as uuidv4 } from "uuid";
 
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSource, MachineTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
-import { MidiLinkModel } from "../layout/Link";
 import React from "react";
 import { S } from "./MachineStyling";
 import { MachineNodeModel } from "../layout/Node";
@@ -251,7 +250,7 @@ const EmittingRemoteNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Em
 
             setConnectionStatus(props.machine.connectionStatus);
         });
-    }, []);
+    }, [props.machine]);
 
     const errorBlock = connectionStatus.error == undefined ? undefined :
         <Alert severity="error">
@@ -535,7 +534,7 @@ const ReceivingRemoteNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<R
             props.machine.removeEventListener(ON_STATUS_CHANGED, onStatusChanged);
             props.machine.removeEventListener(ON_REFRESH, onRefresh);
         }
-    }, []);
+    }, [props.machine, props.engine]);
 
     const errorBlock = connectionStatus.error == undefined ? undefined :
         <Alert severity="error">

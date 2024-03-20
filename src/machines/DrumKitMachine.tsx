@@ -1,6 +1,5 @@
 import { gsStandardSetDrumKit, gsStandardSetDrumKitMini, gsStandardSetDrumKitToms, noteMidiToString } from '../Utils';
 import { AllLinkCode } from '../layout/Engine';
-import { MidiLinkModel } from '../layout/Link';
 import { AbstractMachine, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine, registeredMachineWithParameter } from './Machines';
 
 export enum DrumKitScope {

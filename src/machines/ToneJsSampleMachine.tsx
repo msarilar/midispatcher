@@ -6,7 +6,6 @@ import { SamplerOptions } from "tone";
 import { S } from './MachineStyling';
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, MessageResult, registeredMachine, registeredMachineWithParameter } from "./Machines";
 import { normalizeVelocity, noteMidiToString } from "../Utils";
-import { MidiLinkModel } from "../layout/Link";
 import { MachineNodeModel } from "../layout/Node";
 import { Visualizers } from './Visualizers';
 

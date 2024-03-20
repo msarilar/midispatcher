@@ -5,7 +5,6 @@ import { DiagramEngine } from "@projectstorm/react-diagrams";
 import { S } from './MachineStyling';
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
 import { AllLinkCode } from "../layout/Engine";
-import { MidiLinkModel } from "../layout/Link";
 import { noteStringToNoteMidi, standardMidiMessages } from "../Utils";
 import { ToggleOff, ToggleOnRounded } from "@mui/icons-material";
 import { MachineNodeModel } from "../layout/Node";

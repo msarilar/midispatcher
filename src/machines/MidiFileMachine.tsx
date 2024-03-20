@@ -2,7 +2,6 @@ import * as MidiParser from 'midi-parser-js';
 import * as WebMidi from 'webmidi';
 
 import { AllLinkCode } from '../layout/Engine';
-import { MidiLinkModel } from '../layout/Link';
 import { AbstractMachine, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from './Machines';
 
 interface TrackEvent extends MachineMessage {
@@ -197,7 +196,7 @@ export class MidiFileMachine extends AbstractMachine implements MachineSourceTar
 
             tracks,
             timeDivision: obj.timeDivision,
-            fileName: input.value.replace(/^.*[\\\/]/, '')
+            fileName: input.value.replace(/^.*[\\/]/, '')
         };
     }
 

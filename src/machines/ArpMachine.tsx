@@ -4,7 +4,6 @@ import { AddBox, Clear, VolumeOff, VolumeUp } from '@mui/icons-material';
 import { Checkbox, IconButton, Slider } from '@mui/material';
 
 import { allNotes, noteStringToNoteMidi, standardMidiMessages } from '../Utils';
-import { MidiLinkModel } from '../layout/Link';
 import { MachineNodeModel } from './../layout/Node';
 import { S } from './MachineStyling';
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from './Machines';
@@ -69,35 +68,36 @@ export class ArpMachine extends AbstractMachine implements MachineSourceTarget {
         this.getNode().addMachineOutPort("Out", 0);
     }
 
-    setState(config: ArpConfig) {
+    private applyArpStyle(arpStyle: ArpStyle, notes: NoteConfig[]) {
 
-        let notesToPlay = config.notes.slice();
-        for (let i = 1; i < config.octaves; i++) {
-
-            config.notes.forEach(note => notesToPlay.push({ noteValue: note.noteValue, muted: note.muted, octave: note.octave + i }));
-        }
-
-        switch (config.arpStyle) {
+        switch (arpStyle) {
 
             case "down":
-                notesToPlay = notesToPlay.reverse();
-                break;
+                return notes.reverse();
             case "updown":
-                const reversed = notesToPlay.slice();
+                const reversed = notes.slice();
                 reversed.shift();
                 reversed.reverse();
                 reversed.shift();
-                notesToPlay = notesToPlay.concat(reversed);
-                break;
+                return notes.concat(reversed);
             case "updown2":
-                notesToPlay = notesToPlay.concat(notesToPlay.slice().reverse());
-                break
+                return notes.concat(notes.slice().reverse());
             default:
             case "random":
             case "up":
-                break;
+                return notes;
+        }
+    }
+
+    setState(config: ArpConfig) {
+
+        const notes = config.notes.slice();
+        for (let i = 1; i < config.octaves; i++) {
+
+            config.notes.forEach(note => notes.push({ noteValue: note.noteValue, muted: note.muted, octave: note.octave + i }));
         }
 
+        const notesToPlay = this.applyArpStyle(config.arpStyle, notes);
         if (this.arpIndex >= notesToPlay.length) {
 
             this.arpIndex = notesToPlay.length - 1;

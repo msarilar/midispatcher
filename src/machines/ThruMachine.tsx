@@ -4,7 +4,6 @@ import { AddBox, Clear } from '@mui/icons-material';
 import { IconButton, TextField } from '@mui/material';
 
 import { S } from './MachineStyling';
-import { MidiLinkModel } from './../layout/Link';
 import { MachineNodeModel } from './../layout/Node';
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from './Machines';
 import { standardMidiMessages } from '../Utils';
