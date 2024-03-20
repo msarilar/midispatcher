@@ -129,8 +129,9 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
         this.initPeer();
     }
 
-    private async initPeer() {
+    async initPeer() {
 
+        this.peer?.destroy();
         const apiKey = process.env.REACT_APP_METERED_API_KEY ?? window.alert("missing api key in environment variable");
         const response = await fetch("https://midispatcher.metered.live/api/v1/turn/credentials?apiKey=" + apiKey);
         const iceServers = await response.json();
@@ -162,7 +163,7 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
 
         this.peer.on("close", function() {
 
-            that.setConnectionStatus({ ...that.connectionStatus, status: "closed" });
+            that.setConnectionStatus({ ...that.connectionStatus, error: "closed", status: "closed" });
         });
 
         this.peer.on("error", function (err) {
@@ -217,12 +218,19 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
 
         if (this.connections.size > 0) {
 
-            var clone = { ...messageEvent } as any;
-            clone.port = undefined;
-            clone.target = undefined;
-            clone.channel = channel;
-            clone.message.channel = channel;
-            this.send({ messageEvent: clone, channel: channel });
+            const sanitizedMessage = {
+
+                type: messageEvent.type,
+                message: {
+
+                    rawData: messageEvent.message.rawData,
+                    isChannelMessage: messageEvent.message.isChannelMessage,
+                    type: messageEvent.message.type,
+                    channel: messageEvent.message.channel
+                }
+            }
+            
+            this.send({ messageEvent: sanitizedMessage, channel: channel });
             
             return MessageResult.Processed;
         }
@@ -271,6 +279,11 @@ const EmittingRemoteNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Em
         setChannels(props.machine.getState().channels);
     };
 
+    const forceReconnectClicked = () => {
+
+        props.machine.initPeer();
+    };
+
     return (
         <S.SettingsBarHorizontal>
             <S.SettingsBarVertical>
@@ -297,6 +310,10 @@ const EmittingRemoteNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Em
                     
                     <Typography variant="body2" align="center">{ connectionStatus.connections } connected</Typography >
                     <Typography variant="body2" align="center">{ connectionStatus.status }</Typography >
+                    <Button onClick={forceReconnectClicked}>
+                        <Typography variant="body2" align="center">Reconnect</Typography >
+                        <CachedOutlined/>
+                    </Button>
                 </S.SettingsBarHorizontal>
             </S.SettingsBarVertical>
             { errorBlock }
@@ -414,7 +431,7 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
 
         this.peer.on("close", function() {
 
-            that.setConnectionStatus({ ...that.connectionStatus, status: "closed" });
+            that.setConnectionStatus({ ...that.connectionStatus, error: "closed", status: "disconnected" });
         });
 
         this.peer.on("error", function (err) {
@@ -446,7 +463,7 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
         
             connection.on("close", () => {
 
-                that.setConnectionStatus({ ...that.connectionStatus, status: "closed" });
+                that.setConnectionStatus({ ...that.connectionStatus, error: "closed", status: "disconnected" });
             });
     
             connection.on("error", e => {
