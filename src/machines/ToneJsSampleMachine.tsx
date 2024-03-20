@@ -4,7 +4,7 @@ import { DiagramEngine } from "@projectstorm/react-diagrams";
 import { SamplerOptions } from "tone";
 
 import { S } from './MachineStyling';
-import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, registeredMachine, registeredMachineWithParameter } from "./Machines";
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, MessageResult, registeredMachine, registeredMachineWithParameter } from "./Machines";
 import { normalizeVelocity, noteMidiToString } from "../Utils";
 import { MidiLinkModel } from "../layout/Link";
 import { MachineNodeModel } from "../layout/Node";
@@ -243,16 +243,16 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
         return ToneJsSampleMachine.factory;
     }
 
-    receive(messageEvent: MachineMessage, _: number, link: MidiLinkModel): void {
+    receive(messageEvent: MachineMessage, _: number) {
 
         if (!this.sampler.loaded) {
 
-            return;
+            return MessageResult.Ignored;
         }
 
         if (this.sampler.disposed) {
 
-            return;
+            return MessageResult.Ignored;
         }
 
         Tone.context.lookAhead = 0;
@@ -260,17 +260,14 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
 
             case "stop":
                 this.sampler.releaseAll();
-                link.setSending(true);
-                break;
+                return MessageResult.Processed;
 
             case "allnotesoff":
             case "allsoundoff":
                 this.sampler.releaseAll();
-                link.setSending(true);
-                break;
+                return MessageResult.Processed;
 
             case "noteon":
-                link.setSending(true);
                 if (messageEvent.message.rawData[2] === 0) {
 
                     this.sampler.triggerRelease(noteMidiToString(messageEvent.message.rawData[1]));
@@ -280,13 +277,14 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
                     this.sampler.triggerAttack(noteMidiToString(messageEvent.message.rawData[1]), Tone.context.currentTime, normalizeVelocity(messageEvent.message.rawData[2]));
                 }
 
-                break;
+                return MessageResult.Processed;
 
             case "noteoff":
-                link.setSending(true);
                 this.sampler.triggerRelease(noteMidiToString(messageEvent.message.rawData[1]));
-                break;
+                return MessageResult.Processed;
         }
+
+        return MessageResult.Ignored;
     }
 
     getInChannelCount(): number {

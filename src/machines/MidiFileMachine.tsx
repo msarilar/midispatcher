@@ -3,7 +3,7 @@ import * as WebMidi from 'webmidi';
 
 import { AllLinkCode } from '../layout/Engine';
 import { MidiLinkModel } from '../layout/Link';
-import { AbstractMachine, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, registeredMachine } from './Machines';
+import { AbstractMachine, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from './Machines';
 
 interface TrackEvent extends MachineMessage {
 
@@ -201,46 +201,47 @@ export class MidiFileMachine extends AbstractMachine implements MachineSourceTar
         };
     }
 
-    receive(messageEvent: MachineMessage, _: number, link: MidiLinkModel): void {
+    receive(messageEvent: MachineMessage, _: number) {
 
         switch (messageEvent.message.type) {
 
             case "allnotesoff":
-                link.setSending(true);
                 for(let i = 0; i < this.config.tracks.length; i++) {
 
                     this.emit(messageEvent, i + 1);
                 }
 
-                break;
+                return MessageResult.Processed;
 
             case "continue":
                 this.playing = true;
-                link.setSending(true);
-                break;
+                return MessageResult.Processed;
 
             case "start":
                 this.playing = true;
-                link.setSending(true);
                 for(let i = 0; i < this.config.tracks.length; i++) {
 
                     this.config.tracks[i].currentClock = 0;
                     this.config.tracks[i].currentEvent = 0;
                 }
 
-                break;
+                return MessageResult.Processed;
+
             case "stop":
                 this.playing = false;
-                link.setSending(true);
                 for(let i = 0; i < this.config.tracks.length; i++) {
 
                     this.emit(messageEvent, i + 1);
                 }
 
-                break;
+                return MessageResult.Processed;
+                
             case "clock":
-                if (!this.playing) { return; }
-                link.setSending(true);
+                if (!this.playing) {
+                    
+                    return MessageResult.Ignored;
+                }
+
                 const toPlay = [];
                 for(let currentTrack = 0; currentTrack < this.config.tracks.length; currentTrack++) {
 
@@ -275,7 +276,9 @@ export class MidiFileMachine extends AbstractMachine implements MachineSourceTar
                     this.emit(toPlay[i].signal, toPlay[i].channel);
                 }
 
-                break;
+                return MessageResult.Processed;
         }
+
+        return MessageResult.Ignored;
     }
 }

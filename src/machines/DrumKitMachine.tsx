@@ -1,7 +1,7 @@
 import { gsStandardSetDrumKit, gsStandardSetDrumKitMini, gsStandardSetDrumKitToms, noteMidiToString } from '../Utils';
 import { AllLinkCode } from '../layout/Engine';
 import { MidiLinkModel } from '../layout/Link';
-import { AbstractMachine, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, registeredMachine, registeredMachineWithParameter } from './Machines';
+import { AbstractMachine, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine, registeredMachineWithParameter } from './Machines';
 
 export enum DrumKitScope {
 
@@ -88,9 +88,8 @@ export class DrumKitMachine extends AbstractMachine implements MachineSourceTarg
         this.outOfScopeChannel = channel;
     }
 
-    receive(messageEvent: MachineMessage, _: number, link: MidiLinkModel): void {
+    receive(messageEvent: MachineMessage, _: number) {
 
-        link.setSending(true);
         if (messageEvent.message.type === "noteoff" || messageEvent.message.type === "noteon") {
 
             const note = noteMidiToString(messageEvent.message.rawData[1]);
@@ -110,5 +109,7 @@ export class DrumKitMachine extends AbstractMachine implements MachineSourceTarg
                 this.emit(messageEvent, i + 1);
             }
         }
+        
+        return MessageResult.Processed;
     }
 }

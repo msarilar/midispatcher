@@ -87,9 +87,15 @@ export interface MachineSource extends Machine {
     setEmit(emit: (messageEvent: MachineMessage, channel: number) => void): void;
 }
 
+export enum MessageResult {
+
+    Processed,
+    Ignored
+}
+
 export interface MachineTarget extends Machine {
 
-    receive(messageEvent: MachineMessage, channel: number, link: MidiLinkModel): void;
+    receive(messageEvent: MachineMessage, channel: number): MessageResult;
 }
 
 export interface MachineSourceTarget extends MachineSource, MachineTarget { }

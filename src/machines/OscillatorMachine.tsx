@@ -5,7 +5,7 @@ import * as Tone from "tone";
 import { S } from './MachineStyling';
 import { MidiLinkModel } from './../layout/Link';
 import { MachineNodeModel } from './../layout/Node';
-import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, registeredMachine } from './Machines';
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, MessageResult, registeredMachine } from './Machines';
 import { Visualizers } from './Visualizers';
 
 interface OscillatorConfig {
@@ -124,11 +124,11 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
         }
     }
 
-    receive(messageEvent: MachineMessage, _: number, link: MidiLinkModel) {
+    receive(messageEvent: MachineMessage, _: number) {
 
         if (this.turnedOff) {
 
-            return;
+            return MessageResult.Ignored;
         }
 
         const midiNote = messageEvent.message.rawData[1] + this.state.detune;
@@ -144,7 +144,6 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
 
             this.oscillators[midiNote]?.stop();
             this.oscillators[midiNote]?.disconnect();
-            link.setSending(true);
         }
         else if (messageEvent.message.type === "noteon") {
 
@@ -158,8 +157,9 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
             this.oscillators[midiNote]?.disconnect();
             this.oscillators[midiNote] = osc;
             this.oscillators[midiNote].start();
-            link.setSending(true);
         }
+        
+        return MessageResult.Processed;
     }
 
     dispose() {

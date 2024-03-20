@@ -1,6 +1,6 @@
 import { MidiLinkModel } from "../layout/Link";
 import { MachinePortModel } from "../layout/Port";
-import { MachineMessage, MachineSource, MachineTarget } from "./Machines";
+import { MachineMessage, MachineSource, MachineTarget, MessageResult } from "./Machines";
 
 export class MachineRoutings {
 
@@ -45,7 +45,17 @@ export class MachineRoutings {
 
             const port = link.getTargetPort() as MachinePortModel;
             port.setSending(true);
-            target.receive(e, toChannel, link);
+            try {
+
+                if (target.receive(e, toChannel) === MessageResult.Processed) {
+
+                    link.setSending(true);
+                };
+            }
+            catch (e) {
+
+                console.error(e);
+            }
         }
 
         const emit: (messageEvent: MachineMessage, channel: number) => void = (e: MachineMessage, channel: number) => {

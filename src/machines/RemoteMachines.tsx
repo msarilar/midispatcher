@@ -1,7 +1,7 @@
 import { DataConnection, Peer } from "peerjs";
 import { v4 as uuidv4 } from "uuid";
 
-import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSource, MachineTarget, MachineType, registeredMachine } from "./Machines";
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSource, MachineTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
 import { MidiLinkModel } from "../layout/Link";
 import React from "react";
 import { S } from "./MachineStyling";
@@ -213,18 +213,21 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
         }
     }
 
-    receive(messageEvent: MachineMessage, channel: number, link: MidiLinkModel) {
+    receive(messageEvent: MachineMessage, channel: number) {
 
         if (this.connections.size > 0) {
 
-            link.setSending(true);
             var clone = { ...messageEvent } as any;
             clone.port = undefined;
             clone.target = undefined;
             clone.channel = channel;
             clone.message.channel = channel;
             this.send({ messageEvent: clone, channel: channel });
+            
+            return MessageResult.Processed;
         }
+
+        return MessageResult.Ignored;
     }
 }
 

@@ -3,7 +3,7 @@ import { Box, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import { DiagramEngine } from "@projectstorm/react-diagrams";
 
 import { S } from './MachineStyling';
-import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, registeredMachine } from "./Machines";
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
 import { AllLinkCode } from "../layout/Engine";
 import { MidiLinkModel } from "../layout/Link";
 import { noteStringToNoteMidi, standardMidiMessages } from "../Utils";
@@ -89,16 +89,14 @@ export class NoteSplitMachine extends AbstractMachine implements MachineSourceTa
         return NoteSplitMachine.buildFactory();
     }
 
-    receive(messageEvent: MachineMessage, channel: number, link: MidiLinkModel): void {
+    receive(messageEvent: MachineMessage, _: number): MessageResult {
         
         if (messageEvent.message.type === "noteoff" || messageEvent.message.type === "noteon") {
             
             if (this.config.editNote !== this.config.noteThreshold) {
 
-                return;
+                return MessageResult.Ignored;
             }
-
-            link.setSending(true);
 
             if (this.config.active) {
 
@@ -118,13 +116,18 @@ export class NoteSplitMachine extends AbstractMachine implements MachineSourceTa
                 this.emit(messageEvent, 1);
                 this.emit(messageEvent, 2);
             }
+
+            return MessageResult.Processed;
         }
         else if (this.config.broadcastNonNotes || (messageEvent.message.type === "allnotesoff" || messageEvent.message.type === "allsoundoff")) {
 
-            link.setSending(true);
             this.emit(messageEvent, 1);
             this.emit(messageEvent, 2);
+
+            return MessageResult.Processed;
         }
+
+        return MessageResult.Ignored;
     }
 }
 
@@ -231,12 +234,11 @@ export class NoteGrowMachine extends AbstractMachine implements MachineSourceTar
         this.activeVoices = {};
     }
 
-    receive(messageEvent: MachineMessage, _: number, link: MidiLinkModel) {
+    receive(messageEvent: MachineMessage, _: number): MessageResult {
 
         if (messageEvent.message.type === "noteoff" ||
             (messageEvent.message.type === "noteon" && messageEvent.message.rawData[2] === 0)) {
 
-            link.setSending(true);
             const voices = this.activeVoices[messageEvent.message.rawData[1]];
             const voice = voices?.pop();
             if (voice != undefined) {
@@ -251,7 +253,6 @@ export class NoteGrowMachine extends AbstractMachine implements MachineSourceTar
         }
         else if (messageEvent.message.type === "noteon") {
 
-            link.setSending(true);
             let voice = 0;
             let found = false;
             for (let i = 0; i < this.voices; i++) {
@@ -298,6 +299,8 @@ export class NoteGrowMachine extends AbstractMachine implements MachineSourceTar
                 this.emit(messageEvent, i + 1);
             }
         }
+        
+        return MessageResult.Processed;
     }
 }
 
@@ -352,12 +355,11 @@ export class NoteRoundRobinMachine extends AbstractMachine implements MachineSou
         this.activeVoices = {};
     }
 
-    receive(messageEvent: MachineMessage, _: number, link: MidiLinkModel) {
+    receive(messageEvent: MachineMessage, _: number): MessageResult {
 
         if (messageEvent.message.type === "noteoff" ||
             (messageEvent.message.type === "noteon" && messageEvent.message.rawData[2] === 0)) {
 
-            link.setSending(true);
             if (this.activeVoices[messageEvent.message.rawData[1]] != undefined) {
 
                 this.emit(messageEvent, this.activeVoices[messageEvent.message.rawData[1]] + 1);
@@ -365,7 +367,6 @@ export class NoteRoundRobinMachine extends AbstractMachine implements MachineSou
         }
         else if (messageEvent.message.type === "noteon") {
 
-            link.setSending(true);
             this.activeVoices[messageEvent.message.rawData[1]] = this.currentVoice;
             this.emit(messageEvent, this.currentVoice + 1);
             this.currentVoice = (this.currentVoice + 1) % this.voices;
@@ -386,5 +387,7 @@ export class NoteRoundRobinMachine extends AbstractMachine implements MachineSou
                 this.emit(messageEvent, i + 1);
             }
         }
+
+        return MessageResult.Processed;
     }
 }

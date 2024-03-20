@@ -6,7 +6,7 @@ import { IconButton, TextField } from '@mui/material';
 import { S } from './MachineStyling';
 import { MidiLinkModel } from './../layout/Link';
 import { MachineNodeModel } from './../layout/Node';
-import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, registeredMachine } from './Machines';
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from './Machines';
 import { standardMidiMessages } from '../Utils';
 
 interface Filter {
@@ -108,15 +108,13 @@ export class ThruMachine extends AbstractMachine implements MachineSourceTarget 
         return this.config.filterType === "allows";
     }
 
-    receive(messageEvent: MachineMessage, channel: number, link: MidiLinkModel) {
+    receive(messageEvent: MachineMessage, channel: number) {
 
         if (this.isFiltered(messageEvent)) {
 
-            return;
+            return MessageResult.Ignored;
         }
-
-        link.setSending(true);
-
+        
         if (this.config.detune != 0 && (messageEvent.message.type === "noteon" || messageEvent.message.type === "noteoff")) {
 
             messageEvent = { ...messageEvent, message: { ...messageEvent.message, rawData: new Uint8Array(messageEvent.message.rawData) } };
@@ -124,6 +122,7 @@ export class ThruMachine extends AbstractMachine implements MachineSourceTarget 
         }
 
         this.emit(messageEvent, channel);
+        return MessageResult.Processed;
     }
 }
 

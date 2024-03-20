@@ -7,7 +7,7 @@ import { allNotes, noteStringToNoteMidi, standardMidiMessages } from '../Utils';
 import { MidiLinkModel } from '../layout/Link';
 import { MachineNodeModel } from './../layout/Node';
 import { S } from './MachineStyling';
-import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, registeredMachine } from './Machines';
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from './Machines';
 
 type ArpStyle = "up" | "down" | "updown" | "updown2" | "random";
 
@@ -125,17 +125,15 @@ export class ArpMachine extends AbstractMachine implements MachineSourceTarget {
 
     private previousNote: Uint8Array | undefined;
 
-    receive(messageEvent: MachineMessage, _: number, link: MidiLinkModel): void {
+    receive(messageEvent: MachineMessage, _: number): MessageResult {
 
         switch (messageEvent.type) {
 
             case "start":
-                link.setSending(true);
                 this.emit(messageEvent, 0);
                 this.arpIndex = 0;
-                break;
+                return MessageResult.Processed;
             case "stop":
-                link.setSending(true);
                 this.clockIndex = 0;
                 if (this.previousNote != undefined) {
 
@@ -143,9 +141,8 @@ export class ArpMachine extends AbstractMachine implements MachineSourceTarget {
                 }
 
                 this.emit(messageEvent, 0);
-                break;
+                return MessageResult.Processed;
             case "clock":
-                link.setSending(true);
                 const max = Math.floor(24 / this.config.notes.length);
                 if (this.config.notes.length !== 0 && this.emit != undefined) {
 
@@ -163,20 +160,19 @@ export class ArpMachine extends AbstractMachine implements MachineSourceTarget {
                             ? Math.floor(Math.random() * this.config.notesToPlay.length)
                             : (this.arpIndex + 1) % this.config.notesToPlay.length;
 
-                        if (noteData.muted) {
+                        if (!noteData.muted) {
 
-                            return;
+                            const data = noteStringToNoteMidi(noteData.noteValue + noteData.octave);
+
+                            this.emit({ message: { rawData: data, isChannelMessage: true, type: "noteon", channel: 0 }, type: "noteon" }, 0);
+                            this.previousNote = data;
                         }
-
-                        const data = noteStringToNoteMidi(noteData.noteValue + noteData.octave);
-
-                        this.emit({ message: { rawData: data, isChannelMessage: true, type: "noteon", channel: 0 }, type: "noteon" }, 0);
-                        this.previousNote = data;
                     }
                 }
-                break;
+
+                return MessageResult.Processed;
             default:
-                break;
+                return MessageResult.Ignored;
         }
     }
 }

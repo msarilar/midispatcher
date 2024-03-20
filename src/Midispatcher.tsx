@@ -49,7 +49,6 @@ eventBus.registerAction(new ZoomCanvasAction( { inverseZoom: true }));
 
 interface MidispatcherState {
 
-    readonly loaded: boolean;
     readonly update: boolean;
     readonly machineFactories: { [name: string]: MachineFactory };
     readonly modalContent: JSX.Element | undefined;
@@ -58,7 +57,6 @@ interface MidispatcherState {
 
 const defaultMidispatcherState: MidispatcherState = {
 
-    loaded: false,
     update: false,
     machineFactories: {},
     modalContent: undefined,
@@ -127,44 +125,26 @@ const Midispatcher: React.FunctionComponent = () => {
                 return state;
             case MidispatcherActionType.MidiLoaded:
 
-                if (Object.keys(state.machineFactories).length === 0) {
+                state.machineFactories["MIDI"] = new LabelMachineFactory(MachineType.System, "MIDI machines", "Receive/Send MIDI of your connected devices");
+                action.result.inputs.forEach(input => {
 
-                    Object.values(MachineType).forEach((key) => {
+                    const factory = MidiMachineSource.buildFactory(input, "midimessage");
+                    state.machineFactories[factory.getName()] = factory;
+                });
 
-                        const data = registeredFactories[key];
-                        state.machineFactories[key] = new LabelMachineFactory(key, key, data.tooltip);
-                        for (let i = 0;  i < data.factories.length; i++) {
+                action.result.outputs.forEach(input => {
 
-                            const factory = data.factories[i];
-                            state.machineFactories[factory.getName()] = factory;
-                        }
-                    });
-
-                    state.machineFactories["MIDI"] = new LabelMachineFactory(MachineType.System, "MIDI machines", "Receive/Send MIDI of your connected devices");
-                    action.result.inputs.forEach(input => {
-
-                        const factory = MidiMachineSource.buildFactory(input, "midimessage");
-                        state.machineFactories[factory.getName()] = factory;
-                    });
-
-                    action.result.outputs.forEach(input => {
-
-                        const factory = MidiMachineTarget.buildFactory(input);
-                        state.machineFactories[factory.getName()] = factory;
-                    });
-
-                    engine.getNodeFactories().registerFactory(new MachineNodeFactory(state.machineFactories));
-
-                    return {
-
-                        ...state,
-                        loaded: true
-                    }
-                }
+                    const factory = MidiMachineTarget.buildFactory(input);
+                    state.machineFactories[factory.getName()] = factory;
+                });
+                
+                engine.getNodeFactories().deregisterFactory("machine");
+                engine.getNodeFactories().registerFactory(new MachineNodeFactory(state.machineFactories));
 
                 return {
 
-                    ...state
+                    ...state,
+                    update: !state.update
                 }
             case MidispatcherActionType.Refresh:
                 return {
@@ -178,12 +158,13 @@ const Midispatcher: React.FunctionComponent = () => {
                     ...state,
                     modalContent: action.result.modalContent
                 }
-                case MidispatcherActionType.ToggleDiscuss:
-                    return {
 
-                        ...state,
-                        discussionVisible: !state.discussionVisible
-                    }
+            case MidispatcherActionType.ToggleDiscuss:
+                return {
+
+                    ...state,
+                    discussionVisible: !state.discussionVisible
+                }
             default:
                 return state;
         }
@@ -191,13 +172,28 @@ const Midispatcher: React.FunctionComponent = () => {
 
     React.useEffect(() => {
 
+        Object.values(MachineType).forEach((key) => {
+
+            const data = registeredFactories[key];
+            state.machineFactories[key] = new LabelMachineFactory(key, key, data.tooltip);
+            for (let i = 0;  i < data.factories.length; i++) {
+
+                const factory = data.factories[i];
+                state.machineFactories[factory.getName()] = factory;
+            }
+        });
+
+        engine.getNodeFactories().registerFactory(new MachineNodeFactory(state.machineFactories));
+
+        dispatch({ type: MidispatcherActionType.Refresh, result: {} });
+        
         WebMidi.WebMidi
             .enable()
             .then(() => dispatch({ type: MidispatcherActionType.MidiLoaded, result: { inputs: WebMidi.WebMidi.inputs, outputs: WebMidi.WebMidi.outputs } }))
             .catch(err => {
 
                 console.error(err);
-                alert("Issue when trying to connect your MIDI devices");
+                alert("Issue when trying to connect your MIDI devices:\r\n" + err);
                 dispatch({ type: MidispatcherActionType.MidiLoaded, result: { inputs: WebMidi.WebMidi.inputs, outputs: WebMidi.WebMidi.outputs } });
             });
     }, []);
@@ -281,10 +277,10 @@ const Midispatcher: React.FunctionComponent = () => {
     return (
         <Workspace
             buttons={[
-                <WorkspaceButton disabled={!state.loaded} key={"saveButtonKey"} onClick={() => dispatch({ type: MidispatcherActionType.ToggleModal, result: { modalContent: saveModalContent() } })}>
+                <WorkspaceButton key={"saveButtonKey"} onClick={() => dispatch({ type: MidispatcherActionType.ToggleModal, result: { modalContent: saveModalContent() } })}>
                     Save
                 </WorkspaceButton>,
-                <WorkspaceButton disabled={!state.loaded} key={"loadButtonKey"} onClick={() => {
+                <WorkspaceButton key={"loadButtonKey"} onClick={() => {
 
                     let data = window.prompt("Input save data here");
                     if (data) {
@@ -297,7 +293,7 @@ const Midispatcher: React.FunctionComponent = () => {
                 <WorkspaceButton key={"helpButtonKey"} onClick={() => dispatch({ type: MidispatcherActionType.ToggleModal, result: { modalContent: helpModalContent } })}>
                     Help
                 </WorkspaceButton>,
-                <WorkspaceButton disabled={!state.loaded} key={"nextDemoKey"} onClick={() => {
+                <WorkspaceButton key={"nextDemoKey"} onClick={() => {
 
                     dispatch({ type: MidispatcherActionType.LoadSave, result: { data: LZString.decompressFromBase64(nextDemo())! } });
                 }}>

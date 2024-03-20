@@ -6,7 +6,7 @@ import { S } from './MachineStyling';
 import { normalizeVelocity, noteMidiToString } from "../Utils";
 import { MidiLinkModel } from "../layout/Link";
 import { MachineNodeModel } from "../layout/Node";
-import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, registeredMachine } from "./Machines";
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
 import { Visualizers } from "./Visualizers";
 
 interface ToneJsSynthConfig {
@@ -103,28 +103,25 @@ export class ToneJsSynthMachine extends AbstractMachine implements MachineTarget
 
     getFactory() { return ToneJsSynthMachine.factory; }
 
-    receive(messageEvent: MachineMessage, _: number, link: MidiLinkModel): void {
+    receive(messageEvent: MachineMessage, _: number) {
 
         if (this.synth.disposed) {
 
-            return;
+            return MessageResult.Ignored;
         }
 
         switch(messageEvent.type) {
 
             case "stop":
                 this.synth.releaseAll();
-                link.setSending(true);
-                break;
+                return MessageResult.Processed;
 
             case "allnotesoff":
             case "allsoundoff":
                 this.synth.releaseAll();
-                link.setSending(true);
-                break;
+                return MessageResult.Processed;
 
             case "noteon":
-                link.setSending(true);
                 if (messageEvent.message.rawData[2] === 0) {
 
                     this.synth.triggerRelease(noteMidiToString(messageEvent.message.rawData[1]));
@@ -134,13 +131,14 @@ export class ToneJsSynthMachine extends AbstractMachine implements MachineTarget
                     this.synth.triggerAttack(noteMidiToString(messageEvent.message.rawData[1]), Tone.context.currentTime, normalizeVelocity(messageEvent.message.rawData[2]));
                 }
 
-                break;
+                return MessageResult.Processed;
 
             case "noteoff":
-                link.setSending(true);
                 this.synth.triggerRelease(noteMidiToString(messageEvent.message.rawData[1]));
-                break;
+                return MessageResult.Processed;
         }
+        
+        return MessageResult.Ignored;
     }
 
     getInChannelCount(): number {

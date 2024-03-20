@@ -3,7 +3,7 @@ import * as WebMidi from 'webmidi';
 import { notesOff } from "../Utils";
 import { AllLinkCode } from "../layout/Engine";
 import { MidiLinkModel } from "../layout/Link";
-import { AbstractMachine, MachineFactory, MachineMessage, MachineSource, MachineTarget, MachineType } from "./Machines";
+import { AbstractMachine, MachineFactory, MachineMessage, MachineSource, MachineTarget, MachineType, MessageResult } from "./Machines";
 
 export class MidiMachineSource extends AbstractMachine implements MachineSource {
 
@@ -121,9 +121,7 @@ export class MidiMachineTarget extends AbstractMachine implements MachineTarget 
         }
     }
 
-    receive(messageEvent: MachineMessage, channel: number, link: MidiLinkModel) {
-
-        link.setSending(true);
+    receive(messageEvent: MachineMessage, channel: number) {
 
         if (messageEvent.message.isChannelMessage) {
 
@@ -136,7 +134,7 @@ export class MidiMachineTarget extends AbstractMachine implements MachineTarget 
 
             if (channel === 0) {
 
-                return;
+                return MessageResult.Ignored;
             }
 
             for (let i = 0; i < notesOff.length; i++) {
@@ -165,6 +163,8 @@ export class MidiMachineTarget extends AbstractMachine implements MachineTarget 
                 console.error(messageEvent);
             }
         }
+        
+        return MessageResult.Processed;
     }
 
     setChannel(rawData: Uint8Array, channel: number) {
