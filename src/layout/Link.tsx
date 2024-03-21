@@ -1,8 +1,7 @@
 import { DefaultLinkFactory, DefaultLinkModel, DefaultLinkProps, DefaultLinkWidget } from '@projectstorm/react-diagrams';
-import { css, keyframes } from '@emotion/react';
 
-import styled from '@emotion/styled';
 import React from 'react';
+import { S } from './LayoutStyling';
 
 const MidiLinkWidget: React.FunctionComponent<DefaultLinkProps> = (props) => {
 
@@ -12,6 +11,7 @@ const MidiLinkWidget: React.FunctionComponent<DefaultLinkProps> = (props) => {
 
         const model = props.link as MidiLinkModel;
         model.setSendingCallback(sending => {
+
             setSelected(sending);
         });
     });
@@ -96,36 +96,4 @@ export class MidiLinkModel extends DefaultLinkModel {
         this.options.extras = false;
         this.sending = false;
     }
-}
-
-namespace S {
-
-    export const Keyframes = keyframes`
-        from {
-
-            stroke-dashoffset: 24;
-        }
-        to {
-
-            stroke-dashoffset: 0;
-        }
-    `;
-
-    const selected = css`
-        stroke-dasharray: 10, 2;
-        animation: ${Keyframes} 1s linear infinite;
-    `;
-
-    const sending = css`
-        stroke-dasharray: 10, 1;
-        stroke: lime;
-        animation: ${Keyframes} 0.5s linear infinite;
-    `;
-
-    export const Path = styled.path<{ selected: boolean, sending: boolean }>`
-        ${(p) => p.selected && selected};
-        ${(p) => p.sending && sending};
-        fill: none;
-        pointer-events: auto;
-    `;
 }

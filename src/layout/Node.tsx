@@ -1,10 +1,11 @@
 import * as React from 'react';
-import styled from '@emotion/styled';
+
 import { NodeModel, PortModelAlignment, NodeModelGenerics, DiagramEngine } from '@projectstorm/react-diagrams';
 import { BaseEvent, AbstractReactFactory, GenerateWidgetEvent, GenerateModelEvent, BasePositionModelOptions } from '@projectstorm/react-canvas-core';
 
 import { Machine, MachineFactory, machineTypeToColor } from './../machines/Machines';
 import { MachinePortLabel, MachinePortModel } from './Port';
+import { S } from './LayoutStyling';
 
 interface DefaultNodeModelOptions extends BasePositionModelOptions {
 
@@ -49,7 +50,7 @@ export class MachineNodeModel extends NodeModel<DefaultNodeModelGenerics> {
 
     serialize() {
 
-        return { ... super.serialize(),
+        return { ...super.serialize(),
             machineName: this.machine.getFactory().getName(),
             state: this.machine.getState() };
     }
@@ -197,53 +198,4 @@ export const MachineNodeWidget: React.FunctionComponent<MachineNodeProps> = prop
             )}
         </S.Node>
     );
-}
-
-namespace S {
-
-    export const Node = styled.div<{ background: string; selected: boolean }>`
-        background-color: ${(p) => p.background};
-        border-radius: 5px;
-        font-family: sans-serif;
-        color: white;
-        border: solid 2px black;
-        overflow: visible;
-        font-size: 11px;
-        border: solid 2px ${(p) => (p.selected ? 'rgb(0,192,255)' : 'black')};
-        * {
-    
-            box-sizing:border-box
-        }
-    `;
-
-    export const Title = styled.div`
-        background: rgba(0, 0, 0, 0.3);
-        display: flex;
-        white-space: nowrap;
-        justify-items: center;
-    `;
-
-    export const TitleName = styled.div`
-        flex-grow: 1;
-        padding: 5px 5px;
-    `;
-
-    export const Ports = styled.div`
-        display: flex;
-        background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.2));
-    `;
-
-    export const PortsContainer = styled.div`
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        &:first-of-type {
-
-            margin-right: 10px;
-        }
-        &:only-child {
-
-            margin-right: 0px;
-        }
-    `;
 }

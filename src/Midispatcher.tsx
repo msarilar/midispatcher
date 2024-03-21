@@ -1,7 +1,6 @@
 ﻿import React from 'react';
 import Modal from 'react-modal';
 
-import styled from '@emotion/styled';
 import { CanvasWidget, ZoomCanvasAction, InputType } from '@projectstorm/react-canvas-core';
 import { Box, TextField } from '@mui/material';
 import * as WebMidi from 'webmidi';
@@ -18,6 +17,7 @@ import { MachineNodeFactory, MachineNodeModel } from './layout/Node';
 import { MidiMachineSource, MidiMachineTarget } from './machines/MidiMachines';
 import { fromJson, toJson } from './Utils';
 import { MachinePortFactory } from './layout/Port';
+import { S } from './layout/LayoutStyling';
 
 const commandManager = new CommandManager(engine);
 window.addEventListener('keydown', (event: any) => {
@@ -221,7 +221,7 @@ const Midispatcher: React.FunctionComponent = () => {
                     return data.text();
                 }
 
-                throw "Unexpected HTTP " + data.status;
+                throw new Error("Unexpected HTTP " + data.status);
             })
             .then(json => dispatch({ type: MidispatcherActionType.DemosLoaded, result: { demos: JSON.parse(json) }}))
             .catch(err => {
@@ -365,7 +365,7 @@ const Midispatcher: React.FunctionComponent = () => {
             </Modal>
 
             <S.Body>
-                <S.Content>
+                <S.MainContent>
                     <Tray>
                         {trayItems}
                     </Tray>
@@ -378,7 +378,7 @@ const Midispatcher: React.FunctionComponent = () => {
                             <CanvasWidget engine={engine} />
                         </Canvas>
                     </S.Layer>
-                </S.Content>
+                </S.MainContent>
                 <S.Disqus visible={state.discussionVisible}>
                     <Disqus.DiscussionEmbed shortname={disqusShortname} config={disqusConfig} />
                 </S.Disqus>
@@ -388,74 +388,3 @@ const Midispatcher: React.FunctionComponent = () => {
 }
 
 export default Midispatcher;
-
-namespace S {
-
-    export const Disqus = styled.div<{ visible: boolean }>`
-        display: ${(p) => p.visible ? "block" : "none"};
-        padding-top: 10px;
-        padding-bottom: 10px;
-        padding-left: 30px;
-        padding-right: 30px;
-        overflow: auto;
-        height: 50%;
-        width: 50%;
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        border: 1px;
-        border-style: inset;
-        border-color: #0096ff;
-        background-color: #202020;
-
-        &::-webkit-scrollbar {
-
-            width: 12px;
-        }
-
-        &::-webkit-scrollbar-track {
-
-            -webkit-box-shadow: inset 0 0 6px #0096ff;
-            border-radius: 0px;
-        }
-
-        &::-webkit-scrollbar-thumb {
-
-            border-radius: 0px;
-            -webkit-box-shadow: inset 0 0 6px white;
-        }
-    `;
-
-    export const Body = styled.div`
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 100%;
-    `;
-
-    export const Header = styled.div`
-        display: flex;
-        background: rgb(30, 30, 30);
-        flex-grow: 0;
-        flex-shrink: 0;
-        color: white;
-        font-family: Helvetica, Arial, sans-serif;
-        padding: 10px;
-        align-items: center;
-    `;
-
-    export const Content = styled.div`
-        display: flex;
-        flex-grow: 1;
-    `;
-
-    export const Layer = styled.div`
-        position: relative;
-        flex-grow: 1;
-    `;
-
-    export const ScrollDiv = styled.div`
-        max-height: 400px;
-        overflow-y: auto;
-    `;
-}

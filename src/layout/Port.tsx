@@ -1,9 +1,9 @@
 import { DefaultPortModel, DefaultPortModelOptions, DiagramEngine, PortWidget } from '@projectstorm/react-diagrams';
 import { AbstractModelFactory, DeserializeEvent } from '@projectstorm/react-canvas-core';
 import React from 'react';
-import styled from '@emotion/styled';
 
 import { MidiLinkModel } from './Link';
+import { S } from './LayoutStyling';
 
 export class MachinePortModel extends DefaultPortModel {
 
@@ -37,7 +37,7 @@ export class MachinePortModel extends DefaultPortModel {
 
     serialize() {
 
-        return { ... super.serialize(), isIn: this.isIn, channel: this.channel };
+        return { ...super.serialize(), isIn: this.isIn, channel: this.channel };
     }
 
     deserialize(e: DeserializeEvent<this>) {
@@ -115,27 +115,4 @@ export const MachinePortLabel: React.FunctionComponent<MachinePortLabelProps> = 
             {props.port.getOptions().in ? label : port}
         </S.PortLabel>
     );
-}
-
-namespace S {
-	export const PortLabel = styled.div`
-		display: flex;
-		margin-top: 1px;
-		align-items: center;
-	`;
-
-	export const Label = styled.div`
-		padding: 0 5px;
-		flex-grow: 1;
-	`;
-
-	export const Port = styled.div<{ sending: boolean }>`
-		width: 15px;
-		height: 15px;
-		background: ${(p) => p.sending ? "rgba(255, 255, 255, 0.9)" : "rgba(255, 255, 255, 0.5)" };
-
-		&:hover {
-			background: rgb(192, 255, 0);
-		}
-	`;
 }

@@ -65,6 +65,7 @@
         ]
     },
     "devDependencies": {
+        "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
         "@types/uuid": "^9.0.8",
         "cross-env": "^7.0.3",
         "eslint-config-react-app": "^7.0.1",

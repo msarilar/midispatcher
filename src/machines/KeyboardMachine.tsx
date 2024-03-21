@@ -1,10 +1,10 @@
-import styled from '@emotion/styled';
 import { DiagramEngine } from '@projectstorm/react-diagrams-core';
 import * as React from 'react';
 import * as WebMidi from 'webmidi';
 
 import { MachineNodeModel } from './../layout/Node';
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineSource, MachineType, registeredMachine } from './Machines';
+import { S } from './MachineStyling';
 
 @registeredMachine
 export class KeyboardMachine extends AbstractMachine implements MachineSource {
@@ -46,26 +46,26 @@ export class KeyboardMachine extends AbstractMachine implements MachineSource {
 
 export const KeyboardNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<KeyboardMachine>> = props => {
 
-    function sendNote(noteStr: string) {
+    const sendNote =  React.useCallback((noteStr: string) => {
 
         const note = WebMidi.Utilities.buildNote(noteStr, { rawAttack: 150 });
         const data = Uint8Array.from([
-            (WebMidi.Enumerations.MIDI_CHANNEL_MESSAGES.noteon << 4),
+            (WebMidi.Enumerations.CHANNEL_MESSAGES.noteon << 4),
             note.getOffsetNumber(WebMidi.WebMidi.octaveOffset),
             note.rawAttack]);
 
         props.machine.emit({ message: { rawData: data, isChannelMessage: true, type: "noteon", channel: 1 }, type: "noteon" }, 0);
-    }
+    }, [props.machine]);
 
-    function stopNote(noteStr: string) {
+    const stopNote = React.useCallback((noteStr: string) => {
 
         const note = WebMidi.Utilities.buildNote(noteStr, { rawAttack: 150 });
         const data = Uint8Array.from([
-            (WebMidi.Enumerations.MIDI_CHANNEL_MESSAGES.noteoff << 4),
+            (WebMidi.Enumerations.CHANNEL_MESSAGES.noteoff << 4),
             note.getOffsetNumber(WebMidi.WebMidi.octaveOffset),
             note.rawAttack]);
         props.machine.emit({ message: { rawData: data, isChannelMessage: true, type: "noteoff", channel: 1 }, type: "noteoff" }, 0);
-    }
+    }, [props.machine]);
 
     React.useEffect(() => {
 
@@ -112,10 +112,10 @@ export const KeyboardNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<K
             window.removeEventListener("keydown", onKeyDown);
             window.removeEventListener("keyup", onKeyUp);
         })
-    }, []);
+    }, [sendNote, stopNote]);
 
     return (
-        <S.Body>
+        <S.KeyboardBody>
             <ul className="set">
                 <li className="white e" onMouseDown={() => sendNote("C3")} onMouseUp={() => stopNote("C3")} />
                 <li className="black ds" onMouseDown={() => sendNote("C#3")} onMouseUp={() => stopNote("C#3")} />
@@ -130,80 +130,6 @@ export const KeyboardNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<K
                 <li className="black fs" onMouseDown={() => sendNote("A#3")} onMouseUp={() => stopNote("A#3")} />
                 <li className="white f" onMouseDown={() => sendNote("B3")} onMouseUp={() => stopNote("B3")} />
             </ul>
-        </S.Body>
+        </S.KeyboardBody>
     );
-}
-
-namespace S {
-
-    export const Body = styled.div`
-    ul {
-
-        position:relative;
-        border-radius:1em;
-    }
-
-    li {
-
-        margin:0;
-        padding:0;
-        list-style:none;
-        position:relative;
-        float:left
-    }
-
-    ul .white {
-
-        height:8em;
-        width:3em;
-        z-index:1;
-        border-left:1px solid #bbb;
-        border-bottom:1px solid #bbb;
-        border-radius:0 0 5px 5px;
-        box-shadow:-1px 0 0 rgba(255,255,255,0.8) inset,0 0 5px #ccc inset,0 0 3px rgba(0,0,0,0.2);
-        background:linear-gradient(to bottom,#eee 0%,#fff 100%)
-    }
-
-    ul .white:active {
-
-        border-top:1px solid #777;
-        border-left:1px solid #999;
-        border-bottom:1px solid #999;
-        box-shadow:2px 0 3px rgba(0,0,0,0.1) inset,-5px 5px 20px rgba(0,0,0,0.2) inset,0 0 3px rgba(0,0,0,0.2);
-        background:linear-gradient(to bottom,#fff 0%,#e9e9e9 100%)
-    }
-
-    .black {
-
-        height:5em;
-        width:1.5em;
-        margin:0 0 0 -1em;
-        z-index:2;
-        border:1px solid #000;
-        border-radius:0 0 3px 3px;
-        box-shadow:-1px -1px 2px rgba(255,255,255,0.2) inset,0 -5px 2px 3px rgba(0,0,0,0.6) inset,0 2px 4px rgba(0,0,0,0.5);
-        background:linear-gradient(45deg,#222 0%,#555 100%)
-    }
-
-    .black:active {
-
-        box-shadow:-1px -1px 2px rgba(255,255,255,0.2) inset,0 -2px 2px 3px rgba(0,0,0,0.6) inset,0 1px 2px rgba(0,0,0,0.5);
-        background:linear-gradient(to right,#444 0%,#222 100%)
-    }
-
-    .a,.g,.f,.d,.c {
-
-        margin:0 0 0 -1em
-    }
-
-    ul li:first-of-type {
-
-        border-radius:5px 0 5px 5px
-    }
-
-    ul li:last-child {
-
-        border-radius:0 5px 5px 5px
-    }
-    `;
 }

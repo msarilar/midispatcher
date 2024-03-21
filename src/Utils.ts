@@ -41,7 +41,7 @@ export function noteStringToNoteMidi(noteString: string): Uint8Array {
 
         const note = WebMidi.Utilities.buildNote(noteString, { rawAttack: 150 });
         notesRawDataCache[noteString] = Uint8Array.from([
-            (WebMidi.Enumerations.MIDI_CHANNEL_MESSAGES.noteon << 4),
+            (WebMidi.Enumerations.CHANNEL_MESSAGES.noteon << 4),
             note.getOffsetNumber(WebMidi.WebMidi.octaveOffset),
             note.rawAttack]);
     }
@@ -56,12 +56,12 @@ export function normalizeVelocity(v: number) {
 
 export const standardMidiMessages: { [type: string]: MachineMessage } =  {
 
-    ["clock"]: { type: "clock", message: { rawData: Uint8Array.from([248]), isChannelMessage: false, type: "clock", channel: 0 } },
-    ["start"]: { type: "start", message: { rawData: Uint8Array.from([250]), isChannelMessage: false, type: "start", channel: 0 } },
-    ["continue"]: { type: "continue", message: { rawData: Uint8Array.from([251]), isChannelMessage: false, type: "continue", channel: 0 } },
-    ["stop"]: { type: "stop", message: { rawData: Uint8Array.from([252]), isChannelMessage: false, type: "stop", channel: 0 } },
-    ["allnotesoff"]: { type: "allnotesoff", message: { rawData: Uint8Array.from([176, 123, 0]), isChannelMessage: true, type: "allnotesoff", channel: 0 } },
-    ["allsoundoff"]: { type: "allsoundoff", message: { rawData: Uint8Array.from([176, 120, 0]), isChannelMessage: true, type: "allsoundoff", channel: 0 } }
+    "clock": { type: "clock", message: { rawData: Uint8Array.from([248]), isChannelMessage: false, type: "clock", channel: 0 } },
+    "start": { type: "start", message: { rawData: Uint8Array.from([250]), isChannelMessage: false, type: "start", channel: 0 } },
+    "continue": { type: "continue", message: { rawData: Uint8Array.from([251]), isChannelMessage: false, type: "continue", channel: 0 } },
+    "stop": { type: "stop", message: { rawData: Uint8Array.from([252]), isChannelMessage: false, type: "stop", channel: 0 } },
+    "allnotesoff": { type: "allnotesoff", message: { rawData: Uint8Array.from([176, 123, 0]), isChannelMessage: true, type: "allnotesoff", channel: 0 } },
+    "allsoundoff": { type: "allsoundoff", message: { rawData: Uint8Array.from([176, 120, 0]), isChannelMessage: true, type: "allsoundoff", channel: 0 } }
 };
 
 export const gsStandardSetDrumKitMini: { [index: string]: string } = {
@@ -203,7 +203,7 @@ export const notesOff: Uint8Array[] = [];
 for (let i = 0; i < 128; i++) {
 
     notesOff.push(Uint8Array.from([
-        (WebMidi.Enumerations.MIDI_CHANNEL_MESSAGES.noteoff << 4),
+        (WebMidi.Enumerations.CHANNEL_MESSAGES.noteoff << 4),
         i,
         0]));
 }

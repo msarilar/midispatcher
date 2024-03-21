@@ -56,7 +56,7 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
             drawSpectrogram(state.spectrogram);
         }
 
-        const _ = setTimeout(() => requestAnimationFrame(function() { drawVisuals(state); }), fpsInterval);
+        setTimeout(() => requestAnimationFrame(function() { drawVisuals(state); }), fpsInterval);
     }
 
     const findTargetIndex = (startingTarget: number, array: Uint8Array) => {
