@@ -1,4 +1,4 @@
-import createEngine, { DiagramEngine, DiagramModel, LinkModel, LinkModelGenerics, NodeModel } from "@projectstorm/react-diagrams";
+import createEngine, { DefaultDiagramState, DiagramEngine, DiagramModel, LinkModel, LinkModelGenerics, NodeModel } from "@projectstorm/react-diagrams";
 import { BaseModel, BaseEntityEvent, BaseEvent, BaseEntity, BaseEntityGenerics } from '@projectstorm/react-canvas-core';
 
 import { MachineSource, MachineTarget } from '../machines/Machines';
@@ -9,6 +9,11 @@ import { MachinePortModel } from "./Port";
 
 const routings = new MachineRoutings();
 export const engine = createEngine();
+const state = engine.getStateMachine().getCurrentState();
+if (state instanceof DefaultDiagramState) {
+
+    state.dragNewLink.config.allowLooseLinks = false;
+}
 
 class Command {
 

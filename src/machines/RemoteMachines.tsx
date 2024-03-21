@@ -554,7 +554,7 @@ const ReceivingRemoteNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<R
             
             <Typography variant="body2" align="center">{ connectionStatus.status }</Typography >
             <Button onClick={forceReconnectClicked}>
-                <Typography variant="body2" align="center">Reconnect</Typography >
+                <Typography variant="body2" align="center">Reset</Typography >
                 <CachedOutlined/>
             </Button>
             { errorBlock }

@@ -63,7 +63,16 @@ export class ArpMachine extends AbstractMachine implements MachineSourceTarget {
 
         super();
 
-        this.config = config ?? { notes: [], octaves: 1, arpStyle: "up", notesToPlay: [] };
+        if (config == undefined) {
+
+            this.config = { notes: [{ muted: false, noteValue: "C", octave: 3 }, { muted: false, noteValue: "E", octave: 3 }, { muted: false, noteValue: "G", octave: 3 }], octaves: 1, arpStyle: "up", notesToPlay: [] };
+            this.setState(this.config);
+        }
+        else {
+
+            this.config = config;
+        }
+
         this.getNode().addMachineInPort("Clock", 0);
         this.getNode().addMachineOutPort("Out", 0);
     }
@@ -257,7 +266,7 @@ const ArpNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ArpMachine>> 
                 </IconButton>
             </S.SettingsBarVertical>
             {config.octaves + " octaves"}
-            <Slider aria-label="Volume"
+            <Slider aria-label="Octaves"
                 min={1}
                 max={4}
                 onChange={(_, v) => {

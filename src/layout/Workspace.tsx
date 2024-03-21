@@ -37,6 +37,7 @@ export const WorkspaceButton = styled.button<{ toggled?: boolean }>`
     color: white;
     outline: none;
     cursor: pointer;
+    white-space:nowrap;
     margin: 2px;
     border-radius: 5px;
     &:hover {
