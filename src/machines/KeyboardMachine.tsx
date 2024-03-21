@@ -46,7 +46,7 @@ export class KeyboardMachine extends AbstractMachine implements MachineSource {
 
 export const KeyboardNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<KeyboardMachine>> = props => {
 
-    const sendNote =  React.useCallback((noteStr: string) => {
+    const sendNote = React.useCallback((noteStr: string) => {
 
         const note = WebMidi.Utilities.buildNote(noteStr, { rawAttack: 150 });
         const data = Uint8Array.from([

@@ -16,8 +16,14 @@ export const allNotes = [
     "B"
 ];
 
-const noteMidiToStringCache: { [index: number]: string } = {}
+const noteMidiToStringCache: { [index: number]: [string, number] } = {}
 export function noteMidiToString(n: number): string {
+
+    const [note, octave]: [string, number] = noteMidiToStringSeparated(n);
+    return note + octave;
+}
+
+export function noteMidiToStringSeparated(n: number): [string, number] {
 
     if (noteMidiToStringCache[n] != undefined) {
 
@@ -26,7 +32,7 @@ export function noteMidiToString(n: number): string {
 
     const oct = Math.floor(n / 12) - 1;
     const note = n % 12;
-    const result = allNotes[note] + oct;
+    const result: [string, number] = [allNotes[note], oct];
 
     noteMidiToStringCache[n] = result;
 
