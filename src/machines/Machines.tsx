@@ -249,6 +249,24 @@ class CustomNodeFactory extends AbstractReactFactory<MachineNodeModel, DiagramEn
                 }
             }
         }
+        
+        if (this.machineFactory.getName() === "ArpMachine") {
+
+            if (e.initialConfig.state.keyboardNotes == undefined) {
+
+                e.initialConfig.state.keyboardNotes = [];
+            }
+
+            if (e.initialConfig.state.arpMode == undefined) {
+
+                e.initialConfig.state.arpMode = "predefined";
+            }
+
+            if (e.initialConfig.state.predefinedNotes == undefined) {
+
+                e.initialConfig.state.predefinedNotes = e.initialConfig.state.notes;
+            }
+        }
 
         return new MachineNodeModel(this.machineFactory.createMachine(e.initialConfig.state), this.type);
     }
