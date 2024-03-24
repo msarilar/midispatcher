@@ -128,6 +128,9 @@ const Midispatcher: React.FunctionComponent = () => {
                 }
 
                 engine.setModel(model);
+                model.setZoomLevel(100);
+                model.realignGrid();
+                engine.repaintCanvas();
                 return state;
             case MidispatcherActionType.MidiLoaded:
 
@@ -332,6 +335,9 @@ const Midispatcher: React.FunctionComponent = () => {
                     }
                 }}>
                     Load
+                </WorkspaceButton>,
+                <WorkspaceButton key={"resetViewButtonKey"} onClick={() => { engine.zoomToFit(); model.realignGrid(); }}>
+                    Reset View
                 </WorkspaceButton>,
                 <WorkspaceButton key={"helpButtonKey"} onClick={() => dispatch({ type: MidispatcherActionType.ToggleModal, result: { modalContent: helpModalContent } })}>
                     Help

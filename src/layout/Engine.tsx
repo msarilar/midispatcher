@@ -142,7 +142,7 @@ export class MidispatcherDiagramModel extends DiagramModel {
         this.realignGrid();
     }
 
-    private realignGrid() {
+    realignGrid() {
 
         this.adjustGridOffset({ offsetX: this.getOffsetX(), offsetY: this.getOffsetY() });
         this.adjustGridZoom({ zoom: this.getZoomLevel() });
