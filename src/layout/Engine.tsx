@@ -87,6 +87,8 @@ export class MidispatcherDiagramModel extends DiagramModel {
         // running this forEach directly does not work (I guess engine not fully loaded?) so we go through setTimeout:
         window.setTimeout(() =>
         this.getLinks().forEach(link => applyLink(link as MidiLinkModel)), 0);
+        
+        this.realignGrid();
     }
 
     constructor(commandManager: CommandManager) {
@@ -119,9 +121,56 @@ export class MidispatcherDiagramModel extends DiagramModel {
 
                     routings.disconnect(linksUpdatedEvent.link);
                 }
+            },
+            eventDidFire: (edf: BaseEvent) => {
+
+                const f = (edf as any).function;
+                switch (f) {
+
+                    case "offsetUpdated":
+                        this.adjustGridOffset(edf as any);
+                        break;
+
+                    case "zoomUpdated":
+                        this.adjustGridZoom(edf as any);
+                        break;
+                }
             }
+
         });
+        
+        this.realignGrid();
     }
+
+    private realignGrid() {
+
+        this.adjustGridOffset({ offsetX: this.getOffsetX(), offsetY: this.getOffsetY() });
+        this.adjustGridZoom({ zoom: this.getZoomLevel() });
+    };
+
+    private adjustGridOffset({ offsetX, offsetY }: { offsetX: number, offsetY: number}) {
+
+        const grid = document.querySelector(".midispatcherGrid") as HTMLElement;
+        if(grid == undefined) {
+
+            return;
+        }
+
+        grid.style.setProperty("--offset-x", `${Math.round(offsetX)}px`);
+        grid.style.setProperty("--offset-y", `${Math.round(offsetY)}px`);
+    };
+
+    private adjustGridZoom({ zoom }: { zoom: number }) {
+
+        const grid = document.querySelector(".midispatcherGrid") as HTMLElement;
+        if(grid == undefined) {
+
+            return;
+        }
+
+        const { gridSize } = this.getOptions();
+        grid.style.setProperty("--grid-size", `${((gridSize ?? 15) * zoom) / 100}px`);
+    };
 
     removeLink(link: LinkModel<LinkModelGenerics>): void {
 

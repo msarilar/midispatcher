@@ -1,11 +1,12 @@
 import styled from "@emotion/styled";
 import { css, keyframes } from "@emotion/react";
+import grid from "../grid.svg";
 
 export namespace S {
 
-    export const Container = styled.div<{ color: string; background: string }>`
+    export const Container = styled.div<{ background: string; }>`
         height: 100%;
-        background-color: ${(p) => p.background};
+        background-color: ${(p) => p.background };
         background-size: 50px 50px;
         background-position: top 10px right 10px;
         display: flex;
@@ -17,30 +18,17 @@ export namespace S {
             width: 100%;
         }
 
-        background-image: linear-gradient(
-                0deg,
-                transparent 24%,
-                ${(p) => p.color} 25%,
-                ${(p) => p.color} 26%,
-                transparent 27%,
-                transparent 74%,
-                ${(p) => p.color} 75%,
-                ${(p) => p.color} 76%,
-                transparent 77%,
-                transparent
-            ),
-            linear-gradient(
-                90deg,
-                transparent 24%,
-                ${(p) => p.color} 25%,
-                ${(p) => p.color} 26%,
-                transparent 27%,
-                transparent 74%,
-                ${(p) => p.color} 75%,
-                ${(p) => p.color} 76%,
-                transparent 77%,
-                transparent
-            );
+        --offset-x: 0px;
+        --offset-y: 0px;
+        --grid-size: 25px;
+
+        background-position-x: var(--offset-x);
+        background-position-y: var(--offset-y);
+
+        background-size: calc(var(--grid-size) * 3)
+            calc(var(--grid-size) * 3);
+
+        background-image: url('${grid}');
     `;
 
     export const Expand = css`

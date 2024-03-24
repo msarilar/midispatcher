@@ -13,10 +13,8 @@ export const Canvas: React.FunctionComponent<React.PropsWithChildren<CanvasProps
     return (
         <>
             <Global styles={S.Expand} />
-            <S.Container
-                background={background || "rgb(40, 40, 40)"}
-                color={color || "rgba(255,255,255, 0.05)"}
-            >
+            <S.Container className="midispatcherGrid"
+                background={background || "rgb(40, 40, 40)"}>
                 {children}
             </S.Container>
         </>
