@@ -1,11 +1,11 @@
-import * as React from 'react';
+import * as React from "react";
 
-import { NodeModel, PortModelAlignment, NodeModelGenerics, DiagramEngine } from '@projectstorm/react-diagrams';
-import { BaseEvent, AbstractReactFactory, GenerateWidgetEvent, GenerateModelEvent, BasePositionModelOptions } from '@projectstorm/react-canvas-core';
+import { NodeModel, PortModelAlignment, NodeModelGenerics, DiagramEngine } from "@projectstorm/react-diagrams";
+import { BaseEvent, AbstractReactFactory, GenerateWidgetEvent, GenerateModelEvent, BasePositionModelOptions } from "@projectstorm/react-canvas-core";
 
-import { Machine, MachineFactory, machineTypeToColor } from './../machines/Machines';
-import { MachinePortLabel, MachinePortModel } from './Port';
-import { S } from './LayoutStyling';
+import { Machine, MachineFactory, machineTypeToColor } from "./../machines/Machines";
+import { MachinePortLabel, MachinePortModel } from "./Port";
+import { S } from "./LayoutStyling";
 
 interface DefaultNodeModelOptions extends BasePositionModelOptions {
 

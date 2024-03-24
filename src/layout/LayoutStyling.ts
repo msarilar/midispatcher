@@ -1,5 +1,5 @@
-import styled from '@emotion/styled';
-import { css, keyframes } from '@emotion/react';
+import styled from "@emotion/styled";
+import { css, keyframes } from "@emotion/react";
 
 export namespace S {
 
@@ -89,7 +89,7 @@ export namespace S {
         border: solid 2px black;
         overflow: visible;
         font-size: 11px;
-        border: solid 2px ${(p) => (p.selected ? 'rgb(0,192,255)' : 'black')};
+        border: solid 2px ${(p) => (p.selected ? "rgb(0,192,255)" : "black")};
         * {
     
             box-sizing:border-box
@@ -150,7 +150,7 @@ export namespace S {
 
     export const ExpandButton = styled.button<{ open: boolean }>`
         background: ${(p) => p.open ? "rgb(50, 100, 50)" : "rgb(60, 192, 60)"};
-        max-width: ${(props) => (props.open ? '95px' : '40px')};
+        width: ${(props) => (props.open ? "100%" : "40px")};
         float: right;
         padding: 5px 10px;
         border: solid;
@@ -160,7 +160,8 @@ export namespace S {
         color: white;
         outline: none;
         cursor: pointer;
-        margin: 0 8px 0 0;
+        float: left;
+        margin-top: 1px;
         border-radius: 5px;
         transition: all 0.2s ease-in-out;
     `;
@@ -173,11 +174,11 @@ export namespace S {
 
     export const TrayChildrens = styled.div<{ open: boolean }>`
         transition: all 0.3s ease-in-out;
-        opacity: ${(props) => (props.open ? '1' : '0')};
+        opacity: ${(props) => (props.open ? "1" : "0")};
     `;
 
     export const Tray = styled.div<{ open: boolean }>`
-        max-width: ${(props) => (props.open ? '200px' : '50px')};
+        max-width: ${(props) => (props.open ? "200px" : "50px")};
         background: rgb(20, 20, 20);
         flex-grow: 0;
         flex-shrink: 0;
@@ -217,29 +218,27 @@ export namespace S {
         &:hover {
             opacity: 100%;
             transform: rotate(360deg);
+            filter: invert(0.5) sepia(1) saturate(5) hue-rotate(175deg);
         };
-        transition: all 0.2s ease-in-out;
+        transition: all 0.3s ease-in-out;
     `
 
     export const Animation = keyframes`
         to {
-            background-position: 500% center;
+            background-position: 250% center;
         }
     `;
 
-    export const WorkspaceTitle = styled.h2`
-        background-image: linear-gradient(
-            -225deg,
-            #bbbbbb 0%,
-            #bbbbbb 90%,
-            #ffffff 100%
-        );
+    export const WorkspaceTitle = styled.h2<{rightPart?: boolean, middlePart?: boolean}>`
+        background-image: ${(p) => (p.rightPart || p.middlePart) === true ?
+            "linear-gradient(-225deg,#bbbbdd 0%,#a7d6fa 90%,#ffffff 100%);" :
+            "linear-gradient(-225deg,#bbbbbb 0%,#bbbbbb 90%,#ffffff 100%);"};
         background-size: auto auto;
         background-clip: border-box;
         background-size: 200% auto;
-        margin-left: auto;
         font-family: helvetica;
-        margin-right:5px;
+        margin-right: ${(p) => p.rightPart === true ? "5px" : "0px"};
+        margin-left: ${(p) => (p.rightPart || p.middlePart) === true ? "0px" : "auto"};
         margin-top:2px;
         color: #fff;
         background-clip: text;
@@ -248,6 +247,7 @@ export namespace S {
         animation: ${Animation} 10s linear infinite;
         display: inline-block;
         text-transform: uppercase;
+        font-variant-caps: ${(p) => p.rightPart === true ? "all-small-caps" : "normal"};
     `;
 
     export const Toolbar = styled.div`

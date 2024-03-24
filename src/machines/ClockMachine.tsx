@@ -1,13 +1,13 @@
-import PlayArrowOutlined from '@mui/icons-material/PlayArrowOutlined';
-import { DiagramEngine } from '@projectstorm/react-diagrams-core';
-import * as React from 'react';
-import { ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { PauseOutlined, RestartAltOutlined } from '@mui/icons-material';
+import PlayArrowOutlined from "@mui/icons-material/PlayArrowOutlined";
+import { DiagramEngine } from "@projectstorm/react-diagrams-core";
+import * as React from "react";
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { PauseOutlined, RestartAltOutlined } from "@mui/icons-material";
 
-import { S } from './MachineStyling';
-import { MachineNodeModel } from './../layout/Node';
-import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineSource, MachineType, registeredMachine } from './Machines';
-import { standardMidiMessages } from '../Utils';
+import { S } from "./MachineStyling";
+import { MachineNodeModel } from "./../layout/Node";
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineSource, MachineType, registeredMachine } from "./Machines";
+import { standardMidiMessages } from "../Utils";
 
 type ClockStatus = "stop" | "start" | "continue";
 interface ClockConfig {
@@ -126,8 +126,8 @@ export class ClockMachine extends AbstractMachine implements MachineSource {
         this.state = { ...this.state, status: "stop" };
 
         let codeToString = ClockMachine.workerFunction.toString();
-        let mainCode = codeToString.substring(codeToString.indexOf('{') + 1, codeToString.lastIndexOf('}'));
-        let blob = new Blob([mainCode], { type: 'application/javascript' });
+        let mainCode = codeToString.substring(codeToString.indexOf("{") + 1, codeToString.lastIndexOf("}"));
+        let blob = new Blob([mainCode], { type: "application/javascript" });
         let workerScript = URL.createObjectURL(blob);
 
         const that = this;

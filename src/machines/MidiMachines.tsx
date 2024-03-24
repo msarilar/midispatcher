@@ -1,4 +1,4 @@
-import * as WebMidi from 'webmidi';
+import * as WebMidi from "webmidi";
 
 import { notesOff } from "../Utils";
 import { AllLinkCode } from "../layout/Engine";

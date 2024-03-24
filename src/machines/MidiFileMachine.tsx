@@ -1,8 +1,8 @@
-import * as MidiParser from 'midi-parser-js';
-import * as WebMidi from 'webmidi';
+import * as MidiParser from "midi-parser-js";
+import * as WebMidi from "webmidi";
 
-import { AllLinkCode } from '../layout/Engine';
-import { AbstractMachine, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from './Machines';
+import { AllLinkCode } from "../layout/Engine";
+import { AbstractMachine, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
 
 interface TrackEvent extends MachineMessage {
 
@@ -65,8 +65,8 @@ export class MidiFileMachine extends AbstractMachine implements MachineSourceTar
         if (config == undefined) {
 
             config = { tracks: [], timeDivision: 0, fileName: "None" };
-            const input = document.createElement('input');
-            input.type = 'file';
+            const input = document.createElement("input");
+            input.type = "file";
             input.accept = ".mid, .midi";
             MidiParser.parse(input, (obj: any) => {
 

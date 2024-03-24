@@ -1,12 +1,12 @@
-import { DiagramEngine } from '@projectstorm/react-diagrams-core';
-import * as React from 'react';
-import { AddBox, Clear, VolumeOff, VolumeUp } from '@mui/icons-material';
-import { Checkbox, IconButton, Slider } from '@mui/material';
+import { DiagramEngine } from "@projectstorm/react-diagrams-core";
+import * as React from "react";
+import { AddBox, Clear, VolumeOff, VolumeUp } from "@mui/icons-material";
+import { Checkbox, IconButton, Slider } from "@mui/material";
 
-import { allNotes, noteMidiToStringSeparated, noteStringToNoteMidi, standardMidiMessages } from '../Utils';
-import { MachineNodeModel } from './../layout/Node';
-import { S } from './MachineStyling';
-import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from './Machines';
+import { allNotes, noteMidiToStringSeparated, noteStringToNoteMidi, standardMidiMessages } from "../Utils";
+import { MachineNodeModel } from "./../layout/Node";
+import { S } from "./MachineStyling";
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
 
 type ArpStyle = "up" | "down" | "updown" | "updown2" | "random";
 
@@ -253,9 +253,9 @@ const ArpNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ArpMachine>> 
             <Slider
                 sx={{
 
-                    '& input[type="range"]': {
+                    "& input[type='range']": {
 
-                        WebkitAppearance: 'slider-vertical',
+                        WebkitAppearance: "slider-vertical",
                     },
                 }}
                 step={1}

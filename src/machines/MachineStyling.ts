@@ -82,7 +82,7 @@ export namespace S {
         overscroll-behavior: contain;
         overflow-y: hidden;
         overflow-x: hidden;
-        background-color: ${(props) => (props.inError ? '#ffe6e6' : 'white')};
+        background-color: ${(props) => (props.inError ? "#ffe6e6" : "white")};
     `;
 
     export const SettingsBar = styled.div`
@@ -97,7 +97,7 @@ export namespace S {
 
     export const InternalWrapper = styled.div<{ open: boolean }>`
         width: 100%;
-        height: ${(props) => (props.open ? 'auto' : '0')};
+        height: ${(props) => (props.open ? "auto" : "0")};
         overflow: hidden;
     `;
     

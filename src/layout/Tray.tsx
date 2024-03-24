@@ -1,8 +1,8 @@
-import * as React from 'react';
-import Tooltip from '@mui/material/Tooltip';
+import * as React from "react";
+import Tooltip from "@mui/material/Tooltip";
 
-import { LabelMachineFactory, MachineFactory, machineTypeToColor } from '../machines/Machines';
-import { S } from './LayoutStyling';
+import { LabelMachineFactory, MachineFactory, machineTypeToColor } from "../machines/Machines";
+import { S } from "./LayoutStyling";
 
 export const Tray: React.FunctionComponent<React.PropsWithChildren> = ({ children }) => {
 

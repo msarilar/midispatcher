@@ -1,12 +1,12 @@
-import { DiagramEngine } from '@projectstorm/react-diagrams-core';
-import * as React from 'react';
-import { AddBox, Clear } from '@mui/icons-material';
-import { IconButton, TextField } from '@mui/material';
+import { DiagramEngine } from "@projectstorm/react-diagrams-core";
+import * as React from "react";
+import { AddBox, Clear } from "@mui/icons-material";
+import { IconButton, TextField } from "@mui/material";
 
-import { S } from './MachineStyling';
-import { MachineNodeModel } from './../layout/Node';
-import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from './Machines';
-import { standardMidiMessages } from '../Utils';
+import { S } from "./MachineStyling";
+import { MachineNodeModel } from "./../layout/Node";
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
+import { standardMidiMessages } from "../Utils";
 
 interface Filter {
 
@@ -170,10 +170,10 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
 
                 style: {
 
-                    fontSize: '12px',
-                    color: 'white',
-                    height: '20px',
-                    width: '80px'
+                    fontSize: "12px",
+                    color: "white",
+                    height: "20px",
+                    width: "80px"
                 },
                 readOnly: isReadOnly,
             }} />
@@ -185,10 +185,10 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
 
                 style: {
 
-                    fontSize: '12px',
-                    color: 'white',
-                    height: '20px',
-                    width: '80px'
+                    fontSize: "12px",
+                    color: "white",
+                    height: "20px",
+                    width: "80px"
                 },
                 readOnly: isReadOnly
             }} />

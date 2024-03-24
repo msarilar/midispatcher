@@ -1,5 +1,5 @@
-import * as WebMidi from 'webmidi';
-import { MachineMessage } from './machines/Machines';
+import * as WebMidi from "webmidi";
+import { MachineMessage } from "./machines/Machines";
 
 export const allNotes = [
     "C",

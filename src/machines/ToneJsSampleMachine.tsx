@@ -1,13 +1,13 @@
-import * as React from 'react';
+import * as React from "react";
 import * as Tone from "tone";
 import { DiagramEngine } from "@projectstorm/react-diagrams";
 import { SamplerOptions } from "tone";
 
-import { S } from './MachineStyling';
+import { S } from "./MachineStyling";
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, MessageResult, registeredMachine, registeredMachineWithParameter } from "./Machines";
 import { normalizeVelocity, noteMidiToString } from "../Utils";
 import { MachineNodeModel } from "../layout/Node";
-import { Visualizers } from './Visualizers';
+import { Visualizers } from "./Visualizers";
 
 function getSamples(library: Instrument): Partial<SamplerOptions> | undefined {
 

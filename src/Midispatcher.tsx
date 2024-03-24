@@ -1,26 +1,26 @@
-﻿import React from 'react';
-import Modal from 'react-modal';
+﻿import React from "react";
+import Modal from "react-modal";
 
-import { CanvasWidget, ZoomCanvasAction, InputType } from '@projectstorm/react-canvas-core';
-import { Box, TextField } from '@mui/material';
-import * as WebMidi from 'webmidi';
+import { CanvasWidget, ZoomCanvasAction, InputType } from "@projectstorm/react-canvas-core";
+import { Box, TextField } from "@mui/material";
+import * as WebMidi from "webmidi";
 import Disqus, { CommentCount } from "disqus-react"
-import LZString from 'lz-string';
+import LZString from "lz-string";
 
-import { WorkspaceButton, Workspace } from './layout/Workspace';
-import { Canvas } from './layout/Canvas';
-import { Tray, TrayItem } from './layout/Tray';
-import { LabelMachineFactory, MachineFactory, MachineType, registeredFactories } from './machines/Machines';
-import { MidiLinkFactory } from './layout/Link';
-import { engine, CommandManager, MidispatcherDiagramModel } from './layout/Engine';
-import { MachineNodeFactory, MachineNodeModel } from './layout/Node';
-import { MidiMachineSource, MidiMachineTarget } from './machines/MidiMachines';
-import { fromJson, toJson } from './Utils';
-import { MachinePortFactory } from './layout/Port';
-import { S } from './layout/LayoutStyling';
+import { WorkspaceButton, Workspace } from "./layout/Workspace";
+import { Canvas } from "./layout/Canvas";
+import { Tray, TrayItem } from "./layout/Tray";
+import { LabelMachineFactory, MachineFactory, MachineType, registeredFactories } from "./machines/Machines";
+import { MidiLinkFactory } from "./layout/Link";
+import { engine, CommandManager, MidispatcherDiagramModel } from "./layout/Engine";
+import { MachineNodeFactory, MachineNodeModel } from "./layout/Node";
+import { MidiMachineSource, MidiMachineTarget } from "./machines/MidiMachines";
+import { fromJson, toJson } from "./Utils";
+import { MachinePortFactory } from "./layout/Port";
+import { S } from "./layout/LayoutStyling";
 
 const commandManager = new CommandManager(engine);
-window.addEventListener('keydown', (event: any) => {
+window.addEventListener("keydown", (event: any) => {
 
     if (event.keyCode === 90 && event.ctrlKey) {
 
@@ -290,7 +290,7 @@ const Midispatcher: React.FunctionComponent = () => {
             <Box component="form"
                 sx={{
 
-                    '& .MuiTextField-root': { m: 1, width: '100ch' },
+                    "& .MuiTextField-root": { m: 1, width: "100ch" },
                 }}
                 noValidate
                 autoComplete="off">

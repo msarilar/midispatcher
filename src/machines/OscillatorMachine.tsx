@@ -1,11 +1,11 @@
-import { DiagramEngine } from '@projectstorm/react-diagrams-core';
-import * as React from 'react';
+import { DiagramEngine } from "@projectstorm/react-diagrams-core";
+import * as React from "react";
 import * as Tone from "tone";
 
-import { S } from './MachineStyling';
-import { MachineNodeModel } from './../layout/Node';
-import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, MessageResult, registeredMachine } from './Machines';
-import { Visualizers } from './Visualizers';
+import { S } from "./MachineStyling";
+import { MachineNodeModel } from "./../layout/Node";
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
+import { Visualizers } from "./Visualizers";
 
 interface OscillatorConfig {
 

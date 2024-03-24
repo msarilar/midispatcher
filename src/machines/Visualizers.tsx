@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as Tone from "tone";
 
-import { S } from './MachineStyling';
+import { S } from "./MachineStyling";
 
 interface VisualizersState {
 
@@ -161,7 +161,7 @@ function findMaxUint8Array(arr: Uint8Array): number {
 
     if (arr.length === 0) {
 
-        throw new Error('Array is empty');
+        throw new Error("Array is empty");
     }
 
     let max = arr[0];

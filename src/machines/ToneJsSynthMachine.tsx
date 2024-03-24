@@ -1,8 +1,8 @@
 import { DiagramEngine } from "@projectstorm/react-diagrams";
-import * as React from 'react';
+import * as React from "react";
 import * as Tone from "tone";
 
-import { S } from './MachineStyling';
+import { S } from "./MachineStyling";
 import { normalizeVelocity, noteMidiToString } from "../Utils";
 import { MachineNodeModel } from "../layout/Node";
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
@@ -231,7 +231,7 @@ const ToneJsSynthNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ToneJ
 
     useAutosizeTextArea(textAreaRef.current, state.editVoice);
 
-    const arrow = open ? '▲' : '▼';
+    const arrow = open ? "▲" : "▼";
 
     return (
         <S.SettingsBar>

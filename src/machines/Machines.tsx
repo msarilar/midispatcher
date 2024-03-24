@@ -1,8 +1,8 @@
-import { DiagramEngine } from '@projectstorm/react-diagrams';
-import { AbstractReactFactory, GenerateWidgetEvent, GenerateModelEvent } from '@projectstorm/react-canvas-core';
+import { DiagramEngine } from "@projectstorm/react-diagrams";
+import { AbstractReactFactory, GenerateWidgetEvent, GenerateModelEvent } from "@projectstorm/react-canvas-core";
 
-import { MachineNodeModel, MachineNodeWidget } from './../layout/Node';
-import { engine } from '../layout/Engine';
+import { MachineNodeModel, MachineNodeWidget } from "./../layout/Node";
+import { engine } from "../layout/Engine";
 
 export interface MachineMessage {
 
@@ -310,12 +310,12 @@ export class LabelMachineFactory implements MachineFactory {
 
     createWidget(_engine: DiagramEngine, _node: MachineNodeModel): JSX.Element {
 
-        throw new Error('Method not implemented.');
+        throw new Error("Method not implemented.");
     }
 
     createMachine(_?: any): AbstractMachine {
 
-        throw new Error('Method not implemented.');
+        throw new Error("Method not implemented.");
     }
 
     getName(): string {

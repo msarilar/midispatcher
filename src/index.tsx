@@ -1,7 +1,7 @@
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import './index.css';
-import reportWebVitals from './reportWebVitals';
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./index.css";
+import reportWebVitals from "./reportWebVitals";
 
 require("./machines/ArpMachine");
 require("./machines/ClockMachine");
@@ -16,7 +16,7 @@ require("./machines/ToneJsSynthMachine");
 require("./machines/RemoteMachines");
 
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
+  document.getElementById("root") as HTMLElement
 );
 
 root.render(

@@ -2,7 +2,7 @@
 
 [![pages-build-deployment](https://github.com/msarilar/midispatcher/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/msarilar/midispatcher/actions/workflows/pages/pages-build-deployment) [![CodeQL](https://github.com/msarilar/midispatcher/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/msarilar/midispatcher/actions/workflows/github-code-scanning/codeql)
 
-Midispatcher is a tool that allows you to design routes to send and receive MIDI signals between machines.
+MIDIspatcher is a tool that allows you to design routes to send and receive MIDI signals between machines.
 
 It connects to the MIDI devices plugged in your computer and provides a number of virtual components (virtual synths, keyboards, dispatching machines) to interact with them.
 

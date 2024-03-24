@@ -1,1 +1,1 @@
-declare module 'midi-parser-js';
+declare module "midi-parser-js";

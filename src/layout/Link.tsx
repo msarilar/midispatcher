@@ -1,7 +1,7 @@
-import { DefaultLinkFactory, DefaultLinkModel, DefaultLinkProps, DefaultLinkWidget } from '@projectstorm/react-diagrams';
+import { DefaultLinkFactory, DefaultLinkModel, DefaultLinkProps, DefaultLinkWidget } from "@projectstorm/react-diagrams";
 
-import React from 'react';
-import { S } from './LayoutStyling';
+import React from "react";
+import { S } from "./LayoutStyling";
 
 const MidiLinkWidget: React.FunctionComponent<DefaultLinkProps> = (props) => {
 

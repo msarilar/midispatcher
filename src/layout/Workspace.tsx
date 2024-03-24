@@ -1,9 +1,9 @@
-import * as React from 'react';
+import * as React from "react";
 
-import logo from './../logo.svg';
-import githubWhite from './../github-mark-white.svg';
-import { S } from './LayoutStyling';
-import styled from '@emotion/styled';
+import logo from "./../logo.svg";
+import githubWhite from "./../github-mark-white.svg";
+import { S } from "./LayoutStyling";
+import styled from "@emotion/styled";
 
 interface WorkspaceProps {
 
@@ -17,7 +17,7 @@ export const Workspace: React.FunctionComponent<React.PropsWithChildren<Workspac
             <S.Toolbar>
                 <img src={logo} alt="Midispatcher Logo" width={30} />
                 {buttons}
-                <S.WorkspaceTitle>{"MIDISPATCHER"}</S.WorkspaceTitle>
+                <S.WorkspaceTitle>{"MI"}</S.WorkspaceTitle><S.WorkspaceTitle middlePart={true}>{"DI"}</S.WorkspaceTitle><S.WorkspaceTitle rightPart={true}>{"spatcher"}</S.WorkspaceTitle>
                 <S.GitHubLink target="_blank" href="https://github.com/msarilar/midispatcher">
                     <S.GitHub src={githubWhite}/>
                 </S.GitHubLink>

@@ -1,10 +1,10 @@
-import { DiagramEngine } from '@projectstorm/react-diagrams-core';
-import * as React from 'react';
-import * as WebMidi from 'webmidi';
+import { DiagramEngine } from "@projectstorm/react-diagrams-core";
+import * as React from "react";
+import * as WebMidi from "webmidi";
 
-import { MachineNodeModel } from './../layout/Node';
-import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineSource, MachineType, registeredMachine } from './Machines';
-import { S } from './MachineStyling';
+import { MachineNodeModel } from "./../layout/Node";
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineSource, MachineType, registeredMachine } from "./Machines";
+import { S } from "./MachineStyling";
 
 @registeredMachine
 export class KeyboardMachine extends AbstractMachine implements MachineSource {

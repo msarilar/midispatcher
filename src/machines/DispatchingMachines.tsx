@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import { DiagramEngine } from "@projectstorm/react-diagrams";
 
-import { S } from './MachineStyling';
+import { S } from "./MachineStyling";
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
 import { AllLinkCode } from "../layout/Engine";
 import { noteStringToNoteMidi, standardMidiMessages } from "../Utils";
@@ -34,7 +34,7 @@ export class NoteSplitMachine extends AbstractMachine implements MachineSourceTa
             }
         }
         catch {
-            // couldn't parse the edit note
+            // couldn"t parse the edit note
         }
 
         this.config = newConfig;

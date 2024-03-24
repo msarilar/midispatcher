@@ -1,9 +1,9 @@
 import createEngine, { DefaultDiagramState, DiagramEngine, DiagramModel, LinkModel, LinkModelGenerics, NodeModel } from "@projectstorm/react-diagrams";
-import { BaseModel, BaseEntityEvent, BaseEvent, BaseEntity, BaseEntityGenerics } from '@projectstorm/react-canvas-core';
+import { BaseModel, BaseEntityEvent, BaseEvent, BaseEntity, BaseEntityGenerics } from "@projectstorm/react-canvas-core";
 
-import { MachineSource, MachineTarget } from '../machines/Machines';
-import { MachineNodeModel } from './Node';
-import { MidiLinkModel } from './Link';
+import { MachineSource, MachineTarget } from "../machines/Machines";
+import { MachineNodeModel } from "./Node";
+import { MidiLinkModel } from "./Link";
 import { MachineRoutings } from "../machines/MachineRoutings";
 import { MachinePortModel } from "./Port";
 
@@ -80,7 +80,7 @@ export class MidispatcherDiagramModel extends DiagramModel {
 
     readonly commandManager: CommandManager;
 
-    deserializeModel(data: ReturnType<this['serialize']>, engine: DiagramEngine) {
+    deserializeModel(data: ReturnType<this["serialize"]>, engine: DiagramEngine) {
 
         super.deserializeModel(data, engine);
 

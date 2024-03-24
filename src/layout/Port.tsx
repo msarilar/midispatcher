@@ -1,9 +1,9 @@
-import { DefaultPortModel, DefaultPortModelOptions, DiagramEngine, PortWidget } from '@projectstorm/react-diagrams';
-import { AbstractModelFactory, DeserializeEvent } from '@projectstorm/react-canvas-core';
-import React from 'react';
+import { DefaultPortModel, DefaultPortModelOptions, DiagramEngine, PortWidget } from "@projectstorm/react-diagrams";
+import { AbstractModelFactory, DeserializeEvent } from "@projectstorm/react-canvas-core";
+import React from "react";
 
-import { MidiLinkModel } from './Link';
-import { S } from './LayoutStyling';
+import { MidiLinkModel } from "./Link";
+import { S } from "./LayoutStyling";
 
 export class MachinePortModel extends DefaultPortModel {
 
