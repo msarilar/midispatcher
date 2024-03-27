@@ -100,6 +100,33 @@ export namespace S {
         height: ${(props) => (props.open ? "auto" : "0")};
         overflow: hidden;
     `;
+
+    export const ConsoleLog = styled.div`
+        max-height: 150px;
+        overflow-y: auto;
+        background: black;
+        
+
+        &::-webkit-scrollbar {
+
+            width: 12px;
+        }
+
+        &::-webkit-scrollbar-track {
+
+            -webkit-box-shadow: inset 0 0 6px #009633;
+            border-radius: 0px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+
+            border-radius: 0px;
+            -webkit-box-shadow: inset 0 0 6px white;
+        }
+    `;
+
+    export const ConsoleLogEntry = styled.span`
+    `;
     
     export const KeyboardBody = styled.div`
         ul {

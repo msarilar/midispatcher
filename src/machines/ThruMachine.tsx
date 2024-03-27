@@ -1,12 +1,14 @@
 import { DiagramEngine } from "@projectstorm/react-diagrams-core";
 import * as React from "react";
 import { AddBox, Clear } from "@mui/icons-material";
-import { IconButton, TextField } from "@mui/material";
+import { IconButton, Slider, TextField } from "@mui/material";
 
 import { S } from "./MachineStyling";
 import { MachineNodeModel } from "./../layout/Node";
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
 import { standardMidiMessages } from "../Utils";
+
+const ON_MESSAGE: string = "onMessage";
 
 interface Filter {
 
@@ -23,6 +25,13 @@ interface ThruConfig {
     filters: Filter[];
     currentCategory: number | undefined;
     currentSubcategory: number | undefined;
+    logSize: number | undefined;
+}
+
+interface MessageEntry {
+
+    accepted: boolean;
+    message: MachineMessage;
 }
 
 @registeredMachine
@@ -37,7 +46,7 @@ export class ThruMachine extends AbstractMachine implements MachineSourceTarget 
 
         super();
 
-        this.config = config ?? { detune: 0, filterType: "none", filters: [], currentCategory: undefined, currentSubcategory: undefined };
+        this.config = config ?? { detune: 0, filterType: "none", filters: [], currentCategory: undefined, currentSubcategory: undefined, logSize: 10 };
         this.getNode().addMachineOutPort("Out", 0);
         this.getNode().addMachineInPort("In", 0);
     }
@@ -107,13 +116,15 @@ export class ThruMachine extends AbstractMachine implements MachineSourceTarget 
         return this.config.filterType === "allows";
     }
 
-    receive(messageEvent: MachineMessage, channel: number) {
+    receive(messageEvent: MachineMessage, channel: number): MessageResult {
 
         if (this.isFiltered(messageEvent)) {
 
+            this.dispatchEvent(new CustomEvent<MessageEntry>(ON_MESSAGE, { detail: { accepted: false, message: messageEvent }}));
             return MessageResult.Ignored;
         }
         
+        this.dispatchEvent(new CustomEvent<MessageEntry>(ON_MESSAGE, { detail: { accepted: true, message: messageEvent }}));
         if (this.config.detune != 0 && (messageEvent.message.type === "noteon" || messageEvent.message.type === "noteoff")) {
 
             messageEvent = { ...messageEvent, message: { ...messageEvent.message, rawData: new Uint8Array(messageEvent.message.rawData) } };
@@ -128,12 +139,32 @@ export class ThruMachine extends AbstractMachine implements MachineSourceTarget 
 const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>> = props => {
 
     const [state, setState] = React.useState(props.machine.getState());
+    const [messages, setMessages] = React.useState<MessageEntry[]>([]);
 
-    function update(newState: ThruConfig) {
+    const update = (newState: ThruConfig) => {
 
         props.machine.setState(newState);
         setState(newState);
     }
+
+    React.useEffect(() => {
+
+        const onMessage = (e: Event) => {
+
+            const detail = (e as CustomEvent<MessageEntry>).detail;
+            messages.push(detail);
+            while (messages.length > (state.logSize ?? 10)) {
+    
+                messages.shift();
+            }
+    
+            setMessages([...messages]);
+        }
+
+        props.machine.addEventListener(ON_MESSAGE, onMessage);
+        return (() => { props.machine.removeEventListener(ON_MESSAGE, onMessage) } );
+    }, [props.machine, state.logSize])
+
     function filterRender(category: number | undefined,
         subcategory: number | undefined,
         action: "create" | number) {
@@ -141,22 +172,24 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
         const actionButton = action === "create" ?
             <IconButton aria-label="add filter"
                 color="primary"
+                size="small"
                 disabled={state.currentCategory == undefined && state.currentSubcategory == undefined}
                 onClick={() => {
 
                     const newFilter: Filter = { Category: state.currentCategory, Subcategory: state.currentSubcategory };
                     update({ ...state, filters: state.filters.concat(newFilter), currentCategory: undefined, currentSubcategory: undefined });
                 }}>
-                <AddBox />
+                <AddBox fontSize="small"/>
             </IconButton>
             : <IconButton aria-label="delete filter"
                 color="primary"
+                size="small"
                 onClick={() => {
 
                     state.filters.splice(action, 1);
                     update({ ...state, filters: state.filters });
                 }}>
-                <Clear />
+                <Clear fontSize="small"/>
             </IconButton>;
 
         const isReadOnly = action === "create" ? false : true;
@@ -165,22 +198,9 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
             <TextField value={category == undefined ? "" : category}
                 type="number"
                 size="small"
+                autoComplete="false"
+                autoCorrect="false"
                 onChange={e => action === "create" ? update({ ...state, currentCategory: parseInt(e.target.value) < 1 ? undefined : parseInt(e.target.value) }) : undefined}
-                InputProps={{
-
-                style: {
-
-                    fontSize: "12px",
-                    color: "white",
-                    height: "20px",
-                    width: "80px"
-                },
-                readOnly: isReadOnly,
-            }} />
-            <TextField value={subcategory == undefined ? "" : subcategory}
-                type="number"
-                size="small"
-                onChange={e => action === "create" ? update({ ...state, currentSubcategory: parseInt(e.target.value) < 1 ? undefined : parseInt(e.target.value) }) : undefined}
                 InputProps={{
 
                 style: {
@@ -192,12 +212,39 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
                 },
                 readOnly: isReadOnly
             }} />
+            <TextField value={subcategory == undefined ? "" : subcategory}
+                type="number"
+                size="small"
+                onChange={e => action === "create" ? update({ ...state, currentSubcategory: parseInt(e.target.value) < 1 ? undefined : parseInt(e.target.value) }) : undefined}
+                InputProps={{
+
+                    style: {
+
+                        fontSize: "12px",
+                        color: "white",
+                        height: "20px",
+                        width: "80px"
+                    },
+                    readOnly: isReadOnly
+                }} />
             {actionButton}
         </S.SettingsBarVertical>
     }
 
     const filtersRender = state.filters.map((filter, i) =>
         filterRender(filter.Category, filter.Subcategory, i));
+
+    const printMessageArray = (arr: Uint8Array) => {
+
+        return `${arr[0].toString().padStart(3, "0")}-${arr[1]?.toString().padStart(3, "0") ?? "N/A"}-${arr[2]?.toString().padStart(3, "0") ?? "N/A"}`;
+    }
+
+    const messageLogs = messages.map((item, index) => {
+        const rowContent = `${item.accepted ? "✔️" : "❌"}${(item.message.type ?? item.message.message.type).padEnd(12).substring(0, 12)} ${(printMessageArray(item.message.message.rawData)).padEnd(12).substring(0, 12)} #${item.message.message.channel}`;
+        return <pre key={index}>
+                <S.ConsoleLogEntry>{rowContent}</S.ConsoleLogEntry>
+            </pre>;
+    });
 
     return (
         <S.SettingsBar>
@@ -231,6 +278,24 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
                     <option value="denies">Denies</option>
                 </select>
             </S.Dropdown>
+            {(state.logSize ?? 10) + " max messages"}
+            <Slider aria-label="MaxMessages"
+                min={1}
+                max={100}
+                size="small"
+                onChange={(_, v) => {
+
+                    if (typeof v === "number") {
+
+                        update({ ...state, logSize: v })
+                    }
+                }}
+                value={state.logSize ?? 10} />
+            <S.ConsoleLog>
+            <>
+                {messageLogs}
+            </>
+            </S.ConsoleLog>
         </S.SettingsBar>
     );
 }

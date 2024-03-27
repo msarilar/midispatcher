@@ -248,7 +248,7 @@ const ArpNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ArpMachine>> 
         return allNotes.indexOf(note);
     }
 
-    const notesRender = config.predefinedNotes.map((note, i) =>
+    const notesRender = () => config.predefinedNotes.map((note, i) =>
         <S.Note key={i}>
             <Slider
                 sx={{
@@ -304,7 +304,7 @@ const ArpNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ArpMachine>> 
 
     const predefinedConfig = config.arpMode === "predefined" ?
             <S.SettingsBarVertical>
-                {notesRender}
+                {notesRender()}
             <IconButton aria-label="add note"
                 color="primary"
                 onClick={() => update({ ...config, predefinedNotes: config.predefinedNotes.concat({ muted: false, noteValue: "C", octave: 3 }) })}>
