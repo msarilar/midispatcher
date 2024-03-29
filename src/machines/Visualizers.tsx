@@ -23,8 +23,6 @@ export const MidiSignalVizualizer: React.FunctionComponent<{ width: number, heig
         const centerX = props.width / 2;
         const centerY = props.height / 2;
 
-        midiVizualizer.clearRect(0, 0, props.width, props.height);
-
         let angle = 0;
         let offsetX = centerX;
         let offsetY = centerY
@@ -35,7 +33,7 @@ export const MidiSignalVizualizer: React.FunctionComponent<{ width: number, heig
 
         const numToColor = (n: number | undefined) => {
 
-            shift = (shift + 1) % 255;
+            shift = (shift + 0.1) % 255;
             if (n == undefined) {
 
                 return shift;
@@ -49,12 +47,17 @@ export const MidiSignalVizualizer: React.FunctionComponent<{ width: number, heig
             
         const onMidiMessage = (e: Event) => {
 
+            if (!state.midiVizualizerOn) {
+
+                return;
+            }
+
             const detail = (e as CustomEvent<MachineMessage>).detail;
 
             if (detail.type !== "noteoff") {
 
                 midiVizualizer.beginPath();
-                midiVizualizer.lineWidth = (angle) + 1;
+                midiVizualizer.lineWidth = midiVizualizer.lineWidth + Math.random() * 10 - 5;
                 const radians = angle * (Math.PI / 180.0);
 
                 const sum = (detail.message.rawData[0] ?? 0) + (detail.message.rawData[1] ?? 0) + (detail.message.rawData[2] ?? 0);
@@ -104,7 +107,7 @@ export const MidiSignalVizualizer: React.FunctionComponent<{ width: number, heig
 
             props.midiMessageEmitter.removeEventListener(ON_MIDI_MESSAGE, onMidiMessage);
         }
-    }, [props.midiMessageEmitter]);
+    }, [props.midiMessageEmitter, state.midiVizualizerOn]);
 
     return (
         <S.SettingsBarHorizontal>
