@@ -16,6 +16,8 @@ export const allNotes = [
     "B"
 ];
 
+export const ON_MIDI_MESSAGE: string = "onMidiMessage";
+
 const noteMidiToStringCache: { [index: number]: [string, number] } = {}
 export function noteMidiToString(n: number): string {
 

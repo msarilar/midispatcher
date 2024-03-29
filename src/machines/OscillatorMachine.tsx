@@ -5,7 +5,7 @@ import * as Tone from "tone";
 import { S } from "./MachineStyling";
 import { MachineNodeModel } from "./../layout/Node";
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
-import { Visualizers } from "./Visualizers";
+import { AudioNodeVizualizer } from "./Visualizers";
 
 interface OscillatorConfig {
 
@@ -200,7 +200,7 @@ const OscillatorNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Oscill
                     <option value="1.0" label="100%"></option>
                 </datalist>
             </S.Slider>
-            <Visualizers width={200} height={50} analyser={props.machine.analyzer} />
+            <AudioNodeVizualizer width={200} height={50} analyser={props.machine.analyzer} />
             <S.Dropdown>
                 <span>Waveform: </span>
                 <select name="waveform"

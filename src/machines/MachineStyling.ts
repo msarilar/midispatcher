@@ -105,7 +105,7 @@ export namespace S {
         max-height: 150px;
         overflow-y: auto;
         background: black;
-        
+        scroll-behavior: smooth;
 
         &::-webkit-scrollbar {
 

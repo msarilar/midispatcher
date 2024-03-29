@@ -2,8 +2,118 @@ import * as React from "react";
 import * as Tone from "tone";
 
 import { S } from "./MachineStyling";
+import { ON_MIDI_MESSAGE } from "../Utils";
+import { MachineMessage } from "./Machines";
 
-interface VisualizersState {
+export const MidiSignalVizualizer: React.FunctionComponent<{ width: number, height: number, midiMessageEmitter: EventTarget}> = props => {
+
+    const midiVizualizerCanvasRef = React.useRef<HTMLCanvasElement>(null);
+
+    const [state, setState] = React.useState({ midiVizualizerOn: true });
+
+    React.useEffect(() => {
+
+        const midiVizualizer = midiVizualizerCanvasRef.current?.getContext("2d") ?? undefined;
+
+        if (midiVizualizer == undefined) {
+
+            return;
+        }
+
+        const centerX = props.width / 2;
+        const centerY = props.height / 2;
+
+        midiVizualizer.clearRect(0, 0, props.width, props.height);
+
+        let angle = 0;
+        let offsetX = centerX;
+        let offsetY = centerY
+        let lastX: number | undefined = undefined;
+        let lastY: number | undefined = undefined;
+
+        let shift = 0;
+
+        const numToColor = (n: number | undefined) => {
+
+            shift = (shift + 1) % 255;
+            if (n == undefined) {
+
+                return shift;
+            }
+
+            else {
+
+                return (n + shift) % 255;
+            }
+        };
+            
+        const onMidiMessage = (e: Event) => {
+
+            const detail = (e as CustomEvent<MachineMessage>).detail;
+
+            if (detail.type !== "noteoff") {
+
+                midiVizualizer.beginPath();
+                midiVizualizer.lineWidth = (angle) + 1;
+                const radians = angle * (Math.PI / 180.0);
+
+                const sum = (detail.message.rawData[0] ?? 0) + (detail.message.rawData[1] ?? 0) + (detail.message.rawData[2] ?? 0);
+                const factor = sum / (255 * 3);
+
+                const x = offsetX + Math.cos(radians) * props.width * factor;
+                const y = offsetY + Math.sin(radians) * props.height * factor;
+
+                midiVizualizer.strokeStyle = "rgb(" + numToColor(detail.message.rawData[angle + 2 % 3]) + " " + numToColor(detail.message.rawData[angle + 1 % 3]) + " " + numToColor(detail.message.rawData[angle % 3]) + ")";
+                midiVizualizer.lineTo(lastX ?? x, lastY ?? y);
+                midiVizualizer.strokeStyle = "rgb(" + numToColor(detail.message.rawData[angle % 3]) + " " + numToColor(detail.message.rawData[(angle + 1) % 3]) + " " + numToColor(detail.message.rawData[(angle + 2) % 3]) + ")";
+                midiVizualizer.lineTo(x, y);
+                midiVizualizer.lineTo(x + Math.random() * 10 - 5, y + Math.random() * 10 - 5);
+
+                lastX = centerX + (x * (angle % 2 === 1 ? 1 : -1)) + Math.random() * angle;
+                lastY = centerY + (y * (angle % 2 === 0 ? 1 : -1)) + Math.random() * angle;
+
+                offsetX += Math.random() * 10 - 5;
+                offsetY += Math.random() * 10 - 5;
+
+                if(offsetX > props.width) {
+                    
+                    offsetX = 0;
+                }
+                else if(offsetX < 0) {
+
+                    offsetX = props.width;
+                }
+
+                if(offsetY > props.height) {
+                    
+                    offsetY = 0;
+                }
+                else if(offsetY < 0) {
+
+                    offsetY = props.height;
+                }
+
+                midiVizualizer.stroke();
+            }
+
+            angle = (angle + 1) % 360;
+        }
+
+        props.midiMessageEmitter.addEventListener(ON_MIDI_MESSAGE, onMidiMessage);
+        return () => {
+
+            props.midiMessageEmitter.removeEventListener(ON_MIDI_MESSAGE, onMidiMessage);
+        }
+    }, [props.midiMessageEmitter]);
+
+    return (
+        <S.SettingsBarHorizontal>
+            <canvas ref={midiVizualizerCanvasRef} width={props.width} height={props.height} onClick={_ => setState({ ...state, midiVizualizerOn: !state.midiVizualizerOn })} />
+        </S.SettingsBarHorizontal>
+    );
+}
+
+interface AudioNodeVizualizerState {
 
     oscilloscopeOn: boolean;
     spectrogramOn: boolean;
@@ -11,12 +121,12 @@ interface VisualizersState {
     spectrogram: CanvasRenderingContext2D | undefined;
 }
 
-export const Visualizers: React.FunctionComponent<{ width: number, height: number, analyser: AnalyserNode }> = props => {
+export const AudioNodeVizualizer: React.FunctionComponent<{ width: number, height: number, analyser: AnalyserNode }> = props => {
 
     const oscilloscopeCanvasRef = React.useRef<HTMLCanvasElement>(null);
     const spectrogramCanvasRef = React.useRef<HTMLCanvasElement>(null);
 
-    const [state, setState] = React.useState<VisualizersState>({ oscilloscopeOn: true, spectrogramOn: true, oscilloscope: undefined, spectrogram: undefined });
+    const [state, setState] = React.useState<AudioNodeVizualizerState>({ oscilloscopeOn: true, spectrogramOn: true, oscilloscope: undefined, spectrogram: undefined });
 
     const foreground = "rgb(0 0 0)";
     let running = true;
@@ -39,7 +149,7 @@ export const Visualizers: React.FunctionComponent<{ width: number, height: numbe
     const waveArrayDuration = 1000 * props.analyser.fftSize / Tone.getContext().sampleRate;
     const waveArrayStepDuration = waveArrayDuration / props.analyser.fftSize;
 
-    const drawVisuals = function (state: VisualizersState) {
+    const drawVisuals = function (state: AudioNodeVizualizerState) {
 
         if (!running) {
 

@@ -7,7 +7,7 @@ import { S } from "./MachineStyling";
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, MessageResult, registeredMachine, registeredMachineWithParameter } from "./Machines";
 import { normalizeVelocity, noteMidiToString } from "../Utils";
 import { MachineNodeModel } from "../layout/Node";
-import { Visualizers } from "./Visualizers";
+import { AudioNodeVizualizer } from "./Visualizers";
 
 function getSamples(library: Instrument): Partial<SamplerOptions> | undefined {
 
@@ -316,7 +316,7 @@ const ToneJsSampleNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Tone
                     list="volumes"
                     name="volume" />
             </S.Slider>
-            <Visualizers width={200} height={50} analyser={props.machine.analyzer as any as AnalyserNode} />
+            <AudioNodeVizualizer width={200} height={50} analyser={props.machine.analyzer as any as AnalyserNode} />
             <S.Dropdown>
                 <span>Preset: </span>
                 <select name="sampleSelection"

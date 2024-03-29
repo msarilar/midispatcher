@@ -6,7 +6,7 @@ import { S } from "./MachineStyling";
 import { normalizeVelocity, noteMidiToString } from "../Utils";
 import { MachineNodeModel } from "../layout/Node";
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
-import { Visualizers } from "./Visualizers";
+import { AudioNodeVizualizer } from "./Visualizers";
 
 interface ToneJsSynthConfig {
 
@@ -247,7 +247,7 @@ const ToneJsSynthNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ToneJ
                     list="volumes"
                     name="volume" />
             </S.Slider>
-            <Visualizers width={200} height={50} analyser={props.machine.analyzer as any as AnalyserNode} />
+            <AudioNodeVizualizer width={200} height={50} analyser={props.machine.analyzer as any as AnalyserNode} />
             <S.ExpandButton open={open} onClick={toggleVoiceInput}>
                 {arrow} Edit {state.voiceConfig.preset} {arrow}
             </S.ExpandButton>

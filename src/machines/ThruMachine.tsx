@@ -6,9 +6,8 @@ import { IconButton, Slider, TextField } from "@mui/material";
 import { S } from "./MachineStyling";
 import { MachineNodeModel } from "./../layout/Node";
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
-import { standardMidiMessages } from "../Utils";
-
-const ON_MESSAGE: string = "onMessage";
+import { ON_MIDI_MESSAGE, standardMidiMessages } from "../Utils";
+import { MidiSignalVizualizer } from "./Visualizers";
 
 interface Filter {
 
@@ -28,10 +27,9 @@ interface ThruConfig {
     logSize: number | undefined;
 }
 
-interface MessageEntry {
+interface MessageEntry extends MachineMessage {
 
     accepted: boolean;
-    message: MachineMessage;
 }
 
 @registeredMachine
@@ -120,11 +118,11 @@ export class ThruMachine extends AbstractMachine implements MachineSourceTarget 
 
         if (this.isFiltered(messageEvent)) {
 
-            this.dispatchEvent(new CustomEvent<MessageEntry>(ON_MESSAGE, { detail: { accepted: false, message: messageEvent }}));
+            this.dispatchEvent(new CustomEvent<MessageEntry>(ON_MIDI_MESSAGE, { detail: { ...messageEvent, accepted: false }}));
             return MessageResult.Ignored;
         }
         
-        this.dispatchEvent(new CustomEvent<MessageEntry>(ON_MESSAGE, { detail: { accepted: true, message: messageEvent }}));
+        this.dispatchEvent(new CustomEvent<MessageEntry>(ON_MIDI_MESSAGE, { detail: { ...messageEvent, accepted: true }}));
         if (this.config.detune != 0 && (messageEvent.message.type === "noteon" || messageEvent.message.type === "noteoff")) {
 
             messageEvent = { ...messageEvent, message: { ...messageEvent.message, rawData: new Uint8Array(messageEvent.message.rawData) } };
@@ -161,8 +159,8 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
             setMessages([...messages]);
         }
 
-        props.machine.addEventListener(ON_MESSAGE, onMessage);
-        return (() => { props.machine.removeEventListener(ON_MESSAGE, onMessage) } );
+        props.machine.addEventListener(ON_MIDI_MESSAGE, onMessage);
+        return (() => { props.machine.removeEventListener(ON_MIDI_MESSAGE, onMessage) } );
     }, [props.machine, state.logSize])
 
     function filterRender(category: number | undefined,
@@ -240,11 +238,27 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
     }
 
     const messageLogs = messages.map((item, index) => {
-        const rowContent = `${item.accepted ? "✔️" : "❌"}${(item.message.type ?? item.message.message.type).padEnd(12).substring(0, 12)} ${(printMessageArray(item.message.message.rawData)).padEnd(12).substring(0, 12)} #${item.message.message.channel}`;
+        const rowContent = `${item.accepted ? "✔️" : "❌"}${(item.message.type ?? item.message.type).padEnd(12).substring(0, 12)} ${(printMessageArray(item.message.rawData)).padEnd(12).substring(0, 12)} #${item.message.channel}`;
         return <pre key={index}>
                 <S.ConsoleLogEntry>{rowContent}</S.ConsoleLogEntry>
             </pre>;
     });
+
+    const [ vizualizationOpened, setVizualizationOpened]  = React.useState(false);
+    const [ logOpened, setLogOpened ] = React.useState(false);
+
+    const toggleVizualization = () => {
+
+        setVizualizationOpened(!vizualizationOpened);
+    };
+
+    const toggleLog = () => {
+
+        setLogOpened(!logOpened);
+    };
+
+    const vizualizationArrow = vizualizationOpened ? "▲" : "▼";
+    const logArrow = logOpened ? "▲" : "▼";
 
     return (
         <S.SettingsBar>
@@ -278,24 +292,36 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
                     <option value="denies">Denies</option>
                 </select>
             </S.Dropdown>
-            {(state.logSize ?? 10) + " max messages"}
-            <Slider aria-label="MaxMessages"
-                min={1}
-                max={100}
-                size="small"
-                onChange={(_, v) => {
+            <S.ExpandButton open={logOpened} onClick={toggleLog}>
+                {logArrow} Message logs {logArrow}
+            </S.ExpandButton>
+            <S.InternalWrapper open={logOpened}>
+                {(state.logSize ?? 10) + " max messages"}
+                <Slider aria-label="MaxMessages"
+                    min={1}
+                    max={100}
+                    size="small"
+                    onChange={(_, v) => {
 
-                    if (typeof v === "number") {
+                        if (typeof v === "number") {
 
-                        update({ ...state, logSize: v })
-                    }
-                }}
-                value={state.logSize ?? 10} />
-            <S.ConsoleLog>
-            <>
-                {messageLogs}
-            </>
-            </S.ConsoleLog>
+                            update({ ...state, logSize: v })
+                        }
+                    }}
+                    value={state.logSize ?? 10} />
+                <S.ConsoleLog>
+                <>
+                    {messageLogs}
+                </>
+                </S.ConsoleLog>
+            </S.InternalWrapper>
+
+            <S.ExpandButton open={vizualizationOpened} onClick={toggleVizualization}>
+                {vizualizationArrow} Vizualization {vizualizationArrow}
+            </S.ExpandButton>
+            <S.InternalWrapper open={vizualizationOpened}>
+                <MidiSignalVizualizer width={200} height={200} midiMessageEmitter={props.machine} />
+            </S.InternalWrapper>
         </S.SettingsBar>
     );
 }
