@@ -244,7 +244,7 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
             </pre>;
     });
 
-    const [ vizualizationOpened, setVizualizationOpened]  = React.useState(false);
+    const [ vizualizationOpened, setVizualizationOpened]  = React.useState(true);
     const [ logOpened, setLogOpened ] = React.useState(false);
 
     const toggleVizualization = () => {
@@ -292,6 +292,14 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
                     <option value="denies">Denies</option>
                 </select>
             </S.Dropdown>
+            
+            <S.ExpandButton open={vizualizationOpened} onClick={toggleVizualization}>
+                {vizualizationArrow} Vizualization {vizualizationArrow}
+            </S.ExpandButton>
+            <S.InternalWrapper open={vizualizationOpened}>
+                <MidiSignalVizualizer width={200} height={200} midiMessageEmitter={props.machine} />
+            </S.InternalWrapper>
+
             <S.ExpandButton open={logOpened} onClick={toggleLog}>
                 {logArrow} Message logs {logArrow}
             </S.ExpandButton>
@@ -314,13 +322,6 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
                     {messageLogs}
                 </>
                 </S.ConsoleLog>
-            </S.InternalWrapper>
-
-            <S.ExpandButton open={vizualizationOpened} onClick={toggleVizualization}>
-                {vizualizationArrow} Vizualization {vizualizationArrow}
-            </S.ExpandButton>
-            <S.InternalWrapper open={vizualizationOpened}>
-                <MidiSignalVizualizer width={200} height={200} midiMessageEmitter={props.machine} />
             </S.InternalWrapper>
         </S.SettingsBar>
     );

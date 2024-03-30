@@ -44,7 +44,7 @@ export const MidiSignalVizualizer: React.FunctionComponent<{ width: number, heig
                 return (n + shift) % 255;
             }
         };
-            
+
         const onMidiMessage = (e: Event) => {
 
             if (!state.midiVizualizerOn) {
