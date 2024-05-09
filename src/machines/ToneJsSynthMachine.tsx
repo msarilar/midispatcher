@@ -84,7 +84,7 @@ export class ToneJsSynthMachine extends AbstractMachine implements MachineTarget
 
             createMachine(config?: ToneJsSynthConfig) { return new ToneJsSynthMachine(config); },
             createWidget(engine: DiagramEngine, node: MachineNodeModel): JSX.Element { return <ToneJsSynthNodeWidget engine={engine} size={50} machine={node.machine as ToneJsSynthMachine} />; },
-            getName() { return "ToneJsSynthMachine"; },
+            getName() { return "ToneJsSynth"; },
             getType() { return MachineType.Output; },
             getTooltip() { return "Reads MIDI notes and emits sound"; },
             getMachineCode() { return "tonejssynth" }

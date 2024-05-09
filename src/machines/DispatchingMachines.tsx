@@ -57,7 +57,7 @@ export class NoteSplitMachine extends AbstractMachine implements MachineSourceTa
             },
             createWidget(engine: DiagramEngine, node: MachineNodeModel) { return <NoteSplitNodeWidget engine={engine} size={50} machine={node.machine as NoteSplitMachine} />; },
             getType() { return MachineType.Processor; },
-            getName() { return "NoteSplitMachine"; },
+            getName() { return "NoteSplit"; },
             getTooltip() { return "Reads notes then dispatches them over 2 channels depending on whether they're above or below a threshold"; },
             getMachineCode() { return "split" }
         }
@@ -203,7 +203,7 @@ export class NoteGrowMachine extends AbstractMachine implements MachineSourceTar
                 return new NoteGrowMachine(voices);
             },
             getType() { return MachineType.Processor; },
-            getName() { return "NoteGrowMachine"; },
+            getName() { return "NoteGrow"; },
             getTooltip() { return "Reads notes then dispatches them over N voices using the first free voice"; },
             getMachineCode() { return "grow" }
         }
@@ -329,7 +329,7 @@ export class NoteRoundRobinMachine extends AbstractMachine implements MachineSou
 
             createMachine(voices?: number) { return new NoteRoundRobinMachine(voices); },
             getType() { return MachineType.Processor; },
-            getName() { return "NoteRoundRobinMachine"; },
+            getName() { return "NoteRoundRobin"; },
             getTooltip() { return "Reads notes then dispatches them over N voices to allow dispatching to different targets (you can achieve polyphony with multiple monophonic devices this way)"; },
             getMachineCode() { return "roundrobin" }
         }

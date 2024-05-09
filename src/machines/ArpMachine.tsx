@@ -53,7 +53,7 @@ export class ArpMachine extends AbstractMachine implements MachineSourceTarget {
 
                 return new ArpMachine(arpConfig);
             },
-            getName(): string { return "ArpMachine"; },
+            getName(): string { return "Arp"; },
             createWidget(engine: DiagramEngine, node: MachineNodeModel) { return <ArpNodeWidget engine={engine} size={50} machine={node.machine as ArpMachine} />; },
             getType() { return MachineType.Emitter; },
             getTooltip() { return "Reads CLOCK message and sends out arpeggiated notes ; add notes to the arpeggiato with the + button"; },

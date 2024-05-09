@@ -154,7 +154,7 @@ export class ClockMachine extends AbstractMachine implements MachineSource {
 
             createMachine(config?: ClockConfig) { return new ClockMachine(config); },
             createWidget(engine: DiagramEngine, node: MachineNodeModel) { return <ClockNodeWidget engine={engine} size={50} machine={node.machine as ClockMachine} />; },
-            getName() { return "ClockMachine"; },
+            getName() { return "Clock"; },
             getType() { return MachineType.System; },
             getTooltip() { return "Emits CLOCK message which can be used to command MIDI targets (on their system port) or Midispatcher's arpeggiator"; },
             getMachineCode() { return "clock" }

@@ -29,7 +29,7 @@ export class KeyboardMachine extends AbstractMachine implements MachineSource {
             createMachine(): AbstractMachine { return new KeyboardMachine(); },
             createWidget(engine: DiagramEngine, node: MachineNodeModel): JSX.Element { return <KeyboardNodeWidget engine={engine} size={50} machine={node.machine as KeyboardMachine} />; },
             getType() { return MachineType.Emitter; },
-            getName(): string { return "KeyboardMachine"; },
+            getName(): string { return "Keyboard"; },
             getTooltip() { return "Visual keyboard to send out MIDI notes with fixed attack"; },
             getMachineCode() { return "keyboard" }
         }

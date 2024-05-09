@@ -45,7 +45,7 @@ export class MidiFileMachine extends AbstractMachine implements MachineSourceTar
 
             createMachine(midiFileConfig?: MidiFileConfig): AbstractMachine {return new MidiFileMachine(midiFileConfig); },
             getType() { return MachineType.Emitter; },
-            getName(): string { return "MidiFileMachine"; },
+            getName(): string { return "MidiFile"; },
             getTooltip() { return "Reads CLOCK message and sends out MIDI from file content"; },
             getMachineCode() { return "midifile" }
         }

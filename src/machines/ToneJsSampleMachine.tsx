@@ -219,7 +219,7 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
 
             createMachine(config?: ToneJsSampleMachineConfig) { return new ToneJsSampleMachine( config ?? { sample: defaultInstrument ?? "Guitar", volume: -15 }); },
             createWidget(engine: DiagramEngine, node: MachineNodeModel): JSX.Element { return <ToneJsSampleNodeWidget engine={engine} size={50} machine={node.machine as ToneJsSampleMachine} />; },
-            getName() { return "ToneJsSampleMachine" + (defaultInstrument == undefined ? "" : " (" + defaultInstrument + ")"); },
+            getName() { return "ToneJsSample" + (defaultInstrument == undefined ? "" : " (" + defaultInstrument + ")"); },
             getType() { return MachineType.Output; },
             getTooltip() { return "Reads MIDI notes and emits sound"; },
             getMachineCode() { return "sample" }

@@ -82,7 +82,7 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
 
             createMachine(config?: OscillatorConfig) { return new OscillatorMachine(config); },
             createWidget(engine: DiagramEngine, node: MachineNodeModel): JSX.Element { return <OscillatorNodeWidget engine={engine} size={50} machine={node.machine as OscillatorMachine} />; },
-            getName() { return "OscillatorMachine"; },
+            getName() { return "Oscillator"; },
             getType() { return MachineType.Output; },
             getTooltip() { return "Reads MIDI notes and emits sound with basic filtering ability"; },
             getMachineCode() { return "oscillator" }

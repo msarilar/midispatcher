@@ -65,7 +65,7 @@ export class ThruMachine extends AbstractMachine implements MachineSourceTarget 
 
             createMachine(thruConfig?: ThruConfig) { return new ThruMachine(thruConfig); },
             createWidget(engine: DiagramEngine, node: MachineNodeModel): JSX.Element { return <ThruNodeWidget engine={engine} size={50} machine={node.machine as ThruMachine} />; },
-            getName() { return "ThruMachine"; },
+            getName() { return "Thru"; },
             getType() { return MachineType.Processor; },
             getTooltip() { return "Reads all MIDI messages, can apply a detune to any incoming NOTEON message as well as filtering specific MIDI messages"; },
             getMachineCode() { return "thru" }

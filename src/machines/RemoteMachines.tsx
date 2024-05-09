@@ -59,7 +59,7 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
             },
             createWidget(engine: DiagramEngine, node: MachineNodeModel) { return <EmittingRemoteNodeWidget engine={engine} size={50} machine={node.machine as EmittingRemoteMachine} />; },
             getType() { return MachineType.WebRTC; },
-            getName() { return "EmittingRemoteMachine"; },
+            getName() { return "EmittingRemote"; },
             getTooltip() { return "Reads messages and send them to a remote location"; },
             getMachineCode() { return "emitrtc" }
         }
@@ -349,7 +349,7 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
             },
             createWidget(engine: DiagramEngine, node: MachineNodeModel) { return <ReceivingRemoteNodeWidget engine={engine} size={50} machine={node.machine as ReceivingRemoteMachine} />; },
             getType() { return MachineType.WebRTC; },
-            getName() { return "ReceivingRemoteMachine"; },
+            getName() { return "ReceivingRemote"; },
             getTooltip() { return "Receives message from remote location"; },
             getMachineCode() { return "receivertc" }
         }
