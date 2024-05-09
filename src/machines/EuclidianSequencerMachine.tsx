@@ -1,9 +1,11 @@
+import { Knob } from 'primereact/knob';
+import React from "react";
 import { DiagramEngine } from "@projectstorm/react-diagrams";
+
 import { noteMidiToString, noteStringToNoteMidi, notesOff } from "../Utils";
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
 import { MachineNodeModel } from "../layout/Node";
 import { S } from "./MachineStyling";
-import React from "react";
 
 interface EuclidianSequence {
 
@@ -310,26 +312,17 @@ const EuclidianSequencerNodeWidget: React.FunctionComponent<CustomNodeWidgetProp
     return (
         <S.SettingsBar>
             <span>Steps: {config.steps}</span>
-            <S.SettingsBarVertical>
-                <S.Slider>
-                    <input
-                        type="range"
-                        min="4"
-                        max="64"
-                        step="1"
-                        value={config.steps}
-                        onChange={e => { update({ ...config, steps: Number(e.target.value) }) }}
-                        list="steps"
-                        name="steps" />
-                </S.Slider>
-                <S.Dropdown>
-                    <select name="noteSelection"
-                            value={config.note}
-                            onChange={e => { update({ ...config, note: e.target.value}) }}>
-                        { notesOff.map(arr => <option key={arr[1]} value={noteMidiToString(arr[1])}>{noteMidiToString(arr[1])}</option>) }
-                    </select>
-                </S.Dropdown>
-            </S.SettingsBarVertical>
+            <S.Slider>
+                <input
+                    type="range"
+                    min="4"
+                    max="64"
+                    step="1"
+                    value={config.steps}
+                    onChange={e => { update({ ...config, steps: Number(e.target.value) }) }}
+                    list="steps"
+                    name="steps" />
+            </S.Slider>
             <span>Beats A: {config.mainSequence.beats}</span>
             <S.SettingsBarVertical>
                 <S.Slider>
@@ -343,6 +336,16 @@ const EuclidianSequencerNodeWidget: React.FunctionComponent<CustomNodeWidgetProp
                         list="beats1"
                         name="beats1" />
                 </S.Slider>
+                <Knob
+                    value={config.mainSequence.offset}
+                    min={-1 * config.steps / 2}
+                    max={config.steps / 2}
+                    size={35}
+                    valueColor={"SlateGray"}
+                    rangeColor={"MediumTurquoise"}
+                    textColor={"White"}
+                    strokeWidth={23}
+                    onChange={e => { update({ ...config, secondarySequence: { ...config.mainSequence, offset: Number(e.value) }}) }} />
             </S.SettingsBarVertical>
             <span>Beats B: {config.secondarySequence.beats}</span>
             <S.SettingsBarVertical>
@@ -357,15 +360,33 @@ const EuclidianSequencerNodeWidget: React.FunctionComponent<CustomNodeWidgetProp
                         list="beats1"
                         name="beats1" />
                 </S.Slider>
+                <Knob
+                    value={config.secondarySequence.offset}
+                    min={-1 * config.steps / 2}
+                    max={config.steps / 2}
+                    size={35}
+                    valueColor={"SlateGray"}
+                    rangeColor={"MediumTurquoise"}
+                    textColor={"White"}
+                    strokeWidth={23}
+                    onChange={e => { update({ ...config, secondarySequence: { ...config.secondarySequence, offset: Number(e.value) }}) }} />
             </S.SettingsBarVertical>
-            <S.Dropdown>
-                <span>Combine: </span>
-                <select name="combineOperatorSelection"
-                        value={config.combineOperator}
-                        onChange={e => { update({ ...config, combineOperator: e.target.value as CombineOperator}) }}>
-                    { Object.keys(CombineOperator).map(combineOperator => <option key={combineOperator} value={combineOperator}>{combineOperator}</option>) }
-                </select>
-            </S.Dropdown>
+            <S.SettingsBarVertical>
+                <S.Dropdown>
+                    <select name="combineOperatorSelection"
+                            value={config.combineOperator}
+                            onChange={e => { update({ ...config, combineOperator: e.target.value as CombineOperator}) }}>
+                        { Object.keys(CombineOperator).map(combineOperator => <option key={combineOperator} value={combineOperator}>{combineOperator}</option>) }
+                    </select>
+                </S.Dropdown>
+                <S.Dropdown>
+                    <select name="noteSelection"
+                            value={config.note}
+                            onChange={e => { update({ ...config, note: e.target.value}) }}>
+                        { notesOff.map(arr => <option key={arr[1]} value={noteMidiToString(arr[1])}>{noteMidiToString(arr[1])}</option>) }
+                    </select>
+                </S.Dropdown>
+            </S.SettingsBarVertical>
             <canvas ref={sequencerCanvasRef} width={sequencerWidth} height={sequencerHeight} />
         </S.SettingsBar>
     );

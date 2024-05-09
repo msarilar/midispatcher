@@ -29,6 +29,7 @@
         "paths-js": "^0.4.11",
         "peerjs": "^1.5.2",
         "postcss": ">=8.4.31",
+        "primereact": "^10.6.5",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-modal": "^3.16.1",
