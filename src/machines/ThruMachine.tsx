@@ -244,7 +244,7 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
             </pre>;
     });
 
-    const [ vizualizationOpened, setVizualizationOpened]  = React.useState(true);
+    const [ vizualizationOpened, setVizualizationOpened]  = React.useState(false);
     const [ logOpened, setLogOpened ] = React.useState(false);
 
     const toggleVizualization = () => {

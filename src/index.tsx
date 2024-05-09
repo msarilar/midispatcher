@@ -14,6 +14,7 @@ require("./machines/ThruMachine");
 require("./machines/ToneJsSampleMachine");
 require("./machines/ToneJsSynthMachine");
 require("./machines/RemoteMachines");
+require("./machines/EuclidianSequencerMachine");
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement

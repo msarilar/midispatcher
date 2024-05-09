@@ -215,3 +215,8 @@ for (let i = 0; i < 128; i++) {
         i,
         0]));
 }
+
+export function offset<T>(arr: T[], offset: number) {
+    
+    return  [...arr.slice(offset), ...arr.slice(0, offset)];
+}
