@@ -128,6 +128,11 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
         this.getNode().addMachineInPort("Clock", 0);
     }
 
+    private shouldPlayNow() {
+
+        return this.shouldPlay(this.mainBeats[this.currentIndex], this.secondaryBeats[this.currentIndex]);
+    }
+
     private shouldPlay(main: boolean, secondary: boolean) {
 
         switch (this.config.combineOperator) {
@@ -169,10 +174,7 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
                     this.dispatchEvent(this.onSequenceIndexChanged);
                     this.currentClock = 0;
 
-                    const main = this.mainBeats[this.currentIndex];
-                    const secondary = this.secondaryBeats[this.currentIndex];
-
-                    if (this.shouldPlay(main, secondary)) {
+                    if (this.shouldPlayNow()) {
 
                         this.emit(this.noteOn, 0);
                         this.noteOnSent = true;
@@ -188,12 +190,28 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
 
             case "continue":
                 this.playing = true;
+                
+                this.dispatchEvent(this.onSequenceIndexChanged);
+                if (this.shouldPlayNow()) {
+
+                    this.emit(this.noteOn, 0);
+                    this.noteOnSent = true;
+                }
+
                 return MessageResult.Processed;
 
             case "start":
                 this.playing = true;
                 this.currentClock = 0;
                 this.currentIndex = 0;
+                
+                this.dispatchEvent(this.onSequenceIndexChanged);
+                if (this.shouldPlayNow()) {
+
+                    this.emit(this.noteOn, 0);
+                    this.noteOnSent = true;
+                }
+
                 return MessageResult.Processed;
 
             case "stop":
@@ -220,13 +238,18 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
             return pattern;
         }
 
+        if (offset < 0) {
+
+            offset = steps + offset;
+        }
+
         pattern[offset] = true;
         let previous = 0;
 
         for (let i = 1; i < steps; i++) {
 
             const index = (i + offset) % steps;
-            const current = Math.floor((beats * index) / steps);
+            const current = Math.floor((beats * i) / steps);
 
             if (current - previous === 1) {
 
@@ -345,7 +368,7 @@ const EuclidianSequencerNodeWidget: React.FunctionComponent<CustomNodeWidgetProp
                     rangeColor={"MediumTurquoise"}
                     textColor={"White"}
                     strokeWidth={23}
-                    onChange={e => { update({ ...config, secondarySequence: { ...config.mainSequence, offset: Number(e.value) }}) }} />
+                    onChange={e => { update({ ...config, mainSequence: { ...config.mainSequence, offset: Number(e.value) }}) }} />
             </S.SettingsBarVertical>
             <span>Beats B: {config.secondarySequence.beats}</span>
             <S.SettingsBarVertical>
