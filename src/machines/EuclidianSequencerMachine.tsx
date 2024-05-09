@@ -271,6 +271,7 @@ const EuclidianSequencerNodeWidget: React.FunctionComponent<CustomNodeWidgetProp
 
         const rows = Math.ceil(config.steps / 8);
         const columns = Math.min(config.steps, 8);
+
         return [columns * squareSize * 2, rows * squareSize * 2];
     }
 
@@ -281,15 +282,16 @@ const EuclidianSequencerNodeWidget: React.FunctionComponent<CustomNodeWidgetProp
 
         props.machine.sanitizeAndApplyConfig(newConfig);
         setConfig(props.machine.getState());
-        setSequencerDimensions(computeSequencerDimensions(props.machine.getState()));
+        const [newSequencerWidth, newSequencerHeight] = computeSequencerDimensions(props.machine.getState());
+        setSequencerDimensions([newSequencerWidth, newSequencerHeight]);
 
         const sequencer = sequencerCanvasRef.current?.getContext("2d") ?? undefined;
-        setTimeout(() => requestAnimationFrame(function() { drawSequencer(sequencer); }), 24);
+        requestAnimationFrame(function() { drawSequencer(sequencer, newSequencerWidth, newSequencerHeight); });
     }
 
     const sequencerCanvasRef = React.useRef<HTMLCanvasElement>(null);
 
-    const drawSequencer = function (sequencer: CanvasRenderingContext2D | undefined) {
+    const drawSequencer = function (sequencer: CanvasRenderingContext2D | undefined, sequencerWidth: number, sequencerHeight: number) {
 
         if (sequencer == undefined) {
 
@@ -299,7 +301,7 @@ const EuclidianSequencerNodeWidget: React.FunctionComponent<CustomNodeWidgetProp
         const config = props.machine.getState();
 
         sequencer.fillStyle = "rgb(0,0,0)";
-        sequencer.fillRect(0, 0, sequencerWidth, sequencerHeight)
+        sequencer.fillRect(0, 0, sequencerWidth, sequencerHeight);
         for (let y = 0; y < Math.ceil(config.steps / 8); y++) {
 
             for (let x = 0; x < Math.min(config.steps - y * 8, 8); x++) {
@@ -321,11 +323,11 @@ const EuclidianSequencerNodeWidget: React.FunctionComponent<CustomNodeWidgetProp
     React.useEffect(() => {
 
         const sequencer = sequencerCanvasRef.current?.getContext("2d") ?? undefined;
-        drawSequencer(sequencer);
+        drawSequencer(sequencer, sequencerWidth, sequencerHeight);
         
         const onSequenceIndexChanged = () => {
 
-            drawSequencer(sequencer);
+            requestAnimationFrame(function() { drawSequencer(sequencer, sequencerWidth, sequencerHeight); })
         }
 
         props.machine.addEventListener(ON_SEQUENCE_INDEX_CHANGED, onSequenceIndexChanged);
