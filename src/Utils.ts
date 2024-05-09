@@ -32,7 +32,7 @@ export function noteMidiToStringSeparated(n: number): [string, number] {
         return noteMidiToStringCache[n];
     }
 
-    const oct = Math.floor(n / 12) - 1;
+    const oct = Math.floor(n / 12) - 2;
     const note = n % 12;
     const result: [string, number] = [allNotes[note], oct];
 
@@ -214,9 +214,4 @@ for (let i = 0; i < 128; i++) {
         (WebMidi.Enumerations.CHANNEL_MESSAGES.noteoff << 4),
         i,
         0]));
-}
-
-export function offset<T>(arr: T[], offset: number) {
-    
-    return  [...arr.slice(offset), ...arr.slice(0, offset)];
 }
