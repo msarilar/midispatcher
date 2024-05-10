@@ -148,9 +148,10 @@ export class MachineNodeFactory extends AbstractReactFactory<MachineNodeModel, D
 
     generateModel(e: GenerateModelEvent) {
 
+        e.initialConfig.machineName = (e.initialConfig.machineName as string).replace(/(Machine)(?!.*\1)/, "");
         if (!this.factories[e.initialConfig.machineName]) {
 
-            window.alert("Unknown machine " + e.initialConfig.machineName);
+            window.alert("Unknown machine " + e.initialConfig.machineName + "\r\nKnown machines:\r\n" + Object.keys(this.factories));
         }
 
         return new MachineNodeModel(this.factories[e.initialConfig.machineName]

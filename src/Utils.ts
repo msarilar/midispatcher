@@ -32,7 +32,7 @@ export function noteMidiToStringSeparated(n: number): [string, number] {
         return noteMidiToStringCache[n];
     }
 
-    const oct = Math.floor(n / 12) - 2;
+    const oct = Math.floor(n / 12) - 1;
     const note = n % 12;
     const result: [string, number] = [allNotes[note], oct];
 

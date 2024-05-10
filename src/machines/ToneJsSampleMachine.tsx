@@ -157,12 +157,12 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
         super();
 
         this.config = config;
-        this.sampler = new Tone.Sampler(getSamples(config.sample));
+        this.sampler = new Tone.Sampler(getSamples(config.sample ?? "Drum"));
 
         this.volume = new Tone.Volume();
         this.sampler.connect(this.volume);
 
-        this.volume.volume.value = this.config.volume;
+        this.volume.volume.value = this.config.volume ?? -15;
         this.volume.mute = this.config.volume === -30;
         
         this.analyzer = Tone.context.createAnalyser();
