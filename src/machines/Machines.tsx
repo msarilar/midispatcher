@@ -226,7 +226,7 @@ class CustomNodeFactory extends AbstractReactFactory<MachineNodeModel, DiagramEn
 
             e.initialConfig.state = e.initialConfig.toneJsConfig;
         }
-        else if (this.machineFactory.getName().startsWith("ToneJsSampleMachine")) {
+        else if (this.machineFactory.getName().startsWith("ToneJsSample")) {
 
             if (e.initialConfig?.state instanceof String) {
 
@@ -250,7 +250,7 @@ class CustomNodeFactory extends AbstractReactFactory<MachineNodeModel, DiagramEn
             }
         }
         
-        if (this.machineFactory.getName() === "ArpMachine") {
+        if (this.machineFactory.getName() === "ArpMachine" || this.machineFactory.getName() === "Arp") {
 
             if (e.initialConfig.state.keyboardNotes == undefined) {
 
