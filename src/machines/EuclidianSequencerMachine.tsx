@@ -95,6 +95,11 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
             config.secondarySequence.beats = config.steps;
         }
 
+        if (config.note !== this.config.note && this.noteOnSent) {
+
+            this.emit(this.noteOff, 0);
+        }
+
         this.config = config;
 
         this.noteOn = { message: { rawData: noteStringToNoteMidi(this.config.note), isChannelMessage: true, type: "noteon", channel: 0 }, type: "noteon" };
