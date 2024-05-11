@@ -78,22 +78,42 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
         return this.factory;
     }
 
+    private sanitizeSequence(sequence: EuclidianSequence, config: EuclidianSequencerConfig) {
+
+        if (sequence.beats > config.steps) {
+
+            sequence.beats = config.steps;
+        }
+
+        if (sequence.offset > config.steps / 2) {
+
+            sequence.offset = config.steps / 2;
+        }
+        
+        if (sequence.offset < -1 * config.steps / 2) {
+
+            sequence.offset = -1 * config.steps / 2;
+        }
+
+        if (sequence.offset > 0) {
+
+            sequence.offset = Math.floor(sequence.offset);
+        }
+        else if (sequence.offset < 0) {
+
+            sequence.offset = Math.ceil(sequence.offset);
+        }
+    }
+
     sanitizeAndApplyConfig(config: EuclidianSequencerConfig) {
 
         if (this.currentIndex >= config.steps) {
 
             this.currentIndex = 0;
         }
-
-        if (config.mainSequence.beats > config.steps) {
-
-            config.mainSequence.beats = config.steps;
-        }
-
-        if (config.secondarySequence.beats > config.steps) {
-
-            config.secondarySequence.beats = config.steps;
-        }
+        
+        this.sanitizeSequence(config.mainSequence, config);
+        this.sanitizeSequence(config.secondarySequence, config);
 
         if (config.note !== this.config.note && this.noteOnSent) {
 
@@ -374,6 +394,7 @@ const EuclidianSequencerNodeWidget: React.FunctionComponent<CustomNodeWidgetProp
                     valueColor={"SlateGray"}
                     rangeColor={"MediumTurquoise"}
                     textColor={"White"}
+                    step={1}
                     strokeWidth={23}
                     onChange={e => { update({ ...config, mainSequence: { ...config.mainSequence, offset: Number(e.value) }}) }} />
             </S.SettingsBarVertical>
@@ -398,6 +419,7 @@ const EuclidianSequencerNodeWidget: React.FunctionComponent<CustomNodeWidgetProp
                     valueColor={"SlateGray"}
                     rangeColor={"MediumTurquoise"}
                     textColor={"White"}
+                    step={1}
                     strokeWidth={23}
                     onChange={e => { update({ ...config, secondarySequence: { ...config.secondarySequence, offset: Number(e.value) }}) }} />
             </S.SettingsBarVertical>
