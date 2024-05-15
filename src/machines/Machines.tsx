@@ -25,6 +25,8 @@ export interface Machine {
     setNode(node: MachineNodeModel): void;
     getState(): any;
     getFactory(): MachineFactory;
+    isEnabled(): boolean;
+    setEnabled(enabled: boolean): void;
 }
 
 export interface CustomNodeWidgetProps<T extends Machine> {
@@ -39,6 +41,7 @@ export abstract class AbstractMachine extends EventTarget implements Machine {
     private static counters: { [machineName: string]: number } = {};
     abstract getState(): any;
     private readonly node: MachineNodeModel;
+    private enabled: boolean = true;
     getNode(): MachineNodeModel {
 
         return this.node;
@@ -65,6 +68,16 @@ export abstract class AbstractMachine extends EventTarget implements Machine {
         this.node = new MachineNodeModel(this, (factory ?? this.getFactory()).getMachineCode(), factory);
     }
 
+    isEnabled(): boolean {
+
+        return this.enabled;
+    }
+
+    setEnabled(enabled: boolean): void {
+
+        this.enabled = enabled;
+    }
+
     getId() {
 
         return this.id;
@@ -75,6 +88,11 @@ export abstract class AbstractMachine extends EventTarget implements Machine {
     emitter?: (messageEvent: MachineMessage, channel: number) => void;
     setEmit(emit: (messageEvent: MachineMessage, channel: number) => void) { this.emitter = emit; }
     emit(messageEvent: MachineMessage, channel: number) {
+
+        if (!this.enabled) {
+
+            return;
+        }
 
         (this.machineNode ?? this.getNode()).getOutPorts()[channel]?.setSending(true);
         this.emitter?.(messageEvent, channel);

@@ -69,8 +69,9 @@ export namespace S {
         pointer-events: auto;
     `;
     
-    export const Node = styled.div<{ background: string; selected: boolean }>`
+    export const Node = styled.div<{ background: string; selected: boolean; enabled: boolean }>`
         background-color: ${(p) => p.background};
+        opacity: ${(p) => p.enabled ? "1" : "0.5"};
         border-radius: 5px;
         font-family: sans-serif;
         color: white;

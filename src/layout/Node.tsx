@@ -1,11 +1,13 @@
 import * as React from "react";
 
+import SettingsIcon from "@mui/icons-material/Settings";
 import { NodeModel, PortModelAlignment, NodeModelGenerics, DiagramEngine } from "@projectstorm/react-diagrams";
 import { BaseEvent, AbstractReactFactory, GenerateWidgetEvent, GenerateModelEvent, BasePositionModelOptions } from "@projectstorm/react-canvas-core";
 
 import { Machine, MachineFactory, machineTypeToColor } from "./../machines/Machines";
 import { MachinePortLabel, MachinePortModel } from "./Port";
 import { S } from "./LayoutStyling";
+import { IconButton, Menu, MenuItem } from "@mui/material";
 
 interface DefaultNodeModelOptions extends BasePositionModelOptions {
 
@@ -178,13 +180,69 @@ export const MachineNodeWidget: React.FunctionComponent<MachineNodeProps> = prop
         props.node.setLocked(!draggable);
     }
 
+    const [settingsAnchor, setSettingsAnchor] = React.useState<null | HTMLElement>(null);
+    const open = Boolean(settingsAnchor);
+    const handleSettingsClose = () => {
+
+        setSettingsAnchor(null);
+    };
+
+    const handleSettingsClick = (event: React.MouseEvent<HTMLElement>) => {
+
+        setSettingsAnchor(event.currentTarget);
+    };
+
+    const handleDuplicate = () => {
+
+        const clone = props.node.machine.getFactory().createMachine(props.node.machine.getState()).getNode();
+        props.engine.getModel().addAll(clone);
+        handleSettingsClose();
+        props.engine.repaintCanvas();
+    };
+
+    const toggleEnabled = () => {
+
+        props.node.machine.setEnabled(!props.node.machine.isEnabled());
+        handleSettingsClose();
+        props.engine.repaintCanvas();
+    };
+
+    const handleDelete = () => {
+
+        Object.keys(props.node.getMachinePorts()).forEach(key => {
+
+            const port = props.node.getMachinePorts()[key];
+            
+            Object.keys(port.getLinks()).forEach(link => port.getLinks()[link].remove());
+        });
+
+        props.engine.getModel().removeNode(props.node);
+        handleSettingsClose();
+        props.engine.repaintCanvas();
+    };
+
     return (
         <S.Node
             data-default-node-name={props.node.getOptions().name}
             selected={props.node.isSelected()}
-            background={props.node.getOptions().color}>
+            background={props.node.getOptions().color}
+            enabled={props.node.machine.isEnabled()}>
             <S.Title>
-                <S.TitleName>{props.node.getOptions().name}</S.TitleName>
+                <S.TitleName>{props.node.getOptions().name + (props.node.machine.isEnabled() ? "" : " (disabled)")}</S.TitleName>
+                
+                <IconButton aria-label="settings"
+                            size="small"
+                            style={{margin: 0}}
+                            onClick={handleSettingsClick}>
+                    <SettingsIcon fontSize="inherit" style={{margin: 0, color: "white"}}/>
+                </IconButton>
+                <Menu anchorEl={settingsAnchor}
+                      open={open}
+                      onClose={handleSettingsClose}>
+                    <MenuItem style={{margin: 0}} onClick={handleDuplicate}>Duplicate</MenuItem>
+                    <MenuItem style={{margin: 0}} onClick={toggleEnabled}>{props.node.machine.isEnabled() ? "Disable" : "Enable"}</MenuItem>
+                    <MenuItem style={{margin: 0}} onClick={handleDelete}>Delete</MenuItem>
+                </Menu>
             </S.Title>
             <S.Ports>
                 <S.PortsContainer>{Object.values(props.node.getInPorts()).map(generatePort)}</S.PortsContainer>

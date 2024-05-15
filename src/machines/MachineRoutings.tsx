@@ -43,6 +43,11 @@ export class MachineRoutings {
 
         const callback = (e: MachineMessage) => {
 
+            if (!target.isEnabled()) {
+
+                return;
+            }
+            
             const port = link.getTargetPort() as MachinePortModel;
             port.setSending(true);
             try {
