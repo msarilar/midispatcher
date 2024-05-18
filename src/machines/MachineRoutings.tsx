@@ -47,7 +47,7 @@ export class MachineRoutings {
 
                 return;
             }
-            
+
             const port = link.getTargetPort() as MachinePortModel;
             port.setSending(true);
             try {

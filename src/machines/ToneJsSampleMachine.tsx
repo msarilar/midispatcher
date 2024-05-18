@@ -164,7 +164,7 @@ export class ToneJsSampleMachine extends AbstractMachine implements MachineTarge
 
         this.volume.volume.value = this.config.volume ?? -15;
         this.volume.mute = this.config.volume === -30;
-        
+
         this.analyzer = Tone.context.createAnalyser();
         this.gainForAnalyser = Tone.context.createGain();
         this.gainForAnalyser.connect(this.analyzer);

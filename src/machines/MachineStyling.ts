@@ -127,7 +127,7 @@ export namespace S {
 
     export const ConsoleLogEntry = styled.span`
     `;
-    
+
     export const KeyboardBody = styled.div`
         ul {
 

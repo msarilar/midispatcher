@@ -169,7 +169,7 @@ interface MachineNodeProps {
 }
 
 export const MachineNodeWidget: React.FunctionComponent<MachineNodeProps> = props => {
-    
+
     function generatePort(port: MachinePortModel) {
 
         return <MachinePortLabel engine={props.engine} port={port} key={port.getID()} />;
@@ -212,7 +212,7 @@ export const MachineNodeWidget: React.FunctionComponent<MachineNodeProps> = prop
         Object.keys(props.node.getMachinePorts()).forEach(key => {
 
             const port = props.node.getMachinePorts()[key];
-            
+
             Object.keys(port.getLinks()).forEach(link => port.getLinks()[link].remove());
         });
 
@@ -229,7 +229,7 @@ export const MachineNodeWidget: React.FunctionComponent<MachineNodeProps> = prop
             enabled={props.node.machine.isEnabled()}>
             <S.Title>
                 <S.TitleName>{props.node.getOptions().name + (props.node.machine.isEnabled() ? "" : " (disabled)")}</S.TitleName>
-                
+
                 <IconButton aria-label="settings"
                             size="small"
                             style={{margin: 0}}

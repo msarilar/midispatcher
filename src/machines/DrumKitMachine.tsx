@@ -108,7 +108,7 @@ export class DrumKitMachine extends AbstractMachine implements MachineSourceTarg
                 this.emit(messageEvent, i + 1);
             }
         }
-        
+
         return MessageResult.Processed;
     }
 }

@@ -146,7 +146,7 @@ const Midispatcher: React.FunctionComponent = () => {
                     const factory = MidiMachineTarget.buildFactory(input);
                     state.machineFactories[factory.getName()] = factory;
                 });
-                
+
                 engine.getNodeFactories().deregisterFactory("machine");
                 engine.getNodeFactories().registerFactory(new MachineNodeFactory(state.machineFactories));
 
@@ -199,9 +199,9 @@ const Midispatcher: React.FunctionComponent = () => {
         });
         engine.getNodeFactories().registerFactory(new MachineNodeFactory(state.machineFactories));
         dispatch({ type: MidispatcherActionType.Refresh, result: {} });
-        
+
         if (navigator.requestMIDIAccess != undefined) {
-            
+
             WebMidi.WebMidi
                 .enable()
                 .then(() => dispatch({ type: MidispatcherActionType.MidiLoaded, result: { inputs: WebMidi.WebMidi.inputs, outputs: WebMidi.WebMidi.outputs } }))
@@ -212,7 +212,7 @@ const Midispatcher: React.FunctionComponent = () => {
                 });
         }
         else {
-            
+
             alert("Can't connect to your MIDI devices:\r\nWeb MIDI API is not available on your browser");
         }
 
@@ -248,9 +248,9 @@ const Midispatcher: React.FunctionComponent = () => {
     }
 
     function nextDemo() {
-        
+
         if (state.demos == undefined) {
-            
+
             return "";
         }
 

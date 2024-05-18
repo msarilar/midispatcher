@@ -68,7 +68,7 @@ export namespace S {
         fill: none;
         pointer-events: auto;
     `;
-    
+
     export const Node = styled.div<{ background: string; selected: boolean; enabled: boolean }>`
         background-color: ${(p) => p.background};
         opacity: ${(p) => p.enabled ? "1" : "0.5"};
@@ -80,7 +80,7 @@ export namespace S {
         font-size: 11px;
         border: solid 2px ${(p) => (p.selected ? "rgb(0,192,255)" : "black")};
         * {
-    
+
             box-sizing:border-box
         }
     `;
@@ -192,7 +192,7 @@ export namespace S {
         cursor: pointer;
         font-weight: ${(p) => p.isLabel ? "bold" : "unset"};
     `;
-    
+
 
     export const GitHubLink = styled.a`
         width: 32px;
@@ -258,7 +258,7 @@ export namespace S {
         border-radius: 5px;
         overflow: hidden;
     `;
-    
+
     export const Disqus = styled.div<{ visible: boolean }>`
         display: ${(p) => p.visible ? "block" : "none"};
         padding-top: 10px;

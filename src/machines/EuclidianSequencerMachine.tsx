@@ -47,13 +47,13 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
 
     private mainBeats: boolean[] = [];
     private secondaryBeats: boolean[] = [];
-    
+
     private noteOn: MachineMessage = { message: { rawData: noteStringToNoteMidi("C4"), isChannelMessage: true, type: "noteoff", channel: 0 }, type: "noteoff" };;
     private noteOff: MachineMessage = { message: { rawData: noteStringToNoteMidi("C4"), isChannelMessage: true, type: "noteoff", channel: 0 }, type: "noteoff" };
     private noteOnSent: boolean = false;
 
     private onSequenceIndexChanged: Event = new Event(ON_SEQUENCE_INDEX_CHANGED);
-    
+
     getState() { return this.config; }
 
     getFactory() { return EuclidianSequencerMachine.factory; }
@@ -89,7 +89,7 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
 
             sequence.offset = config.steps / 2;
         }
-        
+
         if (sequence.offset < -1 * config.steps / 2) {
 
             sequence.offset = -1 * config.steps / 2;
@@ -111,7 +111,7 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
 
             this.currentIndex = 0;
         }
-        
+
         this.sanitizeSequence(config.mainSequence, config);
         this.sanitizeSequence(config.secondarySequence, config);
 
@@ -124,7 +124,7 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
 
         this.noteOn = { message: { rawData: noteStringToNoteMidi(this.config.note), isChannelMessage: true, type: "noteon", channel: 0 }, type: "noteon" };
         this.noteOff = { message: { rawData: noteStringToNoteMidi(this.config.note), isChannelMessage: true, type: "noteoff", channel: 0 }, type: "noteoff" };
-        
+
         this.mainBeats = EuclidianSequencerMachine.distributeBeats(config.mainSequence.beats, config.steps, config.mainSequence.offset);
         this.secondaryBeats = EuclidianSequencerMachine.distributeBeats(config.secondarySequence.beats, config.steps, config.secondarySequence.offset);
     }
@@ -135,7 +135,7 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
 
         if (config == undefined) {
 
-            config = {            
+            config = {
 
                 steps: 16,
                 note: "C4",
@@ -145,7 +145,7 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
                 combineOperator: CombineOperator.OR
             };
         }
-        
+
         this.config = config;
         this.sanitizeAndApplyConfig(config);
 
@@ -175,7 +175,7 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
                 return main !== secondary;
         }
     }
-    
+
     sequenceIndexKind(index: number): [playing: boolean, mainSequenceBeat: boolean, secondarySequenceBeat: boolean, shouldPlay: boolean] {
 
         return [this.playing && this.currentIndex === index, this.mainBeats[index], this.secondaryBeats[index], this.shouldPlay(this.mainBeats[index], this.secondaryBeats[index])];
@@ -184,10 +184,10 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
     receive(messageEvent: MachineMessage, _: number): MessageResult {
 
         switch (messageEvent.message.type) {
-            
+
             case "clock":
                 if (!this.playing) {
-                    
+
                     return MessageResult.Ignored;
                 }
 
@@ -205,7 +205,7 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
                         this.noteOnSent = true;
                     }
                     else if (this.noteOnSent) {
-    
+
                         this.emit(this.noteOff, 0);
                         this.noteOnSent = false;
                     }
@@ -215,7 +215,7 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
 
             case "continue":
                 this.playing = true;
-                
+
                 this.dispatchEvent(this.onSequenceIndexChanged);
                 if (this.shouldPlayNow()) {
 
@@ -229,7 +229,7 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
                 this.playing = true;
                 this.currentClock = 0;
                 this.currentIndex = 0;
-                
+
                 this.dispatchEvent(this.onSequenceIndexChanged);
                 if (this.shouldPlayNow()) {
 
@@ -290,7 +290,7 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
 }
 
 const EuclidianSequencerNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<EuclidianSequencerMachine>> = props => {
-    
+
     const squareSize = 10;
     function computeSequencerDimensions(config: EuclidianSequencerConfig): [width: number, height: number] {
 
@@ -335,7 +335,7 @@ const EuclidianSequencerNodeWidget: React.FunctionComponent<CustomNodeWidgetProp
                 const baseNumber = playing ? 200 : 100;
                 sequencer.fillStyle = "rgb(" + (secondary ? 255 : baseNumber) + "," + baseNumber + "," + (main ? 255 : baseNumber) + ")";
                 sequencer.fillRect(x * (squareSize * 2) + (squareSize / 2), y * (squareSize * 2) + (squareSize / 2), squareSize, squareSize);
-                
+
                 if (shouldPlay) {
 
                     sequencer.strokeStyle = playing ? "rgb(0,0,0)" : "rgb(255,255,255)";
@@ -349,7 +349,7 @@ const EuclidianSequencerNodeWidget: React.FunctionComponent<CustomNodeWidgetProp
 
         const sequencer = sequencerCanvasRef.current?.getContext("2d") ?? undefined;
         drawSequencer(sequencer, sequencerWidth, sequencerHeight);
-        
+
         const onSequenceIndexChanged = () => {
 
             requestAnimationFrame(function() { drawSequencer(sequencer, sequencerWidth, sequencerHeight); })

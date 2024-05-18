@@ -267,7 +267,7 @@ class CustomNodeFactory extends AbstractReactFactory<MachineNodeModel, DiagramEn
                 }
             }
         }
-        
+
         if (this.machineFactory.getName() === "ArpMachine" || this.machineFactory.getName() === "Arp") {
 
             if (e.initialConfig.state.keyboardNotes == undefined) {

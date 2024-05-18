@@ -121,7 +121,7 @@ export class ThruMachine extends AbstractMachine implements MachineSourceTarget 
             this.dispatchEvent(new CustomEvent<MessageEntry>(ON_MIDI_MESSAGE, { detail: { ...messageEvent, accepted: false }}));
             return MessageResult.Ignored;
         }
-        
+
         this.dispatchEvent(new CustomEvent<MessageEntry>(ON_MIDI_MESSAGE, { detail: { ...messageEvent, accepted: true }}));
         if (this.config.detune != 0 && (messageEvent.message.type === "noteon" || messageEvent.message.type === "noteoff")) {
 
@@ -152,10 +152,10 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
             const detail = (e as CustomEvent<MessageEntry>).detail;
             messages.push(detail);
             while (messages.length > (state.logSize ?? 10)) {
-    
+
                 messages.shift();
             }
-    
+
             setMessages([...messages]);
         }
 
@@ -292,7 +292,7 @@ const ThruNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ThruMachine>
                     <option value="denies">Denies</option>
                 </select>
             </S.Dropdown>
-            
+
             <S.ExpandButton open={vizualizationOpened} onClick={toggleVizualization}>
                 {vizualizationArrow} Vizualization {vizualizationArrow}
             </S.ExpandButton>

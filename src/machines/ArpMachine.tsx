@@ -120,7 +120,7 @@ export class ArpMachine extends AbstractMachine implements MachineSourceTarget {
         if (config.arpMode == "predefined") {
 
             if (this.config.predefinedNotes.length !== config.predefinedNotes.length) {
-                
+
                 this.clockIndex = 0;
                 this.arpIndex = 0;
                 if (this.previousNote != undefined) {
@@ -137,7 +137,7 @@ export class ArpMachine extends AbstractMachine implements MachineSourceTarget {
         }
 
         if(notesToPlay.length === 0) {
-            
+
             if (this.previousNote != undefined) {
 
                 this.emit({ message: { rawData: this.previousNote, isChannelMessage: true, type: "noteoff", channel: 0 }, type: "noteoff" }, 0);
@@ -222,7 +222,7 @@ export class ArpMachine extends AbstractMachine implements MachineSourceTarget {
 
                     this.addKeyboardNote(noteMidiToStringSeparated(messageEvent.message.rawData[1]));
                 }
-                
+
                 return MessageResult.Processed;
             case "noteoff":
                 this.removeKeyboardNote(noteMidiToStringSeparated(messageEvent.message.rawData[1]));

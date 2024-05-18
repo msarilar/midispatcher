@@ -10,13 +10,13 @@ It connects to the MIDI devices plugged in your computer and provides a number o
 <tr>
 <th align="center">
 <img width="441" height="1">
-<p> 
+<p>
 Sample usage
 </p>
 </th>
 <th align="center">
 <img width="441" height="1">
-<p> 
+<p>
 Connecting to physical device
 </p>
 </th>

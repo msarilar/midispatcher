@@ -157,7 +157,7 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
             this.oscillators[midiNote] = osc;
             this.oscillators[midiNote].start();
         }
-        
+
         return MessageResult.Processed;
     }
 

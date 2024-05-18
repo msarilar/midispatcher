@@ -15,13 +15,13 @@ interface NoteSplitConfig {
     readonly noteThreshold: string;
     readonly broadcastNonNotes: boolean;
     readonly active: boolean;
-} 
+}
 
 @registeredMachine
 export class NoteSplitMachine extends AbstractMachine implements MachineSourceTarget {
 
     setState(newConfig: NoteSplitConfig) {
-        
+
         try {
 
             noteStringToNoteMidi(newConfig.editNote);
@@ -70,7 +70,7 @@ export class NoteSplitMachine extends AbstractMachine implements MachineSourceTa
         super();
 
         this.config = config ?? { editNote: "C3", noteThreshold: "C3", broadcastNonNotes: true , active: true };
-        
+
         this.getNode().addMachineInPort("In", 1);
 
         this.getNode().addMachineOutPort(AllLinkCode, 0);
@@ -89,9 +89,9 @@ export class NoteSplitMachine extends AbstractMachine implements MachineSourceTa
     }
 
     receive(messageEvent: MachineMessage, _: number): MessageResult {
-        
+
         if (messageEvent.message.type === "noteoff" || messageEvent.message.type === "noteon") {
-            
+
             if (this.config.editNote !== this.config.noteThreshold) {
 
                 return MessageResult.Ignored;
@@ -111,7 +111,7 @@ export class NoteSplitMachine extends AbstractMachine implements MachineSourceTa
                 }
             }
             else {
-                
+
                 this.emit(messageEvent, 1);
                 this.emit(messageEvent, 2);
             }
@@ -298,7 +298,7 @@ export class NoteGrowMachine extends AbstractMachine implements MachineSourceTar
                 this.emit(messageEvent, i + 1);
             }
         }
-        
+
         return MessageResult.Processed;
     }
 }

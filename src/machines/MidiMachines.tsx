@@ -102,18 +102,18 @@ export class MidiMachineTarget extends AbstractMachine implements MachineTarget 
     getInChannelCount() { return this.midiOutput.channels.length; }
 
     dispose(): void {
-        
+
         for(let channel = 1; channel < this.midiOutput.channels.length; channel++) {
-            
+
             for (let i = 0; i < notesOff.length; i++) {
 
                 this.setChannel(notesOff[i], channel);
                 try {
-        
+
                     this.midiOutput.send(notesOff[i]);
                 }
                 catch(e) {
-        
+
                     console.error(e);
                 }
             }
@@ -140,11 +140,11 @@ export class MidiMachineTarget extends AbstractMachine implements MachineTarget 
 
                 this.setChannel(notesOff[i], channel);
                 try {
-        
+
                     this.midiOutput.send(notesOff[i]);
                 }
                 catch(e) {
-        
+
                     console.error(e);
                     console.error(messageEvent);
                 }
@@ -157,12 +157,12 @@ export class MidiMachineTarget extends AbstractMachine implements MachineTarget 
                 this.midiOutput.send(messageEvent.message.rawData);
             }
             catch(e) {
-    
+
                 console.error(e);
                 console.error(messageEvent);
             }
         }
-        
+
         return MessageResult.Processed;
     }
 

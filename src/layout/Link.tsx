@@ -6,7 +6,7 @@ import { S } from "./LayoutStyling";
 const MidiLinkWidget: React.FunctionComponent<DefaultLinkProps> = (props) => {
 
 	const [_, setSelected] = React.useState(false);
-    
+
     React.useEffect(() => {
 
         const model = props.link as MidiLinkModel;
@@ -15,7 +15,7 @@ const MidiLinkWidget: React.FunctionComponent<DefaultLinkProps> = (props) => {
             setSelected(sending);
         });
     });
-    
+
     return <DefaultLinkWidget link={props.link} diagramEngine={props.diagramEngine}/>
 }
 

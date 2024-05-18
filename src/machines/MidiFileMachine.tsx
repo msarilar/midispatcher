@@ -234,10 +234,10 @@ export class MidiFileMachine extends AbstractMachine implements MachineSourceTar
                 }
 
                 return MessageResult.Processed;
-                
+
             case "clock":
                 if (!this.playing) {
-                    
+
                     return MessageResult.Ignored;
                 }
 

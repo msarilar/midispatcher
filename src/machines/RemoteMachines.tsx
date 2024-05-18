@@ -134,7 +134,7 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
         const apiKey = process.env.REACT_APP_METERED_API_KEY ?? window.alert("missing api key in environment variable");
         const response = await fetch("https://midispatcher.metered.live/api/v1/turn/credentials?apiKey=" + apiKey);
         const iceServers = await response.json();
-        
+
         const peerConfig = {
 
             iceServers: iceServers,
@@ -151,10 +151,10 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
         this.peer = newPeer;
 
         this.peer.on("open", function (_) {
-        
+
             that.setConnectionStatus({ ...that.connectionStatus, status: "waiting" });
         });
-    
+
         this.peer.on("disconnected", function () {
 
             that.setConnectionStatus({ ...that.connectionStatus, status: "disconnected" });
@@ -179,7 +179,7 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
                     that.setConnectionStatus({ ...that.connectionStatus, error: d, status: "ice disconnected" });
                 }
                 else {
-                    
+
                     that.setConnectionStatus({ ...that.connectionStatus, error: undefined });
                 }
             });
@@ -228,9 +228,9 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
                     channel: messageEvent.message.channel
                 }
             }
-            
+
             this.send({ messageEvent: sanitizedMessage, channel: channel });
-            
+
             return MessageResult.Processed;
         }
 
@@ -306,7 +306,7 @@ const EmittingRemoteNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Em
                             <Button onClick={titleClicked}><ContentCopyOutlined/></Button>
                         </Typography >
                     </Tooltip>
-                    
+
                     <Typography variant="body2" align="center">{ connectionStatus.connections } connected</Typography >
                     <Typography variant="body2" align="center">{ connectionStatus.status }</Typography >
                     <Button onClick={forceReconnectClicked}>
@@ -407,7 +407,7 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
         const apiKey = process.env.REACT_APP_METERED_API_KEY ?? window.alert("missing api key in environment variable");
         const response = await fetch("https://midispatcher.metered.live/api/v1/turn/credentials?apiKey=" + apiKey);
         const iceServers = await response.json();
-        
+
         const peerConfig = {
 
             iceServers: iceServers,
@@ -422,7 +422,7 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
         this.peer = newPeer;
 
         const that = this;
-        
+
         this.peer.on("disconnected", function () {
 
             that.setConnectionStatus({ ...that.connectionStatus, status: "disconnected" });
@@ -455,16 +455,16 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
                     that.setConnectionStatus({ ...that.connectionStatus, error: d, status: "ice disconnected" });
                 }
                 else {
-                    
+
                     that.setConnectionStatus({ ...that.connectionStatus, error: undefined });
                 }
             })
-        
+
             connection.on("close", () => {
 
                 that.setConnectionStatus({ ...that.connectionStatus, error: "closed", status: "disconnected" });
             });
-    
+
             connection.on("error", e => {
 
                 that.setConnectionStatus({ ...that.connectionStatus, error: e.message });
@@ -476,7 +476,7 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
             });
 
             connection.on("data", (message: any) => {
-                
+
                 const messageEvent = message.messageEvent;
                 if (messageEvent != undefined) {
 
@@ -493,7 +493,7 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
                         const lastPort = this.getNode().getOutPorts()[this.getNode().getOutPorts().length - 1];
                         this.getNode().removePort(lastPort)
                     }
-                    
+
                     while (channels > this.getNode().getOutPorts().length) {
 
                         this.getNode().addMachineOutPort("Channel " + this.getNode().getOutPorts().length, this.getNode().getOutPorts().length)
@@ -526,7 +526,7 @@ const ReceivingRemoteNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<R
 
             props.engine.repaintCanvas();
         }
-        
+
         props.machine.addEventListener(ON_REFRESH, onRefresh);
 
         return () => {
@@ -551,7 +551,7 @@ const ReceivingRemoteNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<R
             <Typography variant="h6" align="center">
                 { "target: <" + props.machine.getState().targetChannelName + ">" }
             </Typography >
-            
+
             <Typography variant="body2" align="center">{ connectionStatus.status }</Typography >
             <Button onClick={forceReconnectClicked}>
                 <Typography variant="body2" align="center">Reset</Typography >

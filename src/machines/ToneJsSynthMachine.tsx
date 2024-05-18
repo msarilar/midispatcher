@@ -68,7 +68,7 @@ export class ToneJsSynthMachine extends AbstractMachine implements MachineTarget
         this.synth.connect(this.gainForAnalyser);
         this.gainForAnalyser.connect(this.analyzer);
         this.gainForAnalyser.gain.value = 10;
-        
+
         this.destination.toDestination();
         this.getNode().addMachineInPort("In", 1);
     }
@@ -94,7 +94,7 @@ export class ToneJsSynthMachine extends AbstractMachine implements MachineTarget
     }
 
     dispose() {
-        
+
         this.synth.releaseAll();
         this.synth.disconnect();
         this.synth.dispose();
@@ -136,7 +136,7 @@ export class ToneJsSynthMachine extends AbstractMachine implements MachineTarget
                 this.synth.triggerRelease(noteMidiToString(messageEvent.message.rawData[1]));
                 return MessageResult.Processed;
         }
-        
+
         return MessageResult.Ignored;
     }
 

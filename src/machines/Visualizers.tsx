@@ -79,7 +79,7 @@ export const MidiSignalVizualizer: React.FunctionComponent<{ width: number, heig
                 offsetY += Math.random() * 10 - 5;
 
                 if(offsetX > props.width) {
-                    
+
                     offsetX = 0;
                 }
                 else if(offsetX < 0) {
@@ -88,7 +88,7 @@ export const MidiSignalVizualizer: React.FunctionComponent<{ width: number, heig
                 }
 
                 if(offsetY > props.height) {
-                    
+
                     offsetY = 0;
                 }
                 else if(offsetY < 0) {
@@ -135,7 +135,7 @@ export const AudioNodeVizualizer: React.FunctionComponent<{ width: number, heigh
     let running = true;
 
     props.analyser.fftSize = 1024;
-    
+
     const bufferSpectrogramLength = props.analyser.frequencyBinCount;
     const dataSpectrogramArray = new Uint8Array(bufferSpectrogramLength);
     const sliceSpectrogramWidth = props.width / bufferSpectrogramLength;

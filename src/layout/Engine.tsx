@@ -87,7 +87,7 @@ export class MidispatcherDiagramModel extends DiagramModel {
         // running this forEach directly does not work (I guess engine not fully loaded?) so we go through setTimeout:
         window.setTimeout(() =>
         this.getLinks().forEach(link => applyLink(link as MidiLinkModel)), 0);
-        
+
         this.realignGrid();
     }
 
@@ -138,7 +138,7 @@ export class MidispatcherDiagramModel extends DiagramModel {
             }
 
         });
-        
+
         this.realignGrid();
     }
 
