@@ -71,7 +71,7 @@ export class EuclidianSequencerMachine extends AbstractMachine implements Machin
             getType() { return MachineType.Emitter; },
             createWidget(engine: DiagramEngine, node: MachineNodeModel): JSX.Element { return <EuclidianSequencerNodeWidget engine={engine} size={50} machine={node.machine as EuclidianSequencerMachine} />; },
             getName(): string { return "EuclidianSequencer"; },
-            getTooltip() { return ""; },
+            getTooltip() { return "A two tracks euclidian sequencer with different combination algorithms to trigger a MIDI signal"; },
             getMachineCode() { return "euclidiansequencer" }
         }
 
