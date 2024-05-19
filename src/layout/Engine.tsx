@@ -4,10 +4,9 @@ import { BaseModel, BaseEntityEvent, BaseEvent, BaseEntity, BaseEntityGenerics }
 import { MachineSource, MachineTarget } from "../machines/Machines";
 import { MachineNodeModel } from "./Node";
 import { MidiLinkModel } from "./Link";
-import { MachineRoutings } from "../machines/MachineRoutings";
+import { MachineRoutings, ON_CYCLE_ClEARED, ON_CYCLE_DETECTED } from "../machines/MachineRoutings";
 import { MachinePortModel } from "./Port";
 
-const routings = new MachineRoutings();
 export const engine = createEngine();
 const state = engine.getStateMachine().getCurrentState();
 if (state instanceof DefaultDiagramState) {
@@ -79,21 +78,35 @@ export class CommandManager {
 export class MidispatcherDiagramModel extends DiagramModel {
 
     readonly commandManager: CommandManager;
+    private routings: MachineRoutings;
+
+    onCycleDetected: () => void;
+    onCycleCleared: () => void;
 
     deserializeModel(data: ReturnType<this["serialize"]>, engine: DiagramEngine) {
 
         super.deserializeModel(data, engine);
 
+        this.routings = new MachineRoutings()
+        this.routings.addEventListener(ON_CYCLE_DETECTED, () => { this.onCycleDetected(); });
+        this.routings.addEventListener(ON_CYCLE_ClEARED, () => { this.onCycleCleared(); });
+
         // running this forEach directly does not work (I guess engine not fully loaded?) so we go through setTimeout:
         window.setTimeout(() =>
-        this.getLinks().forEach(link => applyLink(link as MidiLinkModel)), 0);
+        this.getLinks().forEach(link => this.applyLink(link as MidiLinkModel)), 0);
 
         this.realignGrid();
     }
 
-    constructor(commandManager: CommandManager) {
+    constructor(commandManager: CommandManager, onCycleDetected: () => void, onCycleCleared: () => void) {
 
         super();
+
+        this.routings = new MachineRoutings();
+        this.onCycleDetected = onCycleDetected;
+        this.onCycleCleared = onCycleCleared;
+        this.routings.addEventListener(ON_CYCLE_DETECTED, () => { this.onCycleDetected(); });
+        this.routings.addEventListener(ON_CYCLE_ClEARED, () => { this.onCycleCleared(); });
         this.commandManager = commandManager;
 
         this.registerListener({
@@ -113,13 +126,13 @@ export class MidispatcherDiagramModel extends DiagramModel {
                         targetPortChanged: (_: BaseEvent) => {
 
                             linksUpdatedEvent.link.deregisterListener(registered);
-                            applyLink(linksUpdatedEvent.link);
+                            this.applyLink(linksUpdatedEvent.link);
                         }
                     });
                 }
                 else {
 
-                    routings.disconnect(linksUpdatedEvent.link);
+                    this.routings.disconnect(linksUpdatedEvent.link);
                 }
             },
             eventDidFire: (edf: BaseEvent) => {
@@ -179,7 +192,7 @@ export class MidispatcherDiagramModel extends DiagramModel {
             () => {
 
                 super.addLink(link);
-                applyLink(link as MidiLinkModel);
+                this.applyLink(link as MidiLinkModel);
             }
         );
 
@@ -194,7 +207,7 @@ export class MidispatcherDiagramModel extends DiagramModel {
             () => {
 
                 super.addLink(link);
-                applyLink(link as MidiLinkModel);
+                this.applyLink(link as MidiLinkModel);
             },
             () => super.removeLink(link),
         );
@@ -232,54 +245,54 @@ export class MidispatcherDiagramModel extends DiagramModel {
 
         return super.addAll(...models);
     }
+
+    applyLink(link: MidiLinkModel) {
+
+        let portSource = link.getSourcePort() as MachinePortModel;
+        let portTarget = link.getTargetPort() as MachinePortModel;
+
+        if (!portTarget.isIn) {
+
+            const temp = portTarget;
+            portTarget = portSource;
+            portSource = temp;
+        }
+
+        const sourceNode = portSource.getNode() as MachineNodeModel;
+        const machineSource = sourceNode.machine as MachineSource;
+
+        const targetNode = portTarget.getNode() as MachineNodeModel;
+        const machineTarget = targetNode.machine as MachineTarget;
+
+        if (link.getSourcePort().getName() === AllLinkCode) {
+
+            Object.keys(sourceNode.getMachinePorts()).forEach(key => {
+
+                const port = sourceNode.getMachinePorts()[key];
+                if (port.getName() !== AllLinkCode && !port.isIn) {
+
+                    const newLink = (link.getTargetPort() as MachinePortModel).link<MidiLinkModel>(port);
+                    engine.getModel().addAll(newLink);
+                    const sourceNode = port.getNode() as MachineNodeModel;
+                    const machineSource = sourceNode.machine as MachineSource;
+                    this.routings.connect(machineSource, machineTarget, port.channel, portTarget.channel, newLink);
+                }
+            });
+
+            engine.getModel().removeLink(link);
+        }
+        else if (portSource.getLinks()[portTarget.getName()] !== undefined) {
+
+            engine.getModel().removeLink(link);
+        }
+        else {
+
+            this.routings.connect(machineSource, machineTarget, portSource.channel, portTarget.channel, link);
+        }
+
+        return true;
+    }
 }
 
 // "magic" constant to create a link used to connect all other links at the same time
 export const AllLinkCode: string = "All";
-
-function applyLink(link: MidiLinkModel) {
-
-    let portSource = link.getSourcePort() as MachinePortModel;
-    let portTarget = link.getTargetPort() as MachinePortModel;
-
-    if (!portTarget.isIn) {
-
-        const temp = portTarget;
-        portTarget = portSource;
-        portSource = temp;
-    }
-
-    const sourceNode = portSource.getNode() as MachineNodeModel;
-    const machineSource = sourceNode.machine as MachineSource;
-
-    const targetNode = portTarget.getNode() as MachineNodeModel;
-    const machineTarget = targetNode.machine as MachineTarget;
-
-    if (link.getSourcePort().getName() === AllLinkCode) {
-
-        Object.keys(sourceNode.getMachinePorts()).forEach(key => {
-
-            const port = sourceNode.getMachinePorts()[key];
-            if (port.getName() !== AllLinkCode && !port.isIn) {
-
-                const newLink = (link.getTargetPort() as MachinePortModel).link<MidiLinkModel>(port);
-                engine.getModel().addAll(newLink);
-                const sourceNode = port.getNode() as MachineNodeModel;
-                const machineSource = sourceNode.machine as MachineSource;
-                routings.connect(machineSource, machineTarget, port.channel, portTarget.channel, newLink);
-            }
-        });
-
-        engine.getModel().removeLink(link);
-    }
-    else if (portSource.getLinks()[portTarget.getName()] !== undefined) {
-
-        engine.getModel().removeLink(link);
-    }
-    else {
-
-        routings.connect(machineSource, machineTarget, portSource.channel, portTarget.channel, link);
-    }
-
-    return true;
-}

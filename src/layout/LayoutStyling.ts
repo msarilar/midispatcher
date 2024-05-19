@@ -62,10 +62,24 @@ export namespace S {
         animation: ${Keyframes} 0.5s linear infinite;
     `;
 
-    export const Path = styled.path<{ selected: boolean, sending: boolean }>`
+    const InCycleWarningAnimation = keyframes`
+        0%, 100% {
+            stroke: rgba(255, 80, 80);
+        }
+        50% {
+            stroke: rgba(120, 120, 120);
+        }
+    `;
+
+    export const MidiLink = styled.path<{ selected: boolean, sending: boolean, inCycle: boolean }>`
         ${(p) => p.selected && selected};
         ${(p) => p.sending && sending};
         fill: none;
+
+        animation: ${(p) => p.inCycle ? InCycleWarningAnimation : "none" };
+        animation-duration: 0.5s;
+        animation-timing-function: ease-in-out;
+        animation-iteration-count: infinite;
         pointer-events: auto;
     `;
 
@@ -75,7 +89,6 @@ export namespace S {
         border-radius: 5px;
         font-family: sans-serif;
         color: white;
-        border: solid 2px black;
         overflow: visible;
         font-size: 11px;
         border: solid 2px ${(p) => (p.selected ? "rgb(0,192,255)" : "black")};
@@ -99,7 +112,7 @@ export namespace S {
 
     export const Ports = styled.div`
         display: flex;
-        background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.2));
+        background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
     `;
 
     export const PortsContainer = styled.div`
@@ -198,7 +211,7 @@ export namespace S {
         width: 32px;
         height: 32px;
         margin: 0px;
-    `
+    `;
 
     export const GitHub = styled.img`
         width: 32px;
@@ -210,7 +223,7 @@ export namespace S {
             filter: invert(0.5) sepia(1) saturate(5) hue-rotate(175deg);
         };
         transition: all 0.3s ease-in-out;
-    `
+    `;
 
     export const Animation = keyframes`
         to {

@@ -5,14 +5,14 @@ import { S } from "./LayoutStyling";
 
 const MidiLinkWidget: React.FunctionComponent<DefaultLinkProps> = (props) => {
 
-	const [_, setSelected] = React.useState(false);
+	const [refresh, toggleRefresh] = React.useState(false);
 
     React.useEffect(() => {
 
         const model = props.link as MidiLinkModel;
-        model.setSendingCallback(sending => {
+        model.setRefreshCallback(() => {
 
-            setSelected(sending);
+            toggleRefresh(!refresh);
         });
     });
 
@@ -39,9 +39,10 @@ export class MidiLinkFactory extends DefaultLinkFactory {
     generateLinkSegment(model: MidiLinkModel, selected: boolean, path: string) {
 
         return (
-            <S.Path
+            <S.MidiLink
                 selected={selected}
                 sending={model.sending}
+                inCycle={model.inCycle}
                 stroke={selected ? model.getOptions().selectedColor : model.getOptions().color}
                 strokeWidth={model.getOptions().width}
                 d={path}
@@ -53,12 +54,23 @@ export class MidiLinkFactory extends DefaultLinkFactory {
 export class MidiLinkModel extends DefaultLinkModel {
 
     sending: boolean;
+    inCycle: boolean;
     sendingTimeout: NodeJS.Timeout | undefined;
-    private sendingCallback?: (sending: boolean) => void;
+    private refreshCallback?: () => void;
 
-    setSendingCallback(callback: (sending: boolean) => void) {
+    setRefreshCallback(callback: () => void) {
 
-        this.sendingCallback = callback;
+        this.refreshCallback = callback;
+    }
+
+    setInCycle(inCycle: boolean) {
+
+        const changed = this.inCycle !== inCycle;
+        this.inCycle = inCycle;
+        if (changed) {
+
+            this.refreshCallback?.();
+        }
     }
 
     setSending(sending: boolean) {
@@ -81,7 +93,7 @@ export class MidiLinkModel extends DefaultLinkModel {
 
         if (changed) {
 
-            this.sendingCallback?.(sending);
+            this.refreshCallback?.();
         }
     }
 
@@ -95,5 +107,6 @@ export class MidiLinkModel extends DefaultLinkModel {
 
         this.options.extras = false;
         this.sending = false;
+        this.inCycle = false;
     }
 }

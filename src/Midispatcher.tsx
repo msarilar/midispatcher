@@ -2,7 +2,7 @@
 import Modal from "react-modal";
 
 import { CanvasWidget, ZoomCanvasAction, InputType } from "@projectstorm/react-canvas-core";
-import { Box, TextField } from "@mui/material";
+import { Alert, AlertColor, Box, Snackbar, TextField } from "@mui/material";
 import * as WebMidi from "webmidi";
 import Disqus, { CommentCount } from "disqus-react"
 import LZString from "lz-string";
@@ -34,17 +34,6 @@ window.addEventListener("keydown", (event: any) => {
         engine.repaintCanvas();
     }
 });
-
-engine.getPortFactories().registerFactory(new MachinePortFactory());
-
-const model = new MidispatcherDiagramModel(commandManager)
-model.setGridSize(25);
-engine.setModel(model);
-
-const eventBus = engine.getActionEventBus();
-const action = eventBus.getActionsForType(InputType.MOUSE_WHEEL)[0];
-eventBus.deregisterAction(action);
-eventBus.registerAction(new ZoomCanvasAction( { inverseZoom: true }));
 
 interface MidispatcherState {
 
@@ -99,6 +88,27 @@ let demoIndex = 0;
 
 const Midispatcher: React.FunctionComponent = () => {
 
+    const [toastOpened, setToastOpened] = React.useState<{ severity: AlertColor, content: string } | undefined>(undefined);
+    const handleCloseToast = (e?: React.SyntheticEvent | Event, reason?: string) => {
+
+        if (reason === 'clickaway') {
+
+            return;
+        }
+
+        setToastOpened(undefined);
+    };
+
+    const onCycleDetected = () => {
+
+        setToastOpened({ severity: "warning", content: "Cycle detected! To avoid infinite feedback loop, red links are disabled" });
+    };
+
+    const onCycleCleared = () => {
+
+        setToastOpened({ severity: "success", content: "Cycle(s) cleared" });
+    };
+
     const [state, dispatch] = React.useReducer(midispatcherReducer, defaultMidispatcherState);
     engine.getLinkFactories().registerFactory(new MidiLinkFactory());
 
@@ -113,7 +123,16 @@ const Midispatcher: React.FunctionComponent = () => {
                     (node as MachineNodeModel).dispose();
                 });
 
-                const model = new MidispatcherDiagramModel(commandManager);
+                const model = new MidispatcherDiagramModel(commandManager, onCycleDetected, onCycleCleared);
+                model.onCycleDetected = () => {
+
+                    setToastOpened({ severity: "warning", content: "Cycle detected! To avoid infinite feedback loop, red links are disabled" });
+                };
+                model.onCycleCleared = () => {
+
+                    setToastOpened({ severity: "success", content: "Cycle(s) cleared" });
+                };
+
                 try {
 
                     const json = fromJson(action.result.data);
@@ -149,6 +168,8 @@ const Midispatcher: React.FunctionComponent = () => {
 
                 engine.getNodeFactories().deregisterFactory("machine");
                 engine.getNodeFactories().registerFactory(new MachineNodeFactory(state.machineFactories));
+                const totalDevices = action.result.inputs.length + action.result.outputs.length;
+                setToastOpened({ severity: "success", content: `${totalDevices} MIDI device(s) loaded!` });
 
                 return {
 
@@ -185,7 +206,21 @@ const Midispatcher: React.FunctionComponent = () => {
         }
     }
 
+    // need this to run before first render:
+    React.useMemo(() => {
+
+        const model = new MidispatcherDiagramModel(commandManager, onCycleDetected, onCycleCleared);
+        model.setGridSize(25);
+        engine.setModel(model);
+    }, []);
+
     React.useEffect(() => {
+        engine.getPortFactories().registerFactory(new MachinePortFactory());
+
+        const eventBus = engine.getActionEventBus();
+        const action = eventBus.getActionsForType(InputType.MOUSE_WHEEL)[0];
+        eventBus.deregisterAction(action);
+        eventBus.registerAction(new ZoomCanvasAction( { inverseZoom: true }));
 
         Object.values(MachineType).forEach((key) => {
 
@@ -198,7 +233,6 @@ const Midispatcher: React.FunctionComponent = () => {
             }
         });
         engine.getNodeFactories().registerFactory(new MachineNodeFactory(state.machineFactories));
-        dispatch({ type: MidispatcherActionType.Refresh, result: {} });
 
         if (navigator.requestMIDIAccess != undefined) {
 
@@ -207,13 +241,13 @@ const Midispatcher: React.FunctionComponent = () => {
                 .then(() => dispatch({ type: MidispatcherActionType.MidiLoaded, result: { inputs: WebMidi.WebMidi.inputs, outputs: WebMidi.WebMidi.outputs } }))
                 .catch(err => {
 
-                    alert("Can't connect to your MIDI devices:\r\n" + err);
+                    setToastOpened({ severity: "error", content: `Can't connect to your MIDI devices:\r\n${err}` });
                     dispatch({ type: MidispatcherActionType.MidiLoaded, result: { inputs: WebMidi.WebMidi.inputs, outputs: WebMidi.WebMidi.outputs } });
                 });
         }
         else {
 
-            alert("Can't connect to your MIDI devices:\r\nWeb MIDI API is not available on your browser");
+            setToastOpened({ severity: "error", content: "Can't connect to your MIDI devices:\r\nWeb MIDI API is not available on your browser" });
         }
 
         fetch("https://raw.githubusercontent.com/msarilar/midispatcher/main/saves/demos.json")
@@ -230,7 +264,9 @@ const Midispatcher: React.FunctionComponent = () => {
             .catch(err => {
 
                 alert("Issue when trying to retrieve demos:\r\n" + err);
-            })
+            });
+
+        dispatch({ type: MidispatcherActionType.Refresh, result: {} });
     }, []);
 
     function onDrop<T>(event: React.DragEvent<T>) {
@@ -336,9 +372,6 @@ const Midispatcher: React.FunctionComponent = () => {
                 }}>
                     Load
                 </WorkspaceButton>,
-                <WorkspaceButton key={"resetViewButtonKey"} onClick={() => { engine.zoomToFit(); model.realignGrid(); }}>
-                    Reset View
-                </WorkspaceButton>,
                 <WorkspaceButton key={"helpButtonKey"} onClick={() => dispatch({ type: MidispatcherActionType.ToggleModal, result: { modalContent: helpModalContent } })}>
                     Help
                 </WorkspaceButton>,
@@ -389,6 +422,18 @@ const Midispatcher: React.FunctionComponent = () => {
                     <Disqus.DiscussionEmbed shortname={disqusShortname} config={disqusConfig} />
                 </S.Disqus>
             </S.Body>
+
+            <Snackbar open={toastOpened != undefined}
+                      autoHideDuration={toastOpened?.severity === "error" || toastOpened?.severity === "warning" ? undefined : 6000}
+                      onClose={handleCloseToast}
+                      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+                <Alert onClose={handleCloseToast}
+                       severity={toastOpened?.severity}
+                       variant="filled"
+                       sx={{ width: '100%' }}>
+                    {toastOpened?.content}
+                </Alert>
+            </Snackbar>
         </Workspace>
     )
 }
