@@ -62,6 +62,11 @@ export namespace S {
         animation: ${Keyframes} 0.5s linear infinite;
     `;
 
+    const inCycle = css`
+        stroke-dasharray: 2, 2;
+        animation: ${Keyframes} 0.5s linear infinite;
+    `;
+
     const InCycleWarningAnimation = keyframes`
         0%, 100% {
             stroke: rgba(255, 80, 80);
@@ -74,6 +79,7 @@ export namespace S {
     export const MidiLink = styled.path<{ selected: boolean, sending: boolean, inCycle: boolean }>`
         ${(p) => p.selected && selected};
         ${(p) => p.sending && sending};
+        ${(p) => p.inCycle && inCycle};
         fill: none;
 
         animation: ${(p) => p.inCycle ? InCycleWarningAnimation : "none" };
@@ -154,9 +160,9 @@ export namespace S {
         background: ${(p) => p.open ? "rgb(50, 100, 50)" : "rgb(60, 192, 60)"};
         width: ${(props) => (props.open ? "100%" : "40px")};
         float: right;
-        padding: 5px 10px;
+        padding: 5px 8px;
         border: solid;
-        border-width: 1px;
+        border-width: 2px;
         white-space:nowrap;
         border-color: rgb(60, 60, 60);
         color: white;
@@ -166,6 +172,8 @@ export namespace S {
         margin-top: 1px;
         border-radius: 5px;
         transition: all 0.2s ease-in-out;
+        font-family: helvetica;
+        font-variant-caps: all-small-caps;
     `;
 
     export const Tooltip = styled.h2`
@@ -177,13 +185,34 @@ export namespace S {
     export const TrayChildrens = styled.div<{ open: boolean }>`
         transition: all 0.3s ease-in-out;
         opacity: ${(props) => (props.open ? "1" : "0")};
+
+        width: 100%;
+        height: 89vh;
+        overflow-y: ${(props) => (props.open ? "auto" : "hidden")};
+        overflow-x: hidden;
+
+        &::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            border-radius: 8px;
+            border: 3px solid transparent;
+            background-clip: content-box;
+            background-color: #d55959;
+        }
+
+        &::-webkit-scrollbar-track {
+            border-radius: 8px;
+            background-color: #121212;
+            border: 1px solid #232323;
+        }
     `;
 
     export const Tray = styled.div<{ open: boolean }>`
-        max-width: ${(props) => (props.open ? "200px" : "50px")};
+        max-width: ${(props) => (props.open ? "200px" : "41px")};
         background: rgb(20, 20, 20);
-        flex-grow: 0;
-        flex-shrink: 0;
         font-size: 14px;
         transition: all 0.2s ease-in-out;
     `;
@@ -196,12 +225,14 @@ export namespace S {
         font-family: Helvetica, Arial;
         padding: 5px;
         margin: 0px 10px;
-        margin-top: ${(p) => p.isLabel ? "15px" : "0px"};
+        margin-top: ${(p) => p.isLabel ? "10px" : "0px"};
         text-align: ${(p) => p.isLabel ? "center" : "left"};
         background: ${(p) => p.background};
         border: solid 1px ${(p) => p.color};
         border-radius: 5px;
         margin-bottom: 2px;
+        margin-left: 2px;
+        margin-right: 2px;
         cursor: pointer;
         font-weight: ${(p) => p.isLabel ? "bold" : "unset"};
     `;
@@ -256,6 +287,27 @@ export namespace S {
         padding: 5px;
         display: flex;
         flex-shrink: 0;
+        
+        overflow-y: hidden;
+        overflow-x: auto;
+
+        &::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            border-radius: 8px;
+            border: 3px solid transparent;
+            background-clip: content-box;
+            background-color: #d55959;
+        }
+
+        &::-webkit-scrollbar-track {
+            border-radius: 8px;
+            background-color: #121212;
+            border: 1px solid #232323;
+        }
     `;
 
     export const Content = styled.div`
@@ -290,20 +342,20 @@ export namespace S {
         background-color: #202020;
 
         &::-webkit-scrollbar {
-
             width: 12px;
         }
 
-        &::-webkit-scrollbar-track {
-
-            -webkit-box-shadow: inset 0 0 6px #0096ff;
-            border-radius: 0px;
+        &::-webkit-scrollbar-thumb {
+            border-radius: 8px;
+            border: 3px solid transparent;
+            background-clip: content-box;
+            background-color: #d55959;
         }
 
-        &::-webkit-scrollbar-thumb {
-
-            border-radius: 0px;
-            -webkit-box-shadow: inset 0 0 6px white;
+        &::-webkit-scrollbar-track {
+            border-radius: 8px;
+            background-color: #121212;
+            border: 1px solid #232323;
         }
     `;
 
