@@ -94,7 +94,7 @@ export class MidiFileMachine extends AbstractMachine implements MachineSourceTar
 
             for (let i = 0; i < config.tracks.length; i++) {
 
-                this.getNode().addMachineOutPort(config.tracks[i].name + "(" + i + ")", i + 1);
+                this.getNode().addMachineOutPort(config.tracks[i].name, i + 1);
                 config.tracks[i].currentClock = 0;
                 config.tracks[i].currentEvent = 0;
             }

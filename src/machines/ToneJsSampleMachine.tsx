@@ -140,8 +140,8 @@ interface ToneJsSampleMachineConfig {
     readonly volume: number;
 }
 
-@registeredMachine
 @registeredMachineWithParameter<Instrument>("Drum")
+@registeredMachine
 export class ToneJsSampleMachine extends AbstractMachine implements MachineTarget {
 
     private sampler: Tone.Sampler;

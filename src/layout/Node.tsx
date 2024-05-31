@@ -192,9 +192,12 @@ export const MachineNodeWidget: React.FunctionComponent<MachineNodeProps> = prop
         setSettingsAnchor(event.currentTarget);
     };
 
-    const handleDuplicate = () => {
+    const handleDuplicate = (event: React.MouseEvent<HTMLElement>) => {
 
         const clone = props.node.machine.getFactory().createMachine(props.node.machine.getState()).getNode();
+        
+        var point = props.engine.getRelativeMousePoint(event);
+        clone.setPosition(point);
         props.engine.getModel().addAll(clone);
         handleSettingsClose();
         props.engine.repaintCanvas();

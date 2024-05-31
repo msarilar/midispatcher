@@ -242,6 +242,7 @@ export namespace S {
         width: 32px;
         height: 32px;
         margin: 0px;
+        overflow: hidden;
     `;
 
     export const GitHub = styled.img`
