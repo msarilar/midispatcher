@@ -1,11 +1,11 @@
 import createEngine, { DefaultDiagramState, DiagramEngine, DiagramModel, LinkModel, LinkModelGenerics, NodeModel } from "@projectstorm/react-diagrams";
 import { BaseModel, BaseEntityEvent, BaseEvent, BaseEntity, BaseEntityGenerics } from "@projectstorm/react-canvas-core";
 
-import { MachineSource, MachineTarget } from "../machines/Machines";
+import { Machine, MachineModulable, MachineModulator, MachineSource, MachineTarget } from "../machines/Machines";
 import { MachineNodeModel } from "./Node";
 import { MidiLinkModel } from "./Link";
 import { MachineRoutings, ON_CYCLE_ClEARED, ON_CYCLE_DETECTED } from "../machines/MachineRoutings";
-import { MachinePortModel } from "./Port";
+import { MachinePortModel, MidiPortModel } from "./Port";
 
 export const engine = createEngine();
 const state = engine.getStateMachine().getCurrentState();
@@ -259,40 +259,57 @@ export class MidispatcherDiagramModel extends DiagramModel {
         }
 
         const sourceNode = portSource.getNode() as MachineNodeModel;
-        const machineSource = sourceNode.machine as MachineSource;
-
         const targetNode = portTarget.getNode() as MachineNodeModel;
-        const machineTarget = targetNode.machine as MachineTarget;
 
-        if (link.getSourcePort().getName() === AllLinkCode) {
+        if (portSource instanceof MidiPortModel !== portTarget instanceof MidiPortModel) {
 
-            Object.keys(sourceNode.getMachinePorts()).forEach(key => {
+            // trying to connect a modulation port to a midi port is not allowed
+            engine.getModel().removeLink(link);
+            return;
+        }
 
-                const port = sourceNode.getMachinePorts()[key];
-                if (port.getName() !== AllLinkCode && !port.isIn) {
-
-                    const newLink = (link.getTargetPort() as MachinePortModel).link<MidiLinkModel>(port);
-                    engine.getModel().addAll(newLink);
-                    const sourceNode = port.getNode() as MachineNodeModel;
-                    const machineSource = sourceNode.machine as MachineSource;
-                    this.routings.connect(machineSource, machineTarget, port.channel, portTarget.channel, newLink);
-                }
-            });
+        if (portSource.getLinks()[portTarget.getName()] !== undefined) {
 
             engine.getModel().removeLink(link);
         }
-        else if (portSource.getLinks()[portTarget.getName()] !== undefined) {
 
-            engine.getModel().removeLink(link);
-        }
-        else {
+        if (portSource instanceof MidiPortModel) {
 
-            this.routings.connect(machineSource, machineTarget, portSource.channel, portTarget.channel, link);
+            const machineSource = sourceNode.machine as MachineSource;
+            const machineTarget = targetNode.machine as MachineTarget;
+            const midiPortTarget = portTarget as MidiPortModel;
+            const midiPortSource = portSource as MidiPortModel;
+
+            if (link.getSourcePort().getName() === AllMidiPortsCode) {
+
+                sourceNode.getMachineMidiPortsOut().forEach(port => {
+    
+                    if (port.getName() !== AllMidiPortsCode) {
+    
+                        const newLink = portTarget.link<MidiLinkModel>(port);
+                        engine.getModel().addAll(newLink);
+                        this.routings.connectMidi(machineSource, machineTarget, port.channel, midiPortTarget.channel, newLink);
+                    }
+                });
+    
+                engine.getModel().removeLink(link);
+            }
+            else {
+
+                this.routings.connectMidi(machineSource, machineTarget, midiPortSource.channel, midiPortTarget.channel, link);
+            }
+
+            return;
         }
+
+        const machineSource = sourceNode.machine as MachineModulator;
+        const machineTarget = targetNode.machine as MachineModulable;
+        
+        this.routings.connectModulation(machineSource, machineTarget, link);
 
         return true;
     }
 }
 
 // "magic" constant to create a link used to connect all other links at the same time
-export const AllLinkCode: string = "All";
+export const AllMidiPortsCode: string = "All";

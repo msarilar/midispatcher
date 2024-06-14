@@ -1,7 +1,7 @@
 import * as WebMidi from "webmidi";
 
 import { notesOff } from "../Utils";
-import { AllLinkCode } from "../layout/Engine";
+import { AllMidiPortsCode } from "../layout/Engine";
 import { AbstractMachine, MachineFactory, MachineMessage, MachineSource, MachineTarget, MachineType, MessageResult } from "./Machines";
 
 export class MidiMachineSource extends AbstractMachine implements MachineSource {
@@ -38,7 +38,7 @@ export class MidiMachineSource extends AbstractMachine implements MachineSource 
             this.getNode().addMachineOutPort("Channel " + (i + 1), i + 1);
         }
 
-        this.getNode().addMachineOutPort(AllLinkCode, this.midiInput.channels.length + 1);
+        this.getNode().addMachineOutPort(AllMidiPortsCode, this.midiInput.channels.length + 1);
 
         signals.forEach(signal => {
 

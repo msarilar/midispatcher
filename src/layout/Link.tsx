@@ -56,6 +56,7 @@ export class MidiLinkModel extends DefaultLinkModel {
     sending: boolean;
     inCycle: boolean;
     sendingTimeout: NodeJS.Timeout | undefined;
+    private deleteCallback: Function | undefined;
     private refreshCallback?: () => void;
 
     setRefreshCallback(callback: () => void) {
@@ -71,6 +72,16 @@ export class MidiLinkModel extends DefaultLinkModel {
 
             this.refreshCallback?.();
         }
+    }
+
+    setDeleteCallback(deleteCallback: Function) {
+
+        this.deleteCallback = deleteCallback;
+    }
+
+    invokeDeleteCallback() {
+
+        this.deleteCallback?.();
     }
 
     setSending(sending: boolean) {

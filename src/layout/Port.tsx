@@ -4,10 +4,10 @@ import React from "react";
 
 import { MidiLinkModel } from "./Link";
 import { S } from "./LayoutStyling";
+import { MachineModulable, MachineModulator } from "../machines/Machines";
 
-export class MachinePortModel extends DefaultPortModel {
+export abstract class MachinePortModel extends DefaultPortModel {
 
-    channel: number;
     isIn: boolean;
     portActive: boolean;
     sendingTimeout: NodeJS.Timeout | undefined;
@@ -21,11 +21,10 @@ export class MachinePortModel extends DefaultPortModel {
         this.sendingCallback = callback;
     }
 
-    constructor(options: DefaultPortModelOptions, channel?: number) {
+    constructor(options: DefaultPortModelOptions) {
 
         super({ ...options, type: "machine" });
 
-        this.channel = channel ?? -1;
         this.isIn = options.in!;
         this.portActive = false;
     }
@@ -37,14 +36,13 @@ export class MachinePortModel extends DefaultPortModel {
 
     serialize() {
 
-        return { ...super.serialize(), isIn: this.isIn, channel: this.channel };
+        return { ...super.serialize(), isIn: this.isIn };
     }
 
     deserialize(e: DeserializeEvent<this>) {
 
         super.deserialize(e);
         this.isIn = e.data.isIn;
-        this.channel = e.data.channel;
     }
 
     setSending(sending: boolean) {
@@ -71,6 +69,53 @@ export class MachinePortModel extends DefaultPortModel {
     }
 }
 
+export class MidiPortModel extends MachinePortModel {
+
+    channel: number;
+    
+    constructor(options: DefaultPortModelOptions, channel: number) {
+
+        super({ ...options, type: "machine" });
+
+        this.channel = channel ?? -1;
+    }
+
+    serialize() {
+
+        return { ...super.serialize(), channel: this.channel };
+    }
+
+    deserialize(e: DeserializeEvent<this>) {
+
+        super.deserialize(e);
+        this.channel = e.data.channel;
+    }
+}
+
+export class ModulationPortOut extends MachinePortModel {
+
+    modulator: MachineModulator;
+    
+    constructor(options: DefaultPortModelOptions, modulator: MachineModulator) {
+
+        super({ ...options, type: "machine" });
+
+        this.modulator = modulator;
+    }
+}
+
+export class ModulationPortIn extends MachinePortModel {
+
+    modulable: MachineModulable;
+
+    constructor(options: DefaultPortModelOptions, modulable: MachineModulable) {
+
+        super({ ...options, type: "machine" });
+
+        this.modulable = modulable;
+    }
+}
+
 export class MachinePortFactory extends AbstractModelFactory<MachinePortModel, DiagramEngine> {
 
     constructor() {
@@ -80,7 +125,7 @@ export class MachinePortFactory extends AbstractModelFactory<MachinePortModel, D
 
     generateModel(event: any): MachinePortModel {
 
-        return new MachinePortModel({
+        return new MidiPortModel({
 
             in: true,
             name: event.name,
@@ -91,6 +136,7 @@ export class MachinePortFactory extends AbstractModelFactory<MachinePortModel, D
 }
 
 interface MachinePortLabelProps {
+
 	port: MachinePortModel;
 	engine: DiagramEngine;
 }

@@ -1,7 +1,7 @@
 import * as MidiParser from "midi-parser-js";
 import * as WebMidi from "webmidi";
 
-import { AllLinkCode } from "../layout/Engine";
+import { AllMidiPortsCode } from "../layout/Engine";
 import { AbstractMachine, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
 
 interface TrackEvent extends MachineMessage {
@@ -72,7 +72,7 @@ export class MidiFileMachine extends AbstractMachine implements MachineSourceTar
 
                 const parsedConfig = MidiFileMachine.createMidiConfig(obj, input);
 
-                this.getNode().addMachineOutPort(AllLinkCode, 0);
+                this.getNode().addMachineOutPort(AllMidiPortsCode, 0);
 
                 for(let i = 0; i < parsedConfig.tracks.length; i++) {
 
@@ -90,7 +90,7 @@ export class MidiFileMachine extends AbstractMachine implements MachineSourceTar
         }
         else {
 
-            this.getNode().addMachineOutPort(AllLinkCode, 0);
+            this.getNode().addMachineOutPort(AllMidiPortsCode, 0);
 
             for (let i = 0; i < config.tracks.length; i++) {
 

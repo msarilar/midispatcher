@@ -4,11 +4,14 @@ import * as Tone from "tone";
 
 import { S } from "./MachineStyling";
 import { MachineNodeModel } from "./../layout/Node";
-import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
+import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineModulable, MachineModulator, MachineTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
 import { AudioNodeVizualizer } from "./Visualizers";
+
+type OscillatorMode = "carrier" | "operator";
 
 interface OscillatorConfig {
 
+    readonly mode: OscillatorMode;
     readonly volume: number;
     readonly waveform: OscillatorType;
     readonly detune: number;
@@ -19,7 +22,7 @@ interface OscillatorConfig {
 }
 
 @registeredMachine
-export class OscillatorMachine extends AbstractMachine implements MachineTarget {
+export class OscillatorMachine extends AbstractMachine implements MachineTarget, MachineModulable, MachineModulator {
 
     private static factory: MachineFactory;
     private readonly oscillators: { [frequency: number]: OscillatorNode } = {}
@@ -28,6 +31,7 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
     public readonly analyzer: AnalyserNode;
     private state: OscillatorConfig;
     private turnedOff: boolean = false;
+    private operator: OscillatorNode | undefined;
 
     getFactory() { return OscillatorMachine.factory; }
 
@@ -43,15 +47,9 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
 
         super();
 
-        this.mainGainNode = Tone.getContext().createGain();
-        this.mainGainNode.connect(Tone.getContext().rawContext.destination);
-
-        this.analyzer = Tone.getContext().createAnalyser();
-        this.analyzer.connect(this.mainGainNode);
-
         this.state = config ??
         {
-
+            mode: "carrier",
             volume: 0.1,
             waveform: "square",
             detune: 0,
@@ -61,14 +59,22 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
             filterGain: 0 // -40 to 40
         };
 
-        this.mainGainNode.gain.value = this.state.volume / 4;
-
+        this.mainGainNode = Tone.getContext().createGain();
+        this.analyzer = Tone.getContext().createAnalyser();
         this.filter = Tone.getContext().createBiquadFilter();
-        this.applyFilterOptions(this.state);
 
+
+        this.analyzer.connect(this.mainGainNode);
+
+        this.applyFilterOptions(this.state);
         this.filter.connect(this.analyzer);
 
-        this.getNode().addMachineInPort("In", 1);
+        this.setState(this.state);
+
+        this.getNode().addMachineInPort("MIDI In", 1);
+
+        this.getNode().addModulationInput(this);
+        this.getNode().addModulationOutput(this);
     }
 
     static buildFactory(): MachineFactory {
@@ -104,6 +110,25 @@ export class OscillatorMachine extends AbstractMachine implements MachineTarget 
         if (this.state.detune !== options.detune) {
 
             this.stopAllOscillators();
+        }
+
+        if (this.state.mode !== options.mode) {
+
+            this.stopAllOscillators();
+            switch (options.mode) {
+    
+                case "carrier":
+                    this.operator?.stop();
+                    this.mainGainNode.connect(Tone.getContext().rawContext.destination);
+                    break;
+                case "operator":
+                    this.mainGainNode.disconnect();
+                    this.operator = Tone.getContext().createOscillator();
+                    this.operator.connect(this.filter);
+                    this.operator.type = this.state.waveform;
+                    this.operator.start();
+                    break;
+            }
         }
 
         this.state = options;
@@ -184,6 +209,15 @@ const OscillatorNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<Oscill
 
     return (
         <S.SettingsBar>
+            <S.Dropdown>
+                <span>Mode: </span>
+                <select name="mode"
+                    value={state.mode}
+                    onChange={e => { update({ ...state, mode: e.target.value as OscillatorMode }) }}                    >
+                    <option value="carrier">carrier</option>
+                    <option value="operator">operator</option>
+                </select>
+            </S.Dropdown>
             <S.Slider>
                 <span>Volume: </span>
                 <input

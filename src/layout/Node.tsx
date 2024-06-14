@@ -4,10 +4,11 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import { NodeModel, PortModelAlignment, NodeModelGenerics, DiagramEngine } from "@projectstorm/react-diagrams";
 import { BaseEvent, AbstractReactFactory, GenerateWidgetEvent, GenerateModelEvent, BasePositionModelOptions } from "@projectstorm/react-canvas-core";
 
-import { Machine, MachineFactory, machineTypeToColor } from "./../machines/Machines";
-import { MachinePortLabel, MachinePortModel } from "./Port";
+import { Machine, MachineFactory, MachineModulable, MachineModulator, machineTypeToColor } from "./../machines/Machines";
+import { MachinePortLabel, MachinePortModel, MidiPortModel, ModulationPortIn, ModulationPortOut } from "./Port";
 import { S } from "./LayoutStyling";
 import { IconButton, Menu, MenuItem } from "@mui/material";
+import assert from "assert";
 
 interface DefaultNodeModelOptions extends BasePositionModelOptions {
 
@@ -22,8 +23,12 @@ interface DefaultNodeModelGenerics extends NodeModelGenerics {
 
 export class MachineNodeModel extends NodeModel<DefaultNodeModelGenerics> {
 
-    protected portsIn: MachinePortModel[];
-    protected portsOut: MachinePortModel[];
+    protected midiPortsIn: MidiPortModel[];
+    protected midiPortsOut: MidiPortModel[];
+
+    protected modulationPortsIn: ModulationPortIn[];
+    protected modulationPortsOut: ModulationPortOut[];
+
     readonly machine: Machine;
     constructor(machine: Machine, type?: string, factory?: MachineFactory) {
 
@@ -34,8 +39,10 @@ export class MachineNodeModel extends NodeModel<DefaultNodeModelGenerics> {
             color: machineTypeToColor((factory ?? machine.getFactory()).getType())
         });
 
-        this.portsOut = [];
-        this.portsIn = [];
+        this.midiPortsOut = [];
+        this.midiPortsIn = [];
+        this.modulationPortsOut = [];
+        this.modulationPortsIn = [];
         this.machine = machine;
         this.machine.setNode(this);
 
@@ -57,26 +64,36 @@ export class MachineNodeModel extends NodeModel<DefaultNodeModelGenerics> {
             state: this.machine.getState() };
     }
 
-    getInPorts(): MachinePortModel[] {
+    getMidiInPorts(): MidiPortModel[] {
 
-        return this.portsIn;
+        return this.midiPortsIn;
     }
 
-    getOutPorts(): MachinePortModel[] {
+    getMidiOutPorts(): MidiPortModel[] {
 
-        return this.portsOut;
+        return this.midiPortsOut;
     }
 
-    removePort(port: MachinePortModel) {
+    getModulationInPorts(): ModulationPortIn[] {
+
+        return this.modulationPortsIn;
+    }
+
+    getModulationOutPorts(): ModulationPortOut[] {
+
+        return this.modulationPortsOut;
+    }
+
+    removeMidiPort(port: MidiPortModel) {
 
         if (port.getOptions().in) {
 
-            const index = this.portsIn.indexOf(port);
-            this.portsIn.splice(index, 1);
+            const index = this.midiPortsIn.indexOf(port);
+            this.midiPortsIn.splice(index, 1);
         } else {
 
-            const index = this.portsOut.indexOf(port);
-            this.portsOut.splice(index, 1);
+            const index = this.midiPortsOut.indexOf(port);
+            this.midiPortsOut.splice(index, 1);
         }
 
         super.removePort(port);
@@ -85,26 +102,13 @@ export class MachineNodeModel extends NodeModel<DefaultNodeModelGenerics> {
     addPort(port: MachinePortModel): MachinePortModel {
 
         super.addPort(port);
-        if (port.getOptions().in) {
-
-            if (this.portsIn.indexOf(port) === -1) {
-
-                this.portsIn.push(port);
-            }
-        } else {
-
-            if (this.portsOut.indexOf(port) === -1) {
-
-                this.portsOut.push(port);
-            }
-        }
-
+        console.log(this.midiPortsOut);
         return port;
     }
 
     addMachineOutPort(label: string, channel: number): MachinePortModel {
 
-        const p = new MachinePortModel({
+        const port = new MidiPortModel({
 
             in: false,
             name: label,
@@ -112,12 +116,17 @@ export class MachineNodeModel extends NodeModel<DefaultNodeModelGenerics> {
             alignment: PortModelAlignment.RIGHT
         }, channel);
 
-        return this.addPort(p);
+        if (this.midiPortsOut.indexOf(port) === -1) {
+
+            this.midiPortsOut.push(port);
+        }
+
+        return this.addPort(port);
     }
 
     addMachineInPort(label: string, channel: number): MachinePortModel {
 
-        const p = new MachinePortModel({
+        const port = new MidiPortModel({
 
             in: true,
             name: label,
@@ -125,12 +134,58 @@ export class MachineNodeModel extends NodeModel<DefaultNodeModelGenerics> {
             alignment: PortModelAlignment.LEFT
         }, channel);
 
-        return this.addPort(p);
+        if (this.midiPortsIn.indexOf(port) === -1) {
+
+            this.midiPortsIn.push(port);
+        }
+
+        return this.addPort(port);
+    }
+
+    addModulationInput(modulable: MachineModulable): MachinePortModel {
+
+        const port = new ModulationPortIn({
+
+            in: true,
+            name: "Mod In",
+            label: "Mod In",
+            alignment: PortModelAlignment.LEFT
+        }, modulable);
+
+        if (this.modulationPortsIn.indexOf(port) === -1) {
+
+            this.modulationPortsIn.push(port);
+        }
+
+        return this.addPort(port);
+    }
+
+    addModulationOutput(modulator: MachineModulator): MachinePortModel {
+
+        const port = new ModulationPortOut({
+
+            in: false,
+            name: "Mod Out",
+            label: "Mod Out",
+            alignment: PortModelAlignment.LEFT
+        }, modulator);
+
+        if (this.modulationPortsOut.indexOf(port) === -1) {
+
+            this.modulationPortsOut.push(port);
+        }
+
+        return this.addPort(port);
     }
 
     getMachinePorts(): { [s: string]: MachinePortModel } {
 
         return this.getPorts() as { [s: string]: MachinePortModel };
+    }
+
+    getMachineMidiPortsOut(): MidiPortModel[] {
+
+        return this.midiPortsOut;
     }
 }
 
@@ -248,8 +303,12 @@ export const MachineNodeWidget: React.FunctionComponent<MachineNodeProps> = prop
                 </Menu>
             </S.Title>
             <S.Ports>
-                <S.PortsContainer>{Object.values(props.node.getInPorts()).map(generatePort)}</S.PortsContainer>
-                <S.PortsContainer>{Object.values(props.node.getOutPorts()).map(generatePort)}</S.PortsContainer>
+                <S.PortsContainer>{Object.values(props.node.getMidiInPorts()).map(generatePort)}</S.PortsContainer>
+                <S.PortsContainer>{Object.values(props.node.getMidiOutPorts()).map(generatePort)}</S.PortsContainer>
+            </S.Ports>
+            <S.Ports>
+                <S.PortsContainer>{Object.values(props.node.getModulationInPorts()).map(generatePort)}</S.PortsContainer>
+                <S.PortsContainer>{Object.values(props.node.getModulationOutPorts()).map(generatePort)}</S.PortsContainer>
             </S.Ports>
             {
                 props.customWidget && (

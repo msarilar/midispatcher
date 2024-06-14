@@ -1,5 +1,5 @@
 import { gsStandardSetDrumKit, gsStandardSetDrumKitMini, gsStandardSetDrumKitToms, noteMidiToString } from "../Utils";
-import { AllLinkCode } from "../layout/Engine";
+import { AllMidiPortsCode } from "../layout/Engine";
 import { AbstractMachine, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine, registeredMachineWithParameter } from "./Machines";
 
 export enum DrumKitScope {
@@ -82,7 +82,7 @@ export class DrumKitMachine extends AbstractMachine implements MachineSourceTarg
         });
 
         this.getNode().addMachineOutPort("Out of scope", channel + 1);
-        this.getNode().addMachineOutPort(AllLinkCode, channel + 2);
+        this.getNode().addMachineOutPort(AllMidiPortsCode, channel + 2);
 
         this.outOfScopeChannel = channel;
     }

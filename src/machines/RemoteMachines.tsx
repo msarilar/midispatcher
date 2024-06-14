@@ -8,8 +8,8 @@ import { MachineNodeModel } from "../layout/Node";
 import { DiagramEngine } from "@projectstorm/react-diagrams";
 import { AddCircle, CachedOutlined, ContentCopyOutlined, RemoveCircle } from "@mui/icons-material";
 import { Alert, Button, Tooltip, Typography, Zoom } from "@mui/material";
-import { MachinePortModel } from "../layout/Port";
-import { AllLinkCode } from "../layout/Engine";
+import { MidiPortModel } from "../layout/Port";
+import { AllMidiPortsCode } from "../layout/Engine";
 
 const ON_STATUS_CHANGED: string = "onStateChanged";
 const ON_REFRESH: string = "onRefresh";
@@ -89,7 +89,7 @@ export class EmittingRemoteMachine extends AbstractMachine implements MachineTar
         const port = this.getNode().getPort("Channel " + this.config.channels);
         if (port != undefined) {
 
-            this.getNode().removePort(port as MachinePortModel);
+            this.getNode().removeMidiPort(port as MidiPortModel);
             this.config = { ...this.config, channels: this.config.channels - 1 };
             this.send(this.config.channels);
         }
@@ -384,7 +384,7 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
             targetChannelName: window.prompt("target name ?") ?? undefined
         };
 
-        this.getNode().addMachineOutPort(AllLinkCode, 0);
+        this.getNode().addMachineOutPort(AllMidiPortsCode, 0);
         for (let i = 0; i < this.config.channels; i++) {
 
             this.getNode().addMachineOutPort("Channel " + (i + 1), i + 1);
@@ -488,15 +488,15 @@ export class ReceivingRemoteMachine extends AbstractMachine implements MachineSo
                 else if (Number.isFinite(message)) {
 
                     const channels = (message as number) + 1;
-                    while (channels < this.getNode().getOutPorts().length) {
+                    while (channels < this.getNode().getMidiOutPorts().length) {
 
-                        const lastPort = this.getNode().getOutPorts()[this.getNode().getOutPorts().length - 1];
-                        this.getNode().removePort(lastPort)
+                        const lastPort = this.getNode().getMidiOutPorts()[this.getNode().getMidiOutPorts().length - 1];
+                        this.getNode().removeMidiPort(lastPort)
                     }
 
-                    while (channels > this.getNode().getOutPorts().length) {
+                    while (channels > this.getNode().getMidiOutPorts().length) {
 
-                        this.getNode().addMachineOutPort("Channel " + this.getNode().getOutPorts().length, this.getNode().getOutPorts().length)
+                        this.getNode().addMachineOutPort("Channel " + this.getNode().getMidiOutPorts().length, this.getNode().getMidiOutPorts().length)
                     }
 
                     this.dispatchEvent(this.onRefresh);

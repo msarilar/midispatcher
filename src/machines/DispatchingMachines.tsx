@@ -4,7 +4,7 @@ import { DiagramEngine } from "@projectstorm/react-diagrams";
 
 import { S } from "./MachineStyling";
 import { AbstractMachine, CustomNodeWidgetProps, MachineFactory, MachineMessage, MachineSourceTarget, MachineType, MessageResult, registeredMachine } from "./Machines";
-import { AllLinkCode } from "../layout/Engine";
+import { AllMidiPortsCode } from "../layout/Engine";
 import { noteStringToNoteMidi, standardMidiMessages } from "../Utils";
 import { ToggleOff, ToggleOnRounded } from "@mui/icons-material";
 import { MachineNodeModel } from "../layout/Node";
@@ -73,7 +73,7 @@ export class NoteSplitMachine extends AbstractMachine implements MachineSourceTa
 
         this.getNode().addMachineInPort("In", 1);
 
-        this.getNode().addMachineOutPort(AllLinkCode, 0);
+        this.getNode().addMachineOutPort(AllMidiPortsCode, 0);
         this.getNode().addMachineOutPort("Channel 1", 1);
         this.getNode().addMachineOutPort("Channel 2", 2);
     }
@@ -223,7 +223,7 @@ export class NoteGrowMachine extends AbstractMachine implements MachineSourceTar
         this.voices = voices ?? Number(window.prompt("How many voices?", "8"));
         this.usedVoices = new Array<boolean>(this.voices);
 
-        this.getNode().addMachineOutPort(AllLinkCode, 0);
+        this.getNode().addMachineOutPort(AllMidiPortsCode, 0);
         for (let i = 0; i < this.voices; i++) {
 
             this.getNode().addMachineOutPort("Channel " + (i + 1), i + 1);
@@ -343,7 +343,7 @@ export class NoteRoundRobinMachine extends AbstractMachine implements MachineSou
 
         this.voices = voices ?? Number(window.prompt("How many voices?", "8"));
 
-        this.getNode().addMachineOutPort(AllLinkCode, 0);
+        this.getNode().addMachineOutPort(AllMidiPortsCode, 0);
         for (let i = 0; i < this.voices; i++) {
 
             this.getNode().addMachineOutPort("Channel " + (i + 1), i + 1);

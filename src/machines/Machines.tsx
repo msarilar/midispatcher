@@ -94,7 +94,7 @@ export abstract class AbstractMachine extends EventTarget implements Machine {
             return;
         }
 
-        (this.machineNode ?? this.getNode()).getOutPorts()[channel]?.setSending(true);
+        (this.machineNode ?? this.getNode()).getMidiOutPorts()[channel]?.setSending(true);
         this.emitter?.(messageEvent, channel);
     };
 }
@@ -113,6 +113,14 @@ export enum MessageResult {
 export interface MachineTarget extends Machine {
 
     receive(messageEvent: MachineMessage, channel: number): MessageResult;
+}
+
+export interface MachineModulable extends Machine {
+
+}
+
+export interface MachineModulator extends Machine {
+
 }
 
 export interface MachineSourceTarget extends MachineSource, MachineTarget { }
@@ -283,6 +291,13 @@ class CustomNodeFactory extends AbstractReactFactory<MachineNodeModel, DiagramEn
             if (e.initialConfig.state.predefinedNotes == undefined) {
 
                 e.initialConfig.state.predefinedNotes = e.initialConfig.state.notes;
+            }
+        }
+        else if (this.machineFactory.getName() === "Oscillator" || this.machineFactory.getName() === "OscillatorMachine") {
+
+            if (e.initialConfig.state.mode == undefined) {
+
+                e.initialConfig.state.mode = "carrier";
             }
         }
 

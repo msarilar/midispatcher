@@ -1,6 +1,6 @@
 import { MidiLinkModel } from "../layout/Link";
 import { MachinePortModel } from "../layout/Port";
-import { MachineMessage, MachineSource, MachineTarget, MessageResult } from "./Machines";
+import { MachineMessage, MachineModulable, MachineModulator, MachineSource, MachineTarget, MessageResult } from "./Machines";
 
 export const ON_CYCLE_DETECTED = "onCycleDetected";
 export const ON_CYCLE_ClEARED = "onCycleCleared";
@@ -15,11 +15,6 @@ export class MachineRoutings extends EventTarget {
     private readonly routings: {
 
         [machineSource: string]: { [machineTarget: string]: Function[] }[]
-    };
-
-    private readonly deletions: {
-
-        [linkId: string]: Function
     };
 
     private readonly links: {
@@ -57,14 +52,19 @@ export class MachineRoutings extends EventTarget {
         super();
 
         this.routings = {};
-        this.deletions = {};
         this.links = {};
         this.sources = {};
 
         this.hasCycle = false;
     }
 
-    connect(source: MachineSource,
+    connectModulation(source: MachineModulator,
+        target: MachineModulable,
+        link: MidiLinkModel) {
+
+    }
+
+    connectMidi(source: MachineSource,
         target: MachineTarget,
         fromChannel: number,
         toChannel: number,
@@ -129,7 +129,7 @@ export class MachineRoutings extends EventTarget {
             this.hasCycle = true;
         }
 
-        this.deletions[link.getID()] = () => {
+        link.setDeleteCallback(() => {
 
             delete this.routings[source.getId()][fromChannel][target.getId()][toChannel];
             this.deleteLink(source.getId(), target.getId(), link);
@@ -140,7 +140,7 @@ export class MachineRoutings extends EventTarget {
             }
 
             this.hasCycle = hasCycle;
-        };
+        });
     }
 
     private findAndMarkAllCycles(): boolean {
@@ -230,12 +230,6 @@ export class MachineRoutings extends EventTarget {
 
     disconnect(link: MidiLinkModel) {
 
-        if (this.deletions[link.getID()] == undefined) {
-
-            return;
-        }
-
-        this.deletions[link.getID()]();
-        delete this.deletions[link.getID()];
+        link.invokeDeleteCallback();
     }
 }
