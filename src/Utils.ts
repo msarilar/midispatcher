@@ -215,3 +215,31 @@ for (let i = 0; i < 128; i++) {
         i,
         0]));
 }
+
+export const scalesOffsets: { [key: string]: number[] } = {
+    "Aeolian": [0, 2, 3, 5, 7, 8, 10],
+    "Algerian": [0, 2, 3, 6, 7, 8, 11],
+    "Altered": [0, 1, 3, 4, 6, 8, 10],
+    "Augmented": [0, 3, 4, 7, 8, 11],
+    "Bayātī": [0, 1, 4, 5, 7, 8, 10],
+    "Blues": [0, 3, 5, 6, 7, 10],
+    "Chromatic": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "Dorian": [0, 2, 3, 5, 7, 9, 10],
+    "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11],
+    "Hirajōshi": [0, 2, 3, 7, 8],
+    "Hungarian": [0, 2, 3, 6, 7, 8, 11],
+    "Insen": [0, 1, 5, 7, 10],
+    "Iwato": [0, 1, 5, 6, 10],
+    "Korsakovian": [0, 2, 3, 5, 6, 8, 9, 11],
+    "Lydian": [0, 2, 4, 6, 7, 9, 11],
+    "Major": [0, 2, 4, 5, 7, 9, 11],
+    "Minor Pentatonic": [0, 3, 5, 7, 10],
+    "Minyō": [0, 2, 5, 7, 9],
+    "Pentatonic": [0, 2, 4, 7, 9],
+    "Persian": [0, 1, 4, 5, 6, 8, 11],
+    "Romanian": [0, 2, 3, 6, 7, 9, 10],
+    "Triad Major": [0, 4, 7],
+    "Triad Minor": [0, 3, 7],
+    "Tuvan": [0, 2, 4, 6, 7, 9],
+    "Whole Tone": [0, 2, 4, 6, 8, 10]
+};

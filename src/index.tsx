@@ -11,6 +11,7 @@ require("./machines/KeyboardMachine");
 require("./machines/MidiFileMachine");
 require("./machines/OscillatorMachine");
 require("./machines/ThruMachine");
+require("./machines/ScaleMachine");
 require("./machines/ToneJsSampleMachine");
 require("./machines/ToneJsSynthMachine");
 require("./machines/RemoteMachines");
