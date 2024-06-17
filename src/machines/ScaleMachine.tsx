@@ -12,11 +12,14 @@ interface ScaleConfig {
     rootNote: string;
 }
 
+const ON_ROOT_NOTE_CHANGED = "onRootNoteChanged";
+
 @registeredMachine
 export class ScaleMachine extends AbstractMachine implements MachineSourceTarget {
 
     static factory: MachineFactory;
     private config: ScaleConfig;
+    private onRootNoteChanged: Event = new Event(ON_ROOT_NOTE_CHANGED);
 
     getFactory() { return ScaleMachine.factory; }
 
@@ -30,6 +33,7 @@ export class ScaleMachine extends AbstractMachine implements MachineSourceTarget
         };
         this.getNode().addMachineOutPort("Out", 0);
         this.getNode().addMachineInPort("In", 0);
+        this.getNode().addMachineInPort("Root Note Control", 1);
     }
 
     getState() {
@@ -59,7 +63,7 @@ export class ScaleMachine extends AbstractMachine implements MachineSourceTarget
 
     setState(options: ScaleConfig) {
 
-        if (options.rootNote !== this.config.rootNote) {
+        if (options.rootNote !== this.config.rootNote || options.scaleName !== this.config.scaleName) {
 
             this.emit(standardMidiMessages["allnotesoff"], 0);
         }
@@ -69,7 +73,12 @@ export class ScaleMachine extends AbstractMachine implements MachineSourceTarget
 
     receive(messageEvent: MachineMessage, channel: number): MessageResult {
 
-        if (messageEvent.message.type === "noteon" || messageEvent.message.type === "noteoff") {
+        if (channel === 1 && messageEvent.message.type === "noteon") {
+
+            this.setState({ ...this.config, rootNote: noteMidiToString(messageEvent.message.rawData[1])});
+            this.dispatchEvent(this.onRootNoteChanged);
+        }
+        else if (messageEvent.message.type === "noteon" || messageEvent.message.type === "noteoff") {
 
             messageEvent = { ...messageEvent, message: { ...messageEvent.message, rawData: new Uint8Array(messageEvent.message.rawData) } };
 
@@ -77,7 +86,6 @@ export class ScaleMachine extends AbstractMachine implements MachineSourceTarget
             const diff = messageEvent.message.rawData[1] - noteStringToNoteMidi(this.config.rootNote)[1];
 
             const toAdd = Math.floor(diff / scale.length) * 12 + scale[(diff % scale.length + scale.length) % scale.length];
-            console.log(toAdd);
             messageEvent.message.rawData[1] = (noteStringToNoteMidi(this.config.rootNote)[1] + toAdd) % 255;
         }
 
@@ -99,6 +107,16 @@ const ScaleNodeWidget: React.FunctionComponent<CustomNodeWidgetProps<ScaleMachin
         setNotes(notes);
         setState(state);
     }
+
+    React.useEffect(() => {
+        const onRootNoteChanged = () => {
+
+            update({ ...state, scaleName: props.machine.getState().scaleName, rootNote: props.machine.getState().rootNote });
+        }
+
+        props.machine.addEventListener(ON_ROOT_NOTE_CHANGED, onRootNoteChanged);
+        return (() => { props.machine.removeEventListener(ON_ROOT_NOTE_CHANGED, onRootNoteChanged) } );
+    }, [props.machine]);
 
     return (
         <S.SettingsBar>
